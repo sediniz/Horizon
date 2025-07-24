@@ -447,23 +447,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\raul.melo.da.silva\\.nuget\\packages\\": {},
+    "C:\\Users\\m.da.silva.chaves\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\raul.melo.da.silva\\Downloads\\Horizon\\Horizon\\Horizon.csproj",
+      "projectUniqueName": "C:\\Users\\m.da.silva.chaves\\Desktop\\PROJETO\\Horizon\\Horizon.csproj",
       "projectName": "Horizon",
-      "projectPath": "C:\\Users\\raul.melo.da.silva\\Downloads\\Horizon\\Horizon\\Horizon.csproj",
-      "packagesPath": "C:\\Users\\raul.melo.da.silva\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\raul.melo.da.silva\\Downloads\\Horizon\\Horizon\\obj\\",
+      "projectPath": "C:\\Users\\m.da.silva.chaves\\Desktop\\PROJETO\\Horizon\\Horizon.csproj",
+      "packagesPath": "C:\\Users\\m.da.silva.chaves\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\m.da.silva.chaves\\Desktop\\PROJETO\\Horizon\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\raul.melo.da.silva\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\m.da.silva.chaves\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -472,6 +472,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
