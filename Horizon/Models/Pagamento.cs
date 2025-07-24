@@ -1,19 +1,27 @@
-﻿namespace Horizon.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Horizon.Models
 {
     public class Pagamento
     {
-        public int IdPagamento { get; set; }
+        [Key]
+        public int PagamentoId { get; set; }
 
-        public required string TipoPagamento { get; set; } // "Cartão de Crédito", "Boleto", "Pix", etc.
+        [Required]
+        public string TipoPagamento { get; set; }
 
-        public required string StatusPagamento { get; set; } // "Pendente", "Aprovado", "Recusado", etc.
+        [Required]
+        public string StatusPagamento { get; set; }
 
-        public required decimal ValorPagamento { get; set; } // Valor do pagamento
+        [Required]
+        public decimal ValorPagamento { get; set; }
 
-        public string? ComprovantePagamento { get; set; } // URL ou caminho do comprovante de pagamento, se aplicável
+        public string? ComprovantePagamento { get; set; }
+        public DateTime DataPagamento { get; set; }
 
-        public DateTime DataPagamento { get; set; } // Data e hora do pagamento
-
-        public int ReservaId { get; set; } // Chave estrangeira para a tabela de reservas
+        [ForeignKey("Reserva")]
+        public int ReservaId { get; set; }
+        public Reserva Reserva { get; set; }
     }
 }
