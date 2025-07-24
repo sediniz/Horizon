@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
+=======
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.18" />
+>>>>>>> 6d6d7970f799272cd9ba965444f28ef279ec5ba2
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.18">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
