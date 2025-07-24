@@ -1,1 +1,35 @@
 .vs/
+
+# Build results
+bin/
+obj/
+ 
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+ 
+# Visual Studio Code workspace settings
+.vscode/
+ 
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+ 
+# ASP.NET temp files
+wwwroot/node_modules/
+wwwroot/lib/
+ 
+# Logs
+*.log
+ 
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+ 
+# Others
+*.DS_Store
