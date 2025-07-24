@@ -1,0 +1,6 @@
+@Horizon_HostAddress = http://localhost:5298
+
+GET {{Horizon_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
