@@ -4,20 +4,25 @@ namespace Horizon.Models
 {
     public class Usuario
     {
+        [Key]
+        public int UsuarioId { get; set; }
 
-        public int IdUsuario { get; set; }
+        [Required]
+        public string Nome { get; set; }
 
-        public required string Nome { get; set; }
+        [Required]
+        public string Email { get; set; }
 
-        public required string Email { get; set; }
+        [Required]
+        public string Senha { get; set; }
 
-        public required string Senha { get; set; }
+        [Required]
+        public string Telefone { get; set; }
 
-        public required string Telefone { get; set; }
+        [Required]
+        public string CpfPassaporte { get; set; }
 
-        public required string Cpf_Passaporte { get; set; }
-
-        public required string TipoUsuario { get; set; } // "Cliente", "Administrador" e "Atendente". 
-
+        [Required]
+        public string TipoUsuario { get; set; }
     }
 }

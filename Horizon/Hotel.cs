@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Horizon.Models
@@ -26,8 +26,8 @@ namespace Horizon.Models
         public decimal ValorDiaria { get; set; }
         public string Imagens { get; set; }
 
-        [ForeignKey("Quarto")]
-        public int QuartoId { get; set; }
-        public Quarto Quarto { get; set; }
+        [ForeignKey("TipoDeQuarto")]
+        public int IdTiposDeQuarto { get; set; }
+        public Quarto TipoDeQuarto { get; set; }
     }
 }
