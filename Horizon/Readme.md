@@ -5,6 +5,7 @@ desenvolvido como parte do programa FullStack Avanade DecolaTech VI.
 O sistema permite o gerenciamento de pacotes turísticos, reservas, pagamentos e usuários, 
 com foco em usabilidade, segurança e escalabilidade.
 
+
 ## Pré-requisitos
 
 - https://dotnet.microsoft.com/en-us/download/dotnet/8.0
