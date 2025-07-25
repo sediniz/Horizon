@@ -7,6 +7,8 @@ namespace Horizon.Models
         [Key]
         public int QuartoId { get; set; }
 
+        [StringLength(50, ErrorMessage = "A descrição deve ter no máximo 50 caracteres.")]
+
         public string? Descricao { get; set; }
         public bool AmbienteClimatizado { get; set; }
         public bool Tv { get; set; }
