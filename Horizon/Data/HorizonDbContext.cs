@@ -1,5 +1,6 @@
 
 using Horizon.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Horizon.Data
 {
