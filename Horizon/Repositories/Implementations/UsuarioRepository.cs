@@ -37,9 +37,15 @@ namespace Horizon.Repositories.Implementations
             return DeleteAsync(id);
         }
 
-        public Task<Usuario> UpdateAsync(Usuario entity)
+        public async Task<Usuario> UpdateAsync(Usuario entity)
         {
-            return UpdateAsync(entity);
+            return await _context.Usuario.
+                Where(u => u.UsuarioId == entity.UsuarioId)
+                .Set(u => u.Nome, entity.Nome)
+                .Set(u => u.Email, entity.Email)
+                .Set(u => u.Senha, entity.Senha)
+                .Set(u => u.Telefone, entity.Telefone)
+                .ExecuteUpdateAsync();
         }
 
         public async Task SaveChangesAsync()
