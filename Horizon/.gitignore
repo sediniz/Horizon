@@ -39,6 +39,8 @@ Desktop.ini
 *.sqlite
 *.sqlite3
  
+
+
 # Local appsettings with connection strings
 appsettings.Development.json
 appsettings.local.json

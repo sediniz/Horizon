@@ -9,6 +9,8 @@ namespace Horizon.Repositories.Interface
         Task<IEnumerable<Reserva>> GetReservasByDataAsync(DateTime data);
         Task<IEnumerable<Reserva>> GetReservasByClienteIdAndPeriodoAsync(int clienteId, DateTime dataInicio, DateTime dataFim);
 
+
+
         Task<bool> AlterarStatusReservaAsync(int reservaId, StatusReserva novoStatus);
     }
 }
