@@ -14,5 +14,8 @@ namespace Horizon.Data
         public DbSet<Pacote> Pacotes { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
+
+        public DbSet<Avaliacao> Avaliacoes { get; set; }
+
     }
 }
