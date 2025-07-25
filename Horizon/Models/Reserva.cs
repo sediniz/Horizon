@@ -19,7 +19,10 @@ namespace Horizon.Models
         public StatusReserva Status { get; set; }
 
         [Required]
-        public DateTime DataReserva { get; set; }
+        public DateTime DataInicio { get; set; }
+
+        [Required]
+        public DateTime DataFim { get; set; }
 
         [ForeignKey("Usuario")]
         public int UsuarioId { get; set; }

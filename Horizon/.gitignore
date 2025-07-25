@@ -30,6 +30,18 @@ wwwroot/lib/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Database files
+*.mdf
+*.ldf
+*.sdf
+*.db
+*.sqlite
+*.sqlite3
+ 
+# Local appsettings with connection strings
+appsettings.Development.json
+appsettings.local.json
  
 # Others
 *.DS_Store
