@@ -11,5 +11,7 @@
 
         Task<bool> DeleteAsync(int id);
 
+        Task SaveChangesAsync();
+
     }
 }
