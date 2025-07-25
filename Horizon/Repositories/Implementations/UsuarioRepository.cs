@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Horizon.Repositories.Implementations
 {
-    public class UsuarioRepository : IRepository<Usuario>
+    public class UsuarioRepository : IUsuarioRepository
     {
 
         private readonly HorizonDbContext _context;
@@ -53,9 +53,9 @@ namespace Horizon.Repositories.Implementations
                 usuario.Nome = entity.Nome;
                 usuario.Email = entity.Email;
                 usuario.Senha = entity.Senha;
-                usuario.Telefone = entity.Telefone;           
-                usuario.CpfPassaporte = entity.CpfPassaporte; 
-                usuario.TipoUsuario = entity.TipoUsuario;    
+                usuario.Telefone = entity.Telefone;
+                usuario.CpfPassaporte = entity.CpfPassaporte;
+                usuario.TipoUsuario = entity.TipoUsuario;
 
                 await _context.SaveChangesAsync();
             }
@@ -67,5 +67,27 @@ namespace Horizon.Repositories.Implementations
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Usuario?> GetByEmailAsync(string email)
+        {
+            return await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public Task<bool> EmailExistsAsync(string email)
+        {
+            return _context.Usuarios
+                .AnyAsync(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task<Usuario?> GetUserForAuthenticationAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+
+            return await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+        }
+
     }
 }
