@@ -1,4 +1,6 @@
-﻿namespace Horizon.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Horizon.Models
 {
     public class Avaliacao
     {
@@ -6,6 +8,7 @@
 
         public decimal Nota { get; set; }
 
+        [StringLength(50, ErrorMessage = "O comentário deve ter no máximo 50 caracteres.")]
         public string ? Comentario { get; set; }
 
         public DateTime DataAvaliacao { get; set; }
