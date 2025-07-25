@@ -1,6 +1,19 @@
-﻿namespace Horizon.Repositories.Interface
+﻿using Horizon.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Horizon.Repositories.Interface
 {
-    public interface IQuarto
+    public interface IQuartoRepository : IRepository<Quarto>
     {
+
+        Task<IEnumerable<Quarto>> GetDisponiveisAsync();
+        Task<IEnumerable<Quarto>> GetByCaracteristicasAsync(
+            bool? ambienteClimatizado = null,
+            bool? tv = null,
+            bool? varanda = null,
+            bool? frigobar = null
+        );
+        Task<IEnumerable<Quarto>> GetByFaixaDeValorAsync(decimal valorMin, decimal valorMax);
     }
 }

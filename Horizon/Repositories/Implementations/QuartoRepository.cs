@@ -68,6 +68,7 @@ namespace Horizon.Repositories.Implementations
         {
             var query = _context.Quartos.AsQueryable();
 
+
             if (ambienteClimatizado.HasValue)
                 query = query.Where(q => q.AmbienteClimatizado == ambienteClimatizado.Value);
             if (tv.HasValue)
