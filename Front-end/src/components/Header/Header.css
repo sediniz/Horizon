@@ -1,0 +1,37 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: #f5f5f5;
+}
+
+/* Logo à esquerda */
+.header-left .header-logo {
+  width: 120px;
+}
+
+/* Botões centralizados */
+.header-center {
+  display: flex;
+  gap: 25px;
+}
+
+.header-center button {
+  background: transparent;
+  border: 1px solid #444;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Botão perfil à direita */
+.header-right button {
+  background-color: #0080ff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
