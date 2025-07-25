@@ -14,24 +14,24 @@ namespace Horizon.Models
         [Required]
         [StringLength(30, ErrorMessage = "O nome deve ter no máximo 30 caracteres.")]
 
-        public string Nome { get; set; }
+        public string? Nome { get; set; }
 
         [Required]
-        public string Localizacao { get; set; }
+        public string? Localizacao { get; set; }
 
         [StringLength(100, ErrorMessage = "A descrição deve ter no máximo 100 caracteres.")]
 
-        public string Descricao { get; set; }
+        public string? Descricao { get; set; }
         public bool Estacionamento { get; set; }
         public bool PetFriendly { get; set; }
         public bool Piscina { get; set; }
         public bool Wifi { get; set; }
         public DateTime DatasDisponiveis { get; set; }
         public decimal ValorDiaria { get; set; }
-        public string Imagens { get; set; }
+        public string? Imagens { get; set; }
 
         [ForeignKey("Quarto")]
-        public int QuartoId { get; set; }
-        public Quarto Quarto { get; set; }
+        public int? QuartoId { get; set; }
+        public Quarto? Quarto { get; set; }
     }
 }
