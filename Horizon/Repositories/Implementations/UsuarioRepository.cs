@@ -32,20 +32,35 @@ namespace Horizon.Repositories.Implementations
             return entry.Entity;
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return DeleteAsync(id);
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null)
+            {
+                return false;
+            }
+            _context.Usuarios.Remove(usuario);
+            await _context.SaveChangesAsync();
+            return true;
         }
-
         public async Task<Usuario> UpdateAsync(Usuario entity)
         {
-            return await _context.Usuario.
-                Where(u => u.UsuarioId == entity.UsuarioId)
-                .Set(u => u.Nome, entity.Nome)
-                .Set(u => u.Email, entity.Email)
-                .Set(u => u.Senha, entity.Senha)
-                .Set(u => u.Telefone, entity.Telefone)
-                .ExecuteUpdateAsync();
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.UsuarioId == entity.UsuarioId);
+
+            if (usuario != null)
+            {
+                usuario.Nome = entity.Nome;
+                usuario.Email = entity.Email;
+                usuario.Senha = entity.Senha;
+                usuario.Telefone = entity.Telefone;           
+                usuario.CpfPassaporte = entity.CpfPassaporte; 
+                usuario.TipoUsuario = entity.TipoUsuario;    
+
+                await _context.SaveChangesAsync();
+            }
+
+            return usuario;
         }
 
         public async Task SaveChangesAsync()
