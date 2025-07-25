@@ -26,12 +26,12 @@ namespace Horizon.Models
 
         [ForeignKey("Usuario")]
         public int UsuarioId { get; set; }
-        public Usuario Usuario { get; set; }
+        public Usuario? Usuario { get; set; }
 
         [ForeignKey("Hotel")]
         public int HotelId { get; set; }
-        public Hotel Hotel { get; set; }
+        public Hotel? Hotel { get; set; }
 
-        public ICollection<Pagamento> Pagamentos { get; set; }
+        public ICollection<Pagamento>? Pagamentos { get; set; }
     }
 }

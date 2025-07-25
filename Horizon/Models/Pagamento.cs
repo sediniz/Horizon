@@ -9,10 +9,10 @@ namespace Horizon.Models
         public int PagamentoId { get; set; }
 
         [Required]
-        public string TipoPagamento { get; set; }
+        public string? TipoPagamento { get; set; }
 
         [Required]
-        public string StatusPagamento { get; set; }
+        public string? StatusPagamento { get; set; }
 
         [Required]
         public decimal ValorPagamento { get; set; }
@@ -22,6 +22,6 @@ namespace Horizon.Models
 
         [ForeignKey("Reserva")]
         public int ReservaId { get; set; }
-        public Reserva Reserva { get; set; }
+        public Reserva? Reserva { get; set; }
     }
 }
