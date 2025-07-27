@@ -1,6 +1,7 @@
 using Horizon.Data;
-using Horizon.Repositories.Interface;
+using Horizon.Models;
 using Horizon.Repositories.Implementations;
+using Horizon.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,13 +16,13 @@ builder.Services.AddDbContext<HorizonDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Registro do repositorio
-builder.Services.AddScoped<IHotelRepository, HotelRepository>();
-builder.Services.AddScoped<IQuartoRepository, QuartoRepository>();
-builder.Services.AddScoped<IAvaliacaoRepository, AvaliacaoRepository>();
-builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+builder.Services.AddScoped<IRepository<Hotel>, HotelRepository>();
+builder.Services.AddScoped<IRepository<Quarto>, QuartoRepository>();
+builder.Services.AddScoped<IRepository<Avaliacao>, AvaliacaoRepository>();
+builder.Services.AddScoped<IRepository<Reserva>, ReservaRepository>();
 
-// builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+// builder.Services.AddScoped<IRepository<Pagamento>, PagamentoRepository>();
+builder.Services.AddScoped<IRepository<Usuario>, UsuarioRepository>();
 
 
 var app = builder.Build();
