@@ -14,9 +14,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<HorizonDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registro do repositório
+// Registro do repositorio
 builder.Services.AddScoped<IHotelRepository, HotelRepository>();
 builder.Services.AddScoped<IQuartoRepository, QuartoRepository>();
+builder.Services.AddScoped<IAvaliacaoRepository, AvaliacaoRepository>();
+builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+
+// builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
 
 var app = builder.Build();
