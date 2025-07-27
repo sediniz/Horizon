@@ -4,6 +4,8 @@ namespace Horizon.Models
 {
     public class Avaliacao
     {
+
+        [Key]
         public int IdAvaliacao { get; set; }
 
         public decimal Nota { get; set; }
@@ -16,8 +18,6 @@ namespace Horizon.Models
         public int IdUsuario { get; set; }
 
         public int IdPacote { get; set; }
-
-
 
     }
 }
