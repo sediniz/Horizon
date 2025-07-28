@@ -9,6 +9,11 @@ namespace Horizon.Repositories.Implementations
     {
         private readonly HorizonDbContext _context;
 
+        public ReservaRepository(HorizonDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task<Reserva> AddAsync(Reserva entity)
         {
             var entry = await _context.AddAsync(entity);

@@ -16,14 +16,14 @@ namespace Horizon.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPagamentos()
+        public async Task<IActionResult> GetAll()
         {
             var pagamentos = await _pagamentoRepository.GetAllAsync();
             return Ok(pagamentos);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPagamento(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             var pagamento = await _pagamentoRepository.GetByIdAsync(id);
             if (pagamento == null)
@@ -34,15 +34,15 @@ namespace Horizon.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePagamento([FromBody] Pagamento pagamento)
+        public async Task<IActionResult> Create([FromBody] Pagamento pagamento)
         {
             await _pagamentoRepository.AddAsync(pagamento);
             await _pagamentoRepository.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetPagamento), new { id = pagamento.PagamentoId }, pagamento);
+            return CreatedAtAction(nameof(GetById), new { id = pagamento.PagamentoId }, pagamento);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePagamento(int id, [FromBody] Pagamento pagamento)
+        public async Task<IActionResult> Update(int id, [FromBody] Pagamento pagamento)
         {
             if (id != pagamento.PagamentoId)
             {
@@ -59,7 +59,7 @@ namespace Horizon.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePagamento(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var pagamento = await _pagamentoRepository.GetByIdAsync(id);
             if (pagamento == null)
