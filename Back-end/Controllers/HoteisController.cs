@@ -1,5 +1,5 @@
 ﻿using Horizon.Models;
-using Horizon.Repositories.Interface;
+using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -8,18 +8,18 @@ namespace Horizon.Controllers
     [ApiController]
     public class HotelController : ControllerBase
     {
-        private readonly IHotelRepository _hotelRepository;
+        private readonly IHotelService _hotelService;
 
-        public HotelController(IHotelRepository hotelRepository)
+        public HotelController(IHotelService hotelService)
         {
-            _hotelRepository = hotelRepository;
+            _hotelService = hotelService;
         }
 
         // GET: api/hotel
         [HttpGet]
         public async Task<IActionResult> GetAllHotels()
         {
-            var hotels = await _hotelRepository.GetAllAsync();
+            var hotels = await _hotelService.GetAllAsync();
             return Ok(hotels);
         }
 
@@ -27,7 +27,7 @@ namespace Horizon.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetHotelById(int id)
         {
-            var hotel = await _hotelRepository.GetByIdAsync(id);
+            var hotel = await _hotelService.GetByIdAsync(id);
             if (hotel == null) return NotFound();
             return Ok(hotel);
         }
@@ -36,7 +36,7 @@ namespace Horizon.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateHotel([FromBody] Hotel hotel)
         {
-            var created = await _hotelRepository.AddAsync(hotel);
+            var created = await _hotelService.AddAsync(hotel);
             return CreatedAtAction(nameof(GetHotelById), new { id = created.HotelId }, created);
         }
 
@@ -45,7 +45,7 @@ namespace Horizon.Controllers
         public async Task<IActionResult> UpdateHotel(int id, [FromBody] Hotel hotel)
         {
             if (id != hotel.HotelId) return BadRequest();
-            var updated = await _hotelRepository.UpdateAsync(hotel);
+            var updated = await _hotelService.UpdateAsync(hotel);
             return Ok(updated);
         }
 
@@ -53,7 +53,7 @@ namespace Horizon.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHotel(int id)
         {
-            var deleted = await _hotelRepository.DeleteAsync(id);
+            var deleted = await _hotelService.DeleteAsync(id);
             if (!deleted) return NotFound();
             return NoContent();
         }
@@ -62,7 +62,7 @@ namespace Horizon.Controllers
         [HttpGet("por-nome/{nome}")]
         public async Task<IActionResult> GetByName(string nome)
         {
-            var hotel = await _hotelRepository.GetByNameAsync(nome);
+            var hotel = await _hotelService.GetByNameAsync(nome);
             if (hotel == null) return NotFound();
             return Ok(hotel);
         }
@@ -71,7 +71,7 @@ namespace Horizon.Controllers
         [HttpGet("existe-nome/{nome}")]
         public async Task<IActionResult> NameExists(string nome)
         {
-            var exists = await _hotelRepository.NameExistsAsync(nome);
+            var exists = await _hotelService.NameExistsAsync(nome);
             return Ok(exists);
         }
 
@@ -79,7 +79,7 @@ namespace Horizon.Controllers
         [HttpGet("por-localizacao/{localizacao}")]
         public async Task<IActionResult> GetByLocalizacao(string localizacao)
         {
-            var hoteis = await _hotelRepository.GetHotelsByLocalizacaoAsync(localizacao);
+            var hoteis = await _hotelService.GetHotelsByLocalizacaoAsync(localizacao);
             return Ok(hoteis);
         }
 
@@ -87,7 +87,7 @@ namespace Horizon.Controllers
         [HttpGet("disponiveis")]
         public async Task<IActionResult> GetDisponiveis([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
         {
-            var hoteis = await _hotelRepository.GetHotelsDisponiveisAsync(dataInicio, dataFim);
+            var hoteis = await _hotelService.GetHotelsDisponiveisAsync(dataInicio, dataFim);
             return Ok(hoteis);
         }
 
@@ -95,7 +95,7 @@ namespace Horizon.Controllers
         [HttpGet("caracteristicas")]
         public async Task<IActionResult> GetComCaracteristicas([FromQuery] bool estacionamento, [FromQuery] bool petFriendly, [FromQuery] bool piscina, [FromQuery] bool wifi)
         {
-            var hoteis = await _hotelRepository.GetHotelsComCaracteristicasAsync(estacionamento, petFriendly, piscina, wifi);
+            var hoteis = await _hotelService.GetHotelsComCaracteristicasAsync(estacionamento, petFriendly, piscina, wifi);
             return Ok(hoteis);
         }
     }
