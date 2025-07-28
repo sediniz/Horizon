@@ -4,7 +4,7 @@ using Horizon.Services.Interfaces;
 
 namespace Horizon.Services.Implementations
 {
-    public class PagamentoService : IPagamento
+    public class PagamentoService : IPagamentoService
     {
         private readonly IPagamentoRepository _pagamentoRepository;
 

@@ -2,6 +2,7 @@
 using Horizon.Models;
 using Horizon.Repositories.Implementations;
 using Horizon.Repositories.Interface;
+using Horizon.Services.Implementations;
 using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +14,9 @@ namespace Horizon.Controllers
     [ApiController]
     public class UsuariosController : Controller
     {
-        private readonly IService<Usuario> _usuarioService;
+        private readonly IUsuarioService _usuarioService;
 
-        public UsuariosController(IService<Usuario> usuarioService)
+        public UsuariosController(IUsuarioService usuarioService)
         {
             _usuarioService = usuarioService;
         }

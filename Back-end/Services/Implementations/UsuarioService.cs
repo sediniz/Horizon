@@ -7,11 +7,11 @@ namespace Horizon.Services.Implementations
 {
     public class UsuarioService : IUsuarioService
     {
-        private readonly Repositories.Interface.IService<Usuario> _repository;
+        private readonly IUsuarioRepository _usuarioRepository;
 
-        public UsuarioService(Repositories.Interface.IService<Usuario> repository)
+        public UsuarioService(IUsuarioRepository usuarioRepository)
         {
-            _repository = repository;
+            _usuarioRepository = usuarioRepository;
         }
         
         public async Task<Usuario> AddAsync(Usuario entity)
@@ -29,7 +29,7 @@ namespace Horizon.Services.Implementations
             // Hash da senha antes de salvar
             entity.Senha = BCrypt.Net.BCrypt.HashPassword(entity.Senha);
             
-            return await _repository.AddAsync(entity);
+            return await _usuarioRepository.AddAsync(entity);
         }
 
         public async Task<Usuario?> AuthenticateAsync(string email, string senha)
@@ -51,7 +51,7 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(senhaAtual) || string.IsNullOrWhiteSpace(novaSenha))
                 return false;
 
-            var usuario = await _repository.GetByIdAsync(usuarioId);
+            var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
             if (usuario == null)
                 return false;
 
@@ -65,8 +65,8 @@ namespace Horizon.Services.Implementations
 
             // Hash da nova senha
             usuario.Senha = BCrypt.Net.BCrypt.HashPassword(novaSenha);
-            await _repository.UpdateAsync(usuario);
-            await _repository.SaveChangesAsync();
+            await _usuarioRepository.UpdateAsync(usuario);
+            await _usuarioRepository.SaveChangesAsync();
             
             return true;
         }
@@ -76,13 +76,13 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(cpfPassaporte))
                 return false;
 
-            var usuarios = await _repository.GetAllAsync();
+            var usuarios = await _usuarioRepository.GetAllAsync();
             return usuarios.Any(u => u.CpfPassaporte == cpfPassaporte.Trim());
         }
 
         public Task<bool> DeleteAsync(int id)
         {
-            return _repository.DeleteAsync(id);
+            return _usuarioRepository.DeleteAsync(id);
         }
 
         public async Task<bool> EmailExistsAsync(string email)
@@ -90,13 +90,13 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(email))
                 return false;
 
-            var usuarios = await _repository.GetAllAsync();
+            var usuarios = await _usuarioRepository.GetAllAsync();
             return usuarios.Any(u => u.Email != null && u.Email.Equals(email.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public Task<IEnumerable<Usuario>> GetAllAsync()
         {
-            return _repository.GetAllAsync();
+            return _usuarioRepository.GetAllAsync();
         }
 
         public async Task<Usuario?> GetByCpfPassaporteAsync(string cpfPassaporte)
@@ -104,7 +104,7 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(cpfPassaporte))
                 return null;
 
-            var usuarios = await _repository.GetAllAsync();
+            var usuarios = await _usuarioRepository.GetAllAsync();
             return usuarios.FirstOrDefault(u => u.CpfPassaporte == cpfPassaporte.Trim());
         }
 
@@ -114,13 +114,13 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(email))
                 return null;
 
-            var usuarios = await _repository.GetAllAsync();
+            var usuarios = await _usuarioRepository.GetAllAsync();
             return usuarios.FirstOrDefault(u => u.Email != null && u.Email.Equals(email.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public Task<Usuario?> GetByIdAsync(int id)
         {
-            return _repository.GetByIdAsync(id);
+            return _usuarioRepository.GetByIdAsync(id);
         }
 
         public async Task<IEnumerable<Usuario>> GetByTipoUsuarioAsync(string tipoUsuario)
@@ -128,7 +128,7 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(tipoUsuario))
                 return Enumerable.Empty<Usuario>();
 
-            var usuarios = await _repository.GetAllAsync();
+            var usuarios = await _usuarioRepository.GetAllAsync();
             return usuarios.Where(u => u.TipoUsuario != null && u.TipoUsuario.Equals(tipoUsuario.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
@@ -142,8 +142,8 @@ namespace Horizon.Services.Implementations
             string senhaTemporaria = GerarSenhaTemporaria();
             usuario.Senha = BCrypt.Net.BCrypt.HashPassword(senhaTemporaria);
             
-            await _repository.UpdateAsync(usuario);
-            await _repository.SaveChangesAsync();
+            await _usuarioRepository.UpdateAsync(usuario);
+            await _usuarioRepository.SaveChangesAsync();
 
             // Aqui você enviaria por email a senha temporária
             // EmailService.EnviarSenhaTemporaria(email, senhaTemporaria);
@@ -153,7 +153,7 @@ namespace Horizon.Services.Implementations
 
         public Task SaveChangesAsync()
         {
-            return _repository.SaveChangesAsync();
+            return _usuarioRepository.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Usuario>> SearchByNameAsync(string nome)
@@ -161,7 +161,7 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(nome))
                 return Enumerable.Empty<Usuario>();
 
-            var usuarios = await _repository.GetAllAsync();
+            var usuarios = await _usuarioRepository.GetAllAsync();
             return usuarios.Where(u => u.Nome != null && 
                 u.Nome.Contains(nome.Trim(), StringComparison.OrdinalIgnoreCase));
         }
@@ -171,13 +171,13 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(telefone))
                 return false;
 
-            var usuarios = await _repository.GetAllAsync();
+            var usuarios = await _usuarioRepository.GetAllAsync();
             return usuarios.Any(u => u.Telefone == telefone.Trim());
         }
 
         public async Task<Usuario> UpdateAsync(Usuario entity)
         {
-            var usuarioExistente = await _repository.GetByIdAsync(entity.UsuarioId);
+            var usuarioExistente = await _usuarioRepository.GetByIdAsync(entity.UsuarioId);
             if (usuarioExistente == null)
                 throw new ArgumentException("Usuário não encontrado.");
 
@@ -208,7 +208,7 @@ namespace Horizon.Services.Implementations
             else if (entity.Senha != usuarioExistente.Senha)
                 entity.Senha = BCrypt.Net.BCrypt.HashPassword(entity.Senha);
 
-            return await _repository.UpdateAsync(entity);
+            return await _usuarioRepository.UpdateAsync(entity);
         }
 
         public async Task<bool> ValidateCredentialsAsync(string email, string senha)

@@ -1,5 +1,6 @@
 ﻿using Horizon.Models;
 using Horizon.Repositories.Interface;
+using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -9,9 +10,9 @@ namespace Horizon.Controllers
     public class ReservasController : Controller
     {
 
-        private readonly IService<Reserva> _reservaService;
+        private readonly IReservaService _reservaService;
 
-        public ReservasController(IService<Reserva> reservaService)
+        public ReservasController(IReservaService reservaService)
         {
             _reservaService = reservaService;
         }

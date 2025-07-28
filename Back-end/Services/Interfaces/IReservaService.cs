@@ -2,7 +2,7 @@
 
 namespace Horizon.Services.Interfaces
 {
-    public interface IReserva : IService<Reserva>
+    public interface IReservaService : IService<Reserva>
     {
         Task<IEnumerable<Reserva>> GetReservasByClienteIdAsync(int clienteId);
         Task<IEnumerable<Reserva>> GetReservasByHotelIdAsync(int hotelId);

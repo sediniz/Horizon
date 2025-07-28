@@ -2,7 +2,7 @@
 
 namespace Horizon.Services.Interfaces
 {
-    public interface IPagamento : IService<Pagamento>
+    public interface IPagamentoService : IService<Pagamento>
     {
 
         // Buscar pagamentos por reserva específica
