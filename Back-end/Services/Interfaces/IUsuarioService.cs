@@ -1,7 +1,10 @@
-﻿namespace Horizon.Services.Interfaces
+﻿using Horizon.Models;
+
+namespace Horizon.Services.Interfaces
 {
-    public interface IUsuarioService
+    public interface IUsuarioService : IService<Usuario>
     {
+        
 
     }
 }
