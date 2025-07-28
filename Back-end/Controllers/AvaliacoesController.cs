@@ -1,0 +1,118 @@
+using Horizon.Models;
+using Horizon.Repositories.Interface;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Horizon.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AvaliacoesController : ControllerBase
+    {
+        private readonly IAvaliacaoRepository _avaliacaoRepository;
+
+        public AvaliacoesController(IAvaliacaoRepository avaliacaoRepository)
+        {
+            _avaliacaoRepository = avaliacaoRepository;
+        }
+
+        // GET: api/avaliacoes
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var avaliacoes = await _avaliacaoRepository.GetAllAsync();
+            return Ok(avaliacoes);
+        }
+
+        // GET: api/avaliacoes/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var avaliacao = await _avaliacaoRepository.GetByIdAsync(id);
+            if (avaliacao == null) return NotFound();
+            return Ok(avaliacao);
+        }
+
+        // POST: api/avaliacoes
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Avaliacao avaliacao)
+        {
+            if (avaliacao == null)
+                return BadRequest("Avaliação não pode ser nula.");
+
+            var created = await _avaliacaoRepository.AddAsync(avaliacao);
+            await _avaliacaoRepository.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetById), new { id = created.IdAvaliacao }, created);
+        }
+
+        // PUT: api/avaliacoes/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Avaliacao avaliacao)
+        {
+            if (id != avaliacao.IdAvaliacao)
+                return BadRequest("ID não corresponde à avaliação informada.");
+
+            var existing = await _avaliacaoRepository.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            await _avaliacaoRepository.UpdateAsync(avaliacao);
+            await _avaliacaoRepository.SaveChangesAsync();
+            return Ok(avaliacao);
+        }
+
+        // DELETE: api/avaliacoes/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var existing = await _avaliacaoRepository.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            await _avaliacaoRepository.DeleteAsync(id);
+            await _avaliacaoRepository.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // GET: api/avaliacoes/hotel/{hotelId}
+        [HttpGet("hotel/{hotelId}")]
+        public async Task<IActionResult> GetByHotelId(int hotelId)
+        {
+            var avaliacoes = await _avaliacaoRepository.GetAvaliacoesByHotelIdAsync(hotelId);
+            return Ok(avaliacoes);
+        }
+
+        // GET: api/avaliacoes/usuario-hotel?usuarioId=1&hotelId=2
+        [HttpGet("usuario-hotel")]
+        public async Task<IActionResult> GetByUsuarioAndHotel([FromQuery] int usuarioId, [FromQuery] int hotelId)
+        {
+            var avaliacao = await _avaliacaoRepository.GetAvaliacaoByUsuarioAndHotelAsync(usuarioId, hotelId);
+            if (avaliacao == null)
+                return NotFound();
+            return Ok(avaliacao);
+        }
+
+        // GET: api/avaliacoes/existe?usuarioId=1&hotelId=2
+        [HttpGet("existe")]
+        public async Task<IActionResult> AvaliacaoExists([FromQuery] int usuarioId, [FromQuery] int hotelId)
+        {
+            var exists = await _avaliacaoRepository.AvaliacaoExistsAsync(usuarioId, hotelId);
+            return Ok(exists);
+        }
+
+        // GET: api/avaliacoes/media/{hotelId}
+        [HttpGet("media/{hotelId}")]
+        public async Task<IActionResult> GetMediaByHotelId(int hotelId)
+        {
+            var media = await _avaliacaoRepository.GetMediaAvaliacoesByHotelIdAsync(hotelId);
+            return Ok(media);
+        }
+
+        // GET: api/avaliacoes/quantidade/{hotelId}
+        [HttpGet("quantidade/{hotelId}")]
+        public async Task<IActionResult> GetQuantidadeByHotelId(int hotelId)
+        {
+            var quantidade = await _avaliacaoRepository.GetQuantidadeAvaliacoesByHotelIdAsync(hotelId);
+            return Ok(quantidade);
+        }
+    }
+}
