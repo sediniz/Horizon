@@ -2,6 +2,7 @@
 using Horizon.Models;
 using Horizon.Repositories.Implementations;
 using Horizon.Repositories.Interface;
+using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,25 +13,25 @@ namespace Horizon.Controllers
     [ApiController]
     public class UsuariosController : Controller
     {
-        private readonly IRepository<Usuario> _usuarioRepository;
+        private readonly IService<Usuario> _usuarioService;
 
-        public UsuariosController(IRepository<Usuario> usuarioRepository)
+        public UsuariosController(IService<Usuario> usuarioService)
         {
-            _usuarioRepository = usuarioRepository;
+            _usuarioService = usuarioService;
         }
 
         // GET: api/usuarios
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var usuarios = await _usuarioRepository.GetAllAsync();
+            var usuarios = await _usuarioService.GetAllAsync();
             return Ok(usuarios);
         }
         // GET: api/usuarios/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var usuario = await _usuarioRepository.GetByIdAsync(id);
+            var usuario = await _usuarioService.GetByIdAsync(id);
             if (usuario == null)
             {
                 return NotFound();
@@ -42,8 +43,8 @@ namespace Horizon.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUsuario([FromBody] Usuario usuario)
         {
-            await _usuarioRepository.AddAsync(usuario);
-            await _usuarioRepository.SaveChangesAsync();
+            await _usuarioService.AddAsync(usuario);
+            await _usuarioService.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = usuario.UsuarioId }, usuario);
         }
 
@@ -55,13 +56,13 @@ namespace Horizon.Controllers
             {
                 return BadRequest("ID not found");
             }
-            var existingUsuario = await _usuarioRepository.GetByIdAsync(id);
+            var existingUsuario = await _usuarioService.GetByIdAsync(id);
             if (existingUsuario == null)
             {
                 return NotFound();
             }
-            await _usuarioRepository.UpdateAsync(usuario);
-            await _usuarioRepository.SaveChangesAsync();
+            await _usuarioService.UpdateAsync(usuario);
+            await _usuarioService.SaveChangesAsync();
             return NoContent();
         }
 
@@ -69,13 +70,13 @@ namespace Horizon.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var usuario = await _usuarioRepository.GetByIdAsync(id);
+            var usuario = await _usuarioService.GetByIdAsync(id);
             if (usuario == null)
             {
                 return NotFound();
             }
-            await _usuarioRepository.DeleteAsync(id);
-            await _usuarioRepository.SaveChangesAsync();
+            await _usuarioService.DeleteAsync(id);
+            await _usuarioService.SaveChangesAsync();
             return NoContent();
 
         }
