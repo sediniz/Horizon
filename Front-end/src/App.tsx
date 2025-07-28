@@ -4,6 +4,7 @@ import ContentBlock from './components/ContentBlock/ContentBlock';
 import EvaluationRedirection from './components/Avaliation/Avaliation';
 import Footer from './components/Footer/Footer';
 import './App.css';
+import './output.css';
 
 // Importando as imagens corretamente
 import img1 from './assets/img1.jpeg';

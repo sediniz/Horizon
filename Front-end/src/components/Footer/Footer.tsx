@@ -1,11 +1,10 @@
 import React from 'react';
-import './Footer.css';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="footer">
-      <h2>Footer Component</h2>
-      <p>Este é o componente Footer</p>
+    <footer className="bg-red-600 text-white text-center py-6">
+      <h2 className="text-3xl font-bold mb-2">Footer Component</h2>
+      <p className="text-xl">Este é o componente Footer</p>
     </footer>
   );
 };
