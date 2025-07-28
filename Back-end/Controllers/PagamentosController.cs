@@ -1,5 +1,6 @@
 using Horizon.Models;
 using Horizon.Repositories.Interface;
+using Horizon.Services.Implementations;
 using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,9 @@ namespace Horizon.Controllers
     [ApiController]
     public class PagamentosController : ControllerBase
     {
-        private readonly IService<Pagamento> _pagamentoService;
+        private readonly IPagamentoService _pagamentoService;
 
-        public PagamentosController(IService<Pagamento> pagamentoRepository)
+        public PagamentosController(IPagamentoService pagamentoRepository)
         {
             _pagamentoService = pagamentoRepository;
         }

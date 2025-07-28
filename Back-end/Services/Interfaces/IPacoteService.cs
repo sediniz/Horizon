@@ -2,7 +2,7 @@
 
 namespace Horizon.Services.Interfaces
 {
-    public interface IPacote : IService<Pacote>
+    public interface IPacoteService : IService<Pacote>
     {
         // Buscar por destino
         Task<IEnumerable<Pacote>> GetByDestinoAsync(string destino);

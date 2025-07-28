@@ -4,7 +4,7 @@ using Horizon.Services.Interfaces;
 
 namespace Horizon.Services.Implementations
 {
-    public class ReservaService : IReserva
+    public class ReservaService : IReservaService
     {
         private readonly IReservaRepository _reservaRepository;
         

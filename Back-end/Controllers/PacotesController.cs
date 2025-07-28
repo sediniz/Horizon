@@ -1,5 +1,6 @@
 ﻿using Horizon.Models;
 using Horizon.Repositories.Interface;
+using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -10,9 +11,9 @@ namespace Horizon.Controllers
     public class PacotesController : Controller
     {
 
-        private readonly IService<Pacote> _pacoteService;
+        private readonly IPacoteService _pacoteService;
 
-        public PacotesController(IService<Pacote> pacoteService)
+        public PacotesController(IPacoteService pacoteService)
         {
             _pacoteService = pacoteService;
         }
