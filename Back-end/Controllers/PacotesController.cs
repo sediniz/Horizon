@@ -10,11 +10,11 @@ namespace Horizon.Controllers
     public class PacotesController : Controller
     {
 
-        private readonly IRepository<Pacote> _pacoteRepository;
+        private readonly IService<Pacote> _pacoteService;
 
-        public PacotesController(IRepository<Pacote> pacoteRepository)
+        public PacotesController(IService<Pacote> pacoteService)
         {
-            _pacoteRepository = pacoteRepository;
+            _pacoteService = pacoteService;
         }
 
         // GET: api/pacotes
@@ -22,7 +22,7 @@ namespace Horizon.Controllers
 
         public async Task<IActionResult> GetAll()
         {
-            var pacotes = await _pacoteRepository.GetAllAsync();
+            var pacotes = await _pacoteService.GetAllAsync();
             return Ok(pacotes);
         }
 
@@ -31,7 +31,7 @@ namespace Horizon.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var pacote = await _pacoteRepository.GetByIdAsync(id);
+            var pacote = await _pacoteService.GetByIdAsync(id);
             if (pacote == null)
             {
                 return NotFound();
@@ -47,8 +47,8 @@ namespace Horizon.Controllers
             {
                 return BadRequest("Pacote cannot be null");
             }
-            await _pacoteRepository.AddAsync(pacote);
-            await _pacoteRepository.SaveChangesAsync();
+            await _pacoteService.AddAsync(pacote);
+            await _pacoteService.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = pacote.PacoteId }, pacote);
         }
 
@@ -61,13 +61,13 @@ namespace Horizon.Controllers
             {
                 return BadRequest("ID not found");
             }
-            var existingReserva = await _pacoteRepository.GetByIdAsync(id);
+            var existingReserva = await _pacoteService.GetByIdAsync(id);
             if (existingReserva == null)
             {
                 return NotFound();
             }
-            await _pacoteRepository.UpdateAsync(pacote);
-            await _pacoteRepository.SaveChangesAsync();
+            await _pacoteService.UpdateAsync(pacote);
+            await _pacoteService.SaveChangesAsync();
             return NoContent();
         }
 
@@ -75,17 +75,17 @@ namespace Horizon.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var existingReserva = await _pacoteRepository.GetByIdAsync(id);
+            var existingReserva = await _pacoteService.GetByIdAsync(id);
             if (existingReserva == null)
             {
                 return NotFound();
             }
-            var deleted = await _pacoteRepository.DeleteAsync(id);
+            var deleted = await _pacoteService.DeleteAsync(id);
             if (!deleted)
             {
                 return BadRequest("Could not delete the reserva");
             }
-            await _pacoteRepository.SaveChangesAsync();
+            await _pacoteService.SaveChangesAsync();
             return NoContent();
 
 
@@ -95,7 +95,7 @@ namespace Horizon.Controllers
         //[HttpGet("disponiveis")]
         //public async Task<IActionResult> GetPacotesDisponiveis(string? destino = null, decimal? valorTotal = null, int? duracaoMax = null)
         //{
-        //    var pacotes = await _pacoteRepository.GetPacotesDisponiveis(destino, valorTotal, duracaoMax);
+        //    var pacotes = await _pagamentoService.GetPacotesDisponiveis(destino, valorTotal, duracaoMax);
         //    return Ok(pacotes);
         //}
     }

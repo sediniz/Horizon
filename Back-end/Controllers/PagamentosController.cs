@@ -1,5 +1,6 @@
 using Horizon.Models;
 using Horizon.Repositories.Interface;
+using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -8,24 +9,24 @@ namespace Horizon.Controllers
     [ApiController]
     public class PagamentosController : ControllerBase
     {
-        private readonly IRepository<Pagamento> _pagamentoRepository;
+        private readonly IService<Pagamento> _pagamentoService;
 
-        public PagamentosController(IRepository<Pagamento> pagamentoRepository)
+        public PagamentosController(IService<Pagamento> pagamentoRepository)
         {
-            _pagamentoRepository = pagamentoRepository;
+            _pagamentoService = pagamentoRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var pagamentos = await _pagamentoRepository.GetAllAsync();
+            var pagamentos = await _pagamentoService.GetAllAsync();
             return Ok(pagamentos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var pagamento = await _pagamentoRepository.GetByIdAsync(id);
+            var pagamento = await _pagamentoService.GetByIdAsync(id);
             if (pagamento == null)
             {
                 return NotFound();
@@ -36,8 +37,8 @@ namespace Horizon.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Pagamento pagamento)
         {
-            await _pagamentoRepository.AddAsync(pagamento);
-            await _pagamentoRepository.SaveChangesAsync();
+            await _pagamentoService.AddAsync(pagamento);
+            await _pagamentoService.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = pagamento.PagamentoId }, pagamento);
         }
 
@@ -48,26 +49,26 @@ namespace Horizon.Controllers
             {
                 return BadRequest("ID não corresponde ao pagamento informado.");
             }
-            var existingPagamento = await _pagamentoRepository.GetByIdAsync(id);
+            var existingPagamento = await _pagamentoService.GetByIdAsync(id);
             if (existingPagamento == null)
             {
                 return NotFound();
             }
-            await _pagamentoRepository.UpdateAsync(pagamento);
-            await _pagamentoRepository.SaveChangesAsync();
+            await _pagamentoService.UpdateAsync(pagamento);
+            await _pagamentoService.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var pagamento = await _pagamentoRepository.GetByIdAsync(id);
+            var pagamento = await _pagamentoService.GetByIdAsync(id);
             if (pagamento == null)
             {
                 return NotFound();
             }
-            await _pagamentoRepository.DeleteAsync(id);
-            await _pagamentoRepository.SaveChangesAsync();
+            await _pagamentoService.DeleteAsync(id);
+            await _pagamentoService.SaveChangesAsync();
             return NoContent();
         }
     }

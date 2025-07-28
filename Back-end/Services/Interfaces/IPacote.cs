@@ -1,10 +1,9 @@
 ﻿using Horizon.Models;
 
-namespace Horizon.Repositories.Interface
+namespace Horizon.Services.Interfaces
 {
-    public interface IPacoteRepository : IService<Pacote>
+    public interface IPacote : IService<Pacote>
     {
-
         // Buscar por destino
         Task<IEnumerable<Pacote>> GetByDestinoAsync(string destino);
 
