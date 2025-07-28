@@ -1,5 +1,5 @@
 using Horizon.Models;
-using Horizon.Repositories.Interface;
+using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -8,18 +8,18 @@ namespace Horizon.Controllers
     [ApiController]
     public class AvaliacoesController : ControllerBase
     {
-        private readonly IAvaliacaoRepository _avaliacaoRepository;
+        private readonly IAvaliacaoService _avaliacaoService;
 
-        public AvaliacoesController(IAvaliacaoRepository avaliacaoRepository)
+        public AvaliacoesController(IAvaliacaoService avaliacaoService)
         {
-            _avaliacaoRepository = avaliacaoRepository;
+            _avaliacaoService = avaliacaoService;
         }
 
         // GET: api/avaliacoes
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var avaliacoes = await _avaliacaoRepository.GetAllAsync();
+            var avaliacoes = await _avaliacaoService.GetAllAsync();
             return Ok(avaliacoes);
         }
 
@@ -27,7 +27,7 @@ namespace Horizon.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var avaliacao = await _avaliacaoRepository.GetByIdAsync(id);
+            var avaliacao = await _avaliacaoService.GetByIdAsync(id);
             if (avaliacao == null) return NotFound();
             return Ok(avaliacao);
         }
@@ -39,8 +39,7 @@ namespace Horizon.Controllers
             if (avaliacao == null)
                 return BadRequest("Avaliação não pode ser nula.");
 
-            var created = await _avaliacaoRepository.AddAsync(avaliacao);
-            await _avaliacaoRepository.SaveChangesAsync();
+            var created = await _avaliacaoService.AddAsync(avaliacao);
             return CreatedAtAction(nameof(GetById), new { id = created.IdAvaliacao }, created);
         }
 
@@ -51,12 +50,11 @@ namespace Horizon.Controllers
             if (id != avaliacao.IdAvaliacao)
                 return BadRequest("ID não corresponde à avaliação informada.");
 
-            var existing = await _avaliacaoRepository.GetByIdAsync(id);
+            var existing = await _avaliacaoService.GetByIdAsync(id);
             if (existing == null)
                 return NotFound();
 
-            await _avaliacaoRepository.UpdateAsync(avaliacao);
-            await _avaliacaoRepository.SaveChangesAsync();
+            await _avaliacaoService.UpdateAsync(avaliacao);
             return Ok(avaliacao);
         }
 
@@ -64,12 +62,11 @@ namespace Horizon.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var existing = await _avaliacaoRepository.GetByIdAsync(id);
+            var existing = await _avaliacaoService.GetByIdAsync(id);
             if (existing == null)
                 return NotFound();
 
-            await _avaliacaoRepository.DeleteAsync(id);
-            await _avaliacaoRepository.SaveChangesAsync();
+            await _avaliacaoService.DeleteAsync(id);
             return NoContent();
         }
 
@@ -77,15 +74,15 @@ namespace Horizon.Controllers
         [HttpGet("hotel/{hotelId}")]
         public async Task<IActionResult> GetByHotelId(int hotelId)
         {
-            var avaliacoes = await _avaliacaoRepository.GetAvaliacoesByHotelIdAsync(hotelId);
+            var avaliacoes = await _avaliacaoService.GetAvaliacoesByHotelIdAsync(hotelId);
             return Ok(avaliacoes);
-        }
+        }                                                   
 
         // GET: api/avaliacoes/usuario-hotel?usuarioId=1&hotelId=2
         [HttpGet("usuario-hotel")]
         public async Task<IActionResult> GetByUsuarioAndHotel([FromQuery] int usuarioId, [FromQuery] int hotelId)
         {
-            var avaliacao = await _avaliacaoRepository.GetAvaliacaoByUsuarioAndHotelAsync(usuarioId, hotelId);
+            var avaliacao = await _avaliacaoService.GetAvaliacaoByUsuarioAndHotelAsync(usuarioId, hotelId);
             if (avaliacao == null)
                 return NotFound();
             return Ok(avaliacao);
@@ -95,7 +92,7 @@ namespace Horizon.Controllers
         [HttpGet("existe")]
         public async Task<IActionResult> AvaliacaoExists([FromQuery] int usuarioId, [FromQuery] int hotelId)
         {
-            var exists = await _avaliacaoRepository.AvaliacaoExistsAsync(usuarioId, hotelId);
+            var exists = await _avaliacaoService.AvaliacaoExistsAsync(usuarioId, hotelId);
             return Ok(exists);
         }
 
@@ -103,7 +100,7 @@ namespace Horizon.Controllers
         [HttpGet("media/{hotelId}")]
         public async Task<IActionResult> GetMediaByHotelId(int hotelId)
         {
-            var media = await _avaliacaoRepository.GetMediaAvaliacoesByHotelIdAsync(hotelId);
+            var media = await _avaliacaoService.GetMediaAvaliacoesByHotelIdAsync(hotelId);
             return Ok(media);
         }
 
@@ -111,7 +108,7 @@ namespace Horizon.Controllers
         [HttpGet("quantidade/{hotelId}")]
         public async Task<IActionResult> GetQuantidadeByHotelId(int hotelId)
         {
-            var quantidade = await _avaliacaoRepository.GetQuantidadeAvaliacoesByHotelIdAsync(hotelId);
+            var quantidade = await _avaliacaoService.GetQuantidadeAvaliacoesByHotelIdAsync(hotelId);
             return Ok(quantidade);
         }
     }
