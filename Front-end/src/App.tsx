@@ -3,7 +3,6 @@ import Carousel from './components/Carousel/Carousel';
 import ContentBlock from './components/ContentBlock/ContentBlock';
 import Avaliation from './components/Avaliation/Avaliation';
 import Footer from './components/Footer/Footer';
-import './App.css';
 import './output.css';
 
 // Importando as imagens corretamente
