@@ -73,6 +73,7 @@ namespace Horizon.Controllers
             [FromQuery] bool? tv,
             [FromQuery] bool? varanda,
             [FromQuery] bool? frigobar)
+
         {
             var quartos = await _quartoService.GetByCaracteristicasAsync(
                 ambienteClimatizado, tv, varanda, frigobar);
