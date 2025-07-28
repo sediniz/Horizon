@@ -1,5 +1,5 @@
 import React from 'react';
-import './ContentBlock.css';
+
 
 const ContentBlock: React.FC = () => {
   return (

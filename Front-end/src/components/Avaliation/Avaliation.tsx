@@ -1,5 +1,5 @@
 import React from 'react';
-import './Avaliation.css';
+
 
 const Avaliation: React.FC = () => {
   return (
