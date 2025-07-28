@@ -21,6 +21,16 @@ builder.Services.AddDbContext<HorizonDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Registro do repositorio
+builder.Services.AddScoped<IQuartoRepository, QuartoRepository>();
+builder.Services.AddScoped<IAvaliacaoRepository, AvaliacaoRepository>();
+builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IPacoteRepository, PacoteRepository>();
+builder.Services.AddScoped<IHotelRepository, HotelRepository>();
+
+
+// Services
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Quarto>, QuartoService>();
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Avaliacao>, AvaliacaoService>();
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Reserva>, ReservaService>();
@@ -28,6 +38,8 @@ builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Pagamento>, Paga
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Usuario>, UsuarioService>();
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Pacote>, PacoteService>();
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Hotel>, HotelService>();
+
+
 
 
 // Configuração do JWT
