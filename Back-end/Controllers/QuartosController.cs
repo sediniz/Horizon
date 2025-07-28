@@ -1,5 +1,5 @@
 using Horizon.Models;
-using Horizon.Repositories.Interface;
+using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -8,18 +8,18 @@ namespace Horizon.Controllers
     [ApiController]
     public class QuartosController : ControllerBase
     {
-        private readonly IQuartoRepository _quartoRepository;
+        private readonly IQuartoService _quartoService;
 
-        public QuartosController(IQuartoRepository quartoRepository)
+        public QuartosController(IQuartoService quartoService)
         {
-            _quartoRepository = quartoRepository;
+            _quartoService = quartoService;
         }
 
         // GET: api/quartos
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var quartos = await _quartoRepository.GetAllAsync();
+            var quartos = await _quartoService.GetAllAsync();
             return Ok(quartos);
         }
 
@@ -27,7 +27,7 @@ namespace Horizon.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var quarto = await _quartoRepository.GetByIdAsync(id);
+            var quarto = await _quartoService.GetByIdAsync(id);
             if (quarto == null) return NotFound();
             return Ok(quarto);
         }
@@ -36,7 +36,7 @@ namespace Horizon.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Quarto quarto)
         {
-            var created = await _quartoRepository.AddAsync(quarto);
+            var created = await _quartoService.AddAsync(quarto);
             return CreatedAtAction(nameof(GetById), new { id = created.QuartoId }, created);
         }
 
@@ -45,7 +45,7 @@ namespace Horizon.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] Quarto quarto)
         {
             if (id != quarto.QuartoId) return BadRequest();
-            var updated = await _quartoRepository.UpdateAsync(quarto);
+            var updated = await _quartoService.UpdateAsync(quarto);
             return Ok(updated);
         }
 
@@ -53,7 +53,7 @@ namespace Horizon.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _quartoRepository.DeleteAsync(id);
+            var deleted = await _quartoService.DeleteAsync(id);
             if (!deleted) return NotFound();
             return NoContent();
         }
@@ -62,7 +62,7 @@ namespace Horizon.Controllers
         [HttpGet("disponiveis")]
         public async Task<IActionResult> GetDisponiveis()
         {
-            var quartos = await _quartoRepository.GetDisponiveisAsync();
+            var quartos = await _quartoService.GetDisponiveisAsync();
             return Ok(quartos);
         }
 
@@ -74,7 +74,7 @@ namespace Horizon.Controllers
             [FromQuery] bool? varanda,
             [FromQuery] bool? frigobar)
         {
-            var quartos = await _quartoRepository.GetByCaracteristicasAsync(
+            var quartos = await _quartoService.GetByCaracteristicasAsync(
                 ambienteClimatizado, tv, varanda, frigobar);
             return Ok(quartos);
         }
@@ -83,7 +83,7 @@ namespace Horizon.Controllers
         [HttpGet("faixa-valor")]
         public async Task<IActionResult> GetByFaixaDeValor([FromQuery] decimal valorMin, [FromQuery] decimal valorMax)
         {
-            var quartos = await _quartoRepository.GetByFaixaDeValorAsync(valorMin, valorMax);
+            var quartos = await _quartoService.GetByFaixaDeValorAsync(valorMin, valorMax);
             return Ok(quartos);
         }
     }
