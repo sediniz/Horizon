@@ -37,6 +37,8 @@ builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Reserva>, Reserv
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Pagamento>, PagamentoService>();
 builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Usuario>, UsuarioService>();
 builder.Services.AddScoped<IPacote, PacoteService>();
+builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Hotel>, HotelService>();
+
 
 
 
