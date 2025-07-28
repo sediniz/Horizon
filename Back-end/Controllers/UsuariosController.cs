@@ -4,12 +4,13 @@ using Horizon.Repositories.Implementations;
 using Horizon.Repositories.Interface;
 using Horizon.Services.Implementations;
 using Horizon.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Horizon.Controllers
 {
-
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : Controller
