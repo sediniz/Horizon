@@ -1,7 +1,7 @@
 import Header from './components/Header/Header';
 import Carousel from './components/Carousel/Carousel';
 import ContentBlock from './components/ContentBlock/ContentBlock';
-import EvaluationRedirection from './components/Avaliation/Avaliation';
+import Avaliation from './components/Avaliation/Avaliation';
 import Footer from './components/Footer/Footer';
 import './App.css';
 import './output.css';
@@ -10,6 +10,7 @@ import './output.css';
 import img1 from './assets/img1.jpeg';
 import img2 from './assets/img2.png';
 import img3 from './assets/img3.png';
+
 
 // Fallback com URLs funcionais caso as imagens locais falhem
 const fallbackImages = [
@@ -29,7 +30,7 @@ function App() {
       <Header />
       <Carousel images={imageList} />
       <ContentBlock />
-      <EvaluationRedirection />
+      <Avaliation />
       <Footer />
     </div>
   );
