@@ -2,7 +2,7 @@
 
 namespace Horizon.Repositories.Interface
 {
-    public interface IHotelRepository : IRepository<Hotel>
+    public interface IHotelRepository : IService<Hotel>
     {
         Task<Hotel?> GetByNameAsync(string nome);
         Task<bool> NameExistsAsync(string nome);

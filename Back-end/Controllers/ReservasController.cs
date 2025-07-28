@@ -9,18 +9,18 @@ namespace Horizon.Controllers
     public class ReservasController : Controller
     {
 
-        private readonly IRepository<Reserva> _reservaRepository;
+        private readonly IService<Reserva> _reservaService;
 
-        public ReservasController(IRepository<Reserva> reservaRepository)
+        public ReservasController(IService<Reserva> reservaService)
         {
-            _reservaRepository = reservaRepository;
+            _reservaService = reservaService;
         }
 
         // GET: api/reservas
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var reservas = await _reservaRepository.GetAllAsync();
+            var reservas = await _reservaService.GetAllAsync();
             return Ok(reservas);
         }
 
@@ -28,7 +28,7 @@ namespace Horizon.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var reserva = await _reservaRepository.GetByIdAsync(id);
+            var reserva = await _reservaService.GetByIdAsync(id);
             if (reserva == null)
             {
                 return NotFound();
@@ -44,8 +44,8 @@ namespace Horizon.Controllers
             {
                 return BadRequest("Reserva cannot be null");
             }
-            await _reservaRepository.AddAsync(reserva);
-            await _reservaRepository.SaveChangesAsync();
+            await _reservaService.AddAsync(reserva);
+            await _reservaService.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = reserva.ReservaId }, reserva);
         }
 
@@ -57,13 +57,13 @@ namespace Horizon.Controllers
             {
                 return BadRequest("ID not found");
             }
-            var existingReserva = await _reservaRepository.GetByIdAsync(id);
+            var existingReserva = await _reservaService.GetByIdAsync(id);
             if (existingReserva == null)
             {
                 return NotFound();
             }
-            await _reservaRepository.UpdateAsync(reserva);
-            await _reservaRepository.SaveChangesAsync();
+            await _reservaService.UpdateAsync(reserva);
+            await _reservaService.SaveChangesAsync();
             return Ok(reserva);
         }
 
@@ -71,17 +71,17 @@ namespace Horizon.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var existingReserva = await _reservaRepository.GetByIdAsync(id);
+            var existingReserva = await _reservaService.GetByIdAsync(id);
             if (existingReserva == null)
             {
                 return NotFound();
             }
-            var deleted = await _reservaRepository.DeleteAsync(id);
+            var deleted = await _reservaService.DeleteAsync(id);
             if (!deleted)
             {
                 return NotFound();
             }
-            await _reservaRepository.SaveChangesAsync();
+            await _reservaService.SaveChangesAsync();
             return NoContent();
 
         }
@@ -92,7 +92,7 @@ namespace Horizon.Controllers
         [HttpGet("filtro")]
         public async Task<IActionResult> FiltrarReservas(DateTime? dataInicio, DateTime? dataFim)
         {
-            var reservas = await _reservaRepository.GetAllAsync();
+            var reservas = await _reservaService.GetAllAsync();
             if (dataInicio.HasValue)
             {
                 reservas = reservas.Where(r => r.DataInicio >= dataInicio.Value);
@@ -108,7 +108,7 @@ namespace Horizon.Controllers
         [HttpGet("ordenar")]
         public async Task<IActionResult> OrdenarReservas(string sortBy)
         {
-            var reservas = await _reservaRepository.GetAllAsync();
+            var reservas = await _reservaService.GetAllAsync();
             switch (sortBy?.ToLower())
             {
                 case "datainicio":
@@ -131,7 +131,7 @@ namespace Horizon.Controllers
             {
                 return BadRequest("Search term cannot be empty");
             }
-            var reservas = await _reservaRepository.GetAllAsync();
+            var reservas = await _reservaService.GetAllAsync();
             var resultados = reservas.Where(r => r.Usuario.Nome.Contains(nomeUsuario, StringComparison.OrdinalIgnoreCase) ||
                                                  r.Usuario.Email.Contains(nomeUsuario, StringComparison.OrdinalIgnoreCase));
             return Ok(resultados);
@@ -141,7 +141,7 @@ namespace Horizon.Controllers
         [HttpGet("buscarPorStatus")]
         public async Task<IActionResult> BuscarReservasPorStatus(StatusReserva status)
         {
-            var reservas = await _reservaRepository.GetAllAsync();
+            var reservas = await _reservaService.GetAllAsync();
             var resultados = reservas.Where(r => r.Status == status);
             if (!resultados.Any())
             {
@@ -155,14 +155,14 @@ namespace Horizon.Controllers
         [Route("atualizarStatus/{id}")]
         public async Task<IActionResult> AtualizarStatus(int id, [FromBody] StatusReserva novoStatus)
         {
-            var reserva = await _reservaRepository.GetByIdAsync(id);
+            var reserva = await _reservaService.GetByIdAsync(id);
             if (reserva == null)
             {
                 return NotFound("Reserva não encontrada.");
             }
             reserva.Status = novoStatus;
-            await _reservaRepository.UpdateAsync(reserva);
-            await _reservaRepository.SaveChangesAsync();
+            await _reservaService.UpdateAsync(reserva);
+            await _reservaService.SaveChangesAsync();
             return Ok(reserva);
         }
 

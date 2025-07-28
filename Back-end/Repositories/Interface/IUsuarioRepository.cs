@@ -2,7 +2,7 @@
 
 namespace Horizon.Repositories.Interface
 {
-    public interface IUsuarioRepository : IRepository<Usuario>
+    public interface IUsuarioRepository : IService<Usuario>
     {
         Task<Usuario?> GetByEmailAsync(string email);
         Task<bool> EmailExistsAsync(string email);

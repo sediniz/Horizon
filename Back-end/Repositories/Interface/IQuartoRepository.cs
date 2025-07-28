@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Horizon.Repositories.Interface
 {
-    public interface IQuartoRepository : IRepository<Quarto>
+    public interface IQuartoRepository : IService<Quarto>
     {
 
         Task<IEnumerable<Quarto>> GetDisponiveisAsync();

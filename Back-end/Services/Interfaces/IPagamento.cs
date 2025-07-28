@@ -1,8 +1,8 @@
 ﻿using Horizon.Models;
 
-namespace Horizon.Repositories.Interface
+namespace Horizon.Services.Interfaces
 {
-    public interface IPagamentoRepository : IService<Pagamento>
+    public interface IPagamento : IService<Pagamento>
     {
 
         // Buscar pagamentos por reserva específica

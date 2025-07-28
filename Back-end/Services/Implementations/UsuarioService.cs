@@ -1,101 +1,237 @@
 ﻿using Horizon.Models;
 using Horizon.Repositories.Interface;
 using Horizon.Services.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace Horizon.Services.Implementations
 {
     public class UsuarioService : IUsuarioService
     {
-        private readonly IRepository<Usuario> _repository;
+        private readonly Repositories.Interface.IService<Usuario> _repository;
 
-        public UsuarioService(IRepository<Usuario> repository)
+        public UsuarioService(Repositories.Interface.IService<Usuario> repository)
         {
             _repository = repository;
         }
-
-        public Task<Usuario> AddAsync(Usuario entity)
+        
+        public async Task<Usuario> AddAsync(Usuario entity)
         {
-            throw new NotImplementedException();
+            // Validações de negócio
+            if (await EmailExistsAsync(entity.Email!))
+                throw new InvalidOperationException("Email já está em uso.");
+            
+            if (await CpfPassaporteExistsAsync(entity.CpfPassaporte!))
+                throw new InvalidOperationException("CPF/Passaporte já está em uso.");
+            
+            if (await TelefoneExistsAsync(entity.Telefone!))
+                throw new InvalidOperationException("Telefone já está em uso.");
+
+            // Hash da senha antes de salvar
+            entity.Senha = BCrypt.Net.BCrypt.HashPassword(entity.Senha);
+            
+            return await _repository.AddAsync(entity);
         }
 
-        public Task<Usuario?> AuthenticateAsync(string email, string senha)
+        public async Task<Usuario?> AuthenticateAsync(string email, string senha)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
+                return null;
+
+            var usuario = await GetByEmailAsync(email);
+            if (usuario == null)
+                return null;
+
+            // Verificar senha hasheada
+            bool senhaValida = BCrypt.Net.BCrypt.Verify(senha, usuario.Senha);
+            return senhaValida ? usuario : null;
         }
 
-        public Task<bool> ChangePasswordAsync(int usuarioId, string senhaAtual, string novaSenha)
+        public async Task<bool> ChangePasswordAsync(int usuarioId, string senhaAtual, string novaSenha)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(senhaAtual) || string.IsNullOrWhiteSpace(novaSenha))
+                return false;
+
+            var usuario = await _repository.GetByIdAsync(usuarioId);
+            if (usuario == null)
+                return false;
+
+            // Verificar senha atual
+            if (!BCrypt.Net.BCrypt.Verify(senhaAtual, usuario.Senha))
+                return false;
+
+            // Validar nova senha
+            if (!ValidarSenha(novaSenha))
+                throw new ArgumentException("Nova senha não atende aos critérios de segurança.");
+
+            // Hash da nova senha
+            usuario.Senha = BCrypt.Net.BCrypt.HashPassword(novaSenha);
+            await _repository.UpdateAsync(usuario);
+            await _repository.SaveChangesAsync();
+            
+            return true;
         }
 
-        public Task<bool> CpfPassaporteExistsAsync(string cpfPassaporte)
+        public async Task<bool> CpfPassaporteExistsAsync(string cpfPassaporte)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(cpfPassaporte))
+                return false;
+
+            var usuarios = await _repository.GetAllAsync();
+            return usuarios.Any(u => u.CpfPassaporte == cpfPassaporte.Trim());
         }
 
         public Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            return _repository.DeleteAsync(id);
         }
 
-        public Task<bool> EmailExistsAsync(string email)
+        public async Task<bool> EmailExistsAsync(string email)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            var usuarios = await _repository.GetAllAsync();
+            return usuarios.Any(u => u.Email != null && u.Email.Equals(email.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public Task<IEnumerable<Usuario>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return _repository.GetAllAsync();
         }
 
-        public Task<Usuario?> GetByCpfPassaporteAsync(string cpfPassaporte)
+        public async Task<Usuario?> GetByCpfPassaporteAsync(string cpfPassaporte)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(cpfPassaporte))
+                return null;
+
+            var usuarios = await _repository.GetAllAsync();
+            return usuarios.FirstOrDefault(u => u.CpfPassaporte == cpfPassaporte.Trim());
         }
 
-        public Task<Usuario?> GetByEmailAsync(string email)
+        
+        public async Task<Usuario?> GetByEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+
+            var usuarios = await _repository.GetAllAsync();
+            return usuarios.FirstOrDefault(u => u.Email != null && u.Email.Equals(email.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public Task<Usuario?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return _repository.GetByIdAsync(id);
         }
 
-        public Task<IEnumerable<Usuario>> GetByTipoUsuarioAsync(string tipoUsuario)
+        public async Task<IEnumerable<Usuario>> GetByTipoUsuarioAsync(string tipoUsuario)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(tipoUsuario))
+                return Enumerable.Empty<Usuario>();
+
+            var usuarios = await _repository.GetAllAsync();
+            return usuarios.Where(u => u.TipoUsuario != null && u.TipoUsuario.Equals(tipoUsuario.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
-        public Task<bool> ResetPasswordAsync(string email)
+        public async Task<bool> ResetPasswordAsync(string email)
         {
-            throw new NotImplementedException();
+            var usuario = await GetByEmailAsync(email);
+            if (usuario == null)
+                return false;
+
+            // Gerar senha temporária segura
+            string senhaTemporaria = GerarSenhaTemporaria();
+            usuario.Senha = BCrypt.Net.BCrypt.HashPassword(senhaTemporaria);
+            
+            await _repository.UpdateAsync(usuario);
+            await _repository.SaveChangesAsync();
+
+            // Aqui você enviaria por email a senha temporária
+            // EmailService.EnviarSenhaTemporaria(email, senhaTemporaria);
+            
+            return true;
         }
 
         public Task SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            return _repository.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<Usuario>> SearchByNameAsync(string nome)
+        public async Task<IEnumerable<Usuario>> SearchByNameAsync(string nome)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(nome))
+                return Enumerable.Empty<Usuario>();
+
+            var usuarios = await _repository.GetAllAsync();
+            return usuarios.Where(u => u.Nome != null && 
+                u.Nome.Contains(nome.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
-        public Task<bool> TelefoneExistsAsync(string telefone)
+        public async Task<bool> TelefoneExistsAsync(string telefone)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(telefone))
+                return false;
+
+            var usuarios = await _repository.GetAllAsync();
+            return usuarios.Any(u => u.Telefone == telefone.Trim());
         }
 
-        public Task<Usuario> UpdateAsync(Usuario entity)
+        public async Task<Usuario> UpdateAsync(Usuario entity)
         {
-            throw new NotImplementedException();
+            var usuarioExistente = await _repository.GetByIdAsync(entity.UsuarioId);
+            if (usuarioExistente == null)
+                throw new ArgumentException("Usuário não encontrado.");
+
+            // Verificar se email foi alterado e se já existe
+            if (!usuarioExistente.Email!.Equals(entity.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                if (await EmailExistsAsync(entity.Email!))
+                    throw new InvalidOperationException("Email já está em uso por outro usuário.");
+            }
+
+            // Verificar CPF/Passaporte
+            if (usuarioExistente.CpfPassaporte != entity.CpfPassaporte)
+            {
+                if (await CpfPassaporteExistsAsync(entity.CpfPassaporte!))
+                    throw new InvalidOperationException("CPF/Passaporte já está em uso por outro usuário.");
+            }
+
+            // Verificar telefone
+            if (usuarioExistente.Telefone != entity.Telefone)
+            {
+                if (await TelefoneExistsAsync(entity.Telefone!))
+                    throw new InvalidOperationException("Telefone já está em uso por outro usuário.");
+            }
+
+            // Manter senha existente se não foi alterada
+            if (string.IsNullOrEmpty(entity.Senha))
+                entity.Senha = usuarioExistente.Senha;
+            else if (entity.Senha != usuarioExistente.Senha)
+                entity.Senha = BCrypt.Net.BCrypt.HashPassword(entity.Senha);
+
+            return await _repository.UpdateAsync(entity);
         }
 
-        public Task<bool> ValidateCredentialsAsync(string email, string senha)
+        public async Task<bool> ValidateCredentialsAsync(string email, string senha)
         {
-            throw new NotImplementedException();
+            var usuario = await AuthenticateAsync(email, senha);
+            return usuario != null;
+        }
+
+        private bool ValidarSenha(string senha)
+        {
+            if (string.IsNullOrWhiteSpace(senha))
+                return false;
+
+            var regex = new Regex(@"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$");
+            return regex.IsMatch(senha);
+        }
+
+        private string GerarSenhaTemporaria()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)]).ToArray()) + "1!";
         }
     }
 }

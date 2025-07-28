@@ -2,7 +2,7 @@
 
 namespace Horizon.Repositories.Interface
 {
-    public interface IAvaliacaoRepository : IRepository<Avaliacao>
+    public interface IAvaliacaoRepository : IService<Avaliacao>
     {
         Task<IEnumerable<Avaliacao>> GetAvaliacoesByHotelIdAsync(int hotelId);
         Task<Avaliacao?> GetAvaliacaoByUsuarioAndHotelAsync(int usuarioId, int hotelId);
