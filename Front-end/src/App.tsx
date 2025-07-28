@@ -1,7 +1,7 @@
 import Header from './components/Header/Header';
 import Carousel from './components/Carousel/Carousel';
 import ContentBlock from './components/ContentBlock/ContentBlock';
-import Avaliation from './components/Avaliation/Avaliation';
+import Review from './components/Review/Review';
 import Footer from './components/Footer/Footer';
 import './output.css';
 
@@ -29,7 +29,7 @@ function App() {
       <Header />
       <Carousel images={imageList} />
       <ContentBlock />
-      <Avaliation />
+      <Review />
       <Footer />
     </div>
   );
