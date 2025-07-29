@@ -31,13 +31,13 @@ builder.Services.AddScoped<IHotelRepository, HotelRepository>();
 
 
 // Services
-builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Quarto>, QuartoService>();
-builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Avaliacao>, AvaliacaoService>();
-builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Reserva>, ReservaService>();
-builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Pagamento>, PagamentoService>();
-builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Usuario>, UsuarioService>();
-builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Pacote>, PacoteService>();
-builder.Services.AddScoped<Horizon.Services.Interfaces.IService<Hotel>, HotelService>();
+builder.Services.AddScoped<IQuartoService, QuartoService>();
+builder.Services.AddScoped<IAvaliacaoService, AvaliacaoService>();
+builder.Services.AddScoped<IReservaService, ReservaService>();
+builder.Services.AddScoped<IPagamentoService, PagamentoService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IPacoteService, PacoteService>();
+builder.Services.AddScoped<IHotelService, HotelService>();
 
 
 

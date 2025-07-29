@@ -6,11 +6,11 @@ namespace Horizon.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HotelController : ControllerBase
+    public class HoteisController : ControllerBase
     {
         private readonly IHotelService _hotelService;
 
-        public HotelController(IHotelService hotelService)
+        public HoteisController(IHotelService hotelService)
         {
             _hotelService = hotelService;
         }
