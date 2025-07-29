@@ -1,6 +1,6 @@
-import Carousel from '../../Carousel/Carousel';
-import ContentBlock from '../../ContentBlock/ContentBlock';
-import Review from '../../Review/Review';
+import Carousel from '../../components/Carousel/Carousel';
+import ContentBlock from '../../components/ContentBlock/ContentBlock';
+import Review from '../../components/Review/Review';
 
 // Importando as imagens corretamente
 import img1 from '../../../assets/cancun.png';
