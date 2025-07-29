@@ -6,9 +6,9 @@ import Footer from './components/Footer/Footer';
 import './output.css';
 
 // Importando as imagens corretamente
-import img1 from './assets/img1.jpeg';
-import img2 from './assets/img2.png';
-import img3 from './assets/img3.png';
+import img1 from './assets/cancun.png';
+import img2 from './assets/Paris2.png';
+import img3 from './assets/Praia01.png';
 
 
 // Fallback com URLs funcionais caso as imagens locais falhem
