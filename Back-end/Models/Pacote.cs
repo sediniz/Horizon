@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Horizon.Models
 {
@@ -12,7 +13,6 @@ namespace Horizon.Models
 
         [Required]
         [StringLength(50, ErrorMessage = "A descrição deve ter no máximo 50 caracteres.")]
-
         public string? Descricao { get; set; }
 
         [Required]
@@ -21,5 +21,10 @@ namespace Horizon.Models
         public int Duracao { get; set; }
         public int QuantidadeDePessoas { get; set; }
         public decimal ValorTotal { get; set; }
+
+        // Chave estrangeira para Hotel
+        [ForeignKey("Hotel")]
+        public int HotelId { get; set; }
+        public Hotel? Hotel { get; set; }
     }
 }
