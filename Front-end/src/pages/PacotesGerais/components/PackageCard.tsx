@@ -88,7 +88,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
                   <p className="text-sm text-gray-500 line-through">{pkg.originalPrice}</p>
                 )}
                 <p className="text-3xl font-bold text-blue-600">{pkg.price}</p>
-                <p className="text-xs text-gray-500">por pessoa</p>
+                <p className="text-xs text-gray-500">no total</p>
               </div>
 
               <div className="flex flex-col gap-2">
