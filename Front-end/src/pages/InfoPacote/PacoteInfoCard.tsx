@@ -1,4 +1,16 @@
 import React, { useState } from "react";
+import { updatePacote } from '../../api/pacoteApi';
+import type { Pacote } from '../../api/pacoteApi';
+// Função para criar pacote (POST)
+async function createPacote(pacote: Omit<Pacote, 'pacoteId'>): Promise<Pacote> {
+  const resp = await fetch('/api/pacotes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(pacote),
+  });
+  if (!resp.ok) throw new Error('Erro ao criar pacote');
+  return resp.json();
+}
 
 interface PacoteInfoCardProps {
   local: string;
@@ -6,10 +18,11 @@ interface PacoteInfoCardProps {
   dataIda: string;
   dataVolta: string;
   pessoas: number;
+  pacoteId?: number; // novo: id do pacote
   onModificar: (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => void;
 }
 
-const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', dataIda, dataVolta, pessoas, onModificar }) => {
+const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', dataIda, dataVolta, pessoas, pacoteId, onModificar }) => {
   const [showModal, setShowModal] = useState(false);
   const [editLocal, setEditLocal] = useState(local);
   const [editHotel, setEditHotel] = useState(hotel);
@@ -17,11 +30,50 @@ const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', data
   const [editDataVolta, setEditDataVolta] = useState(dataVolta);
   const [editPessoas, setEditPessoas] = useState(pessoas);
 
+  // Sincroniza os estados locais com as props vindas do backend
+  React.useEffect(() => {
+    setEditLocal(local);
+  }, [local]);
+  React.useEffect(() => {
+    setEditHotel(hotel);
+  }, [hotel]);
+  React.useEffect(() => {
+    setEditDataIda(dataIda);
+  }, [dataIda]);
+  React.useEffect(() => {
+    setEditDataVolta(dataVolta);
+  }, [dataVolta]);
+  React.useEffect(() => {
+    setEditPessoas(pessoas);
+  }, [pessoas]);
+
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     onModificar({ local: editLocal, hotel: editHotel, dataIda: editDataIda, dataVolta: editDataVolta, pessoas: editPessoas });
+    if (typeof pacoteId === 'number') {
+      // Atualiza pacote existente
+      await updatePacote({
+        pacoteId: pacoteId,
+        titulo: editLocal,
+        descricao: '',
+        destino: editLocal,
+        duracao: 0,
+        quantidadeDePessoas: editPessoas,
+        valorTotal: 0
+      });
+    } else {
+      // Cria novo pacote
+      await createPacote({
+        titulo: editLocal,
+        descricao: '',
+        destino: editLocal,
+        duracao: 0,
+        quantidadeDePessoas: editPessoas,
+        valorTotal: 0
+      });
+    }
     setShowModal(false);
   };
 
