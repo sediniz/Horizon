@@ -364,9 +364,10 @@ const Search: React.FC = () => {
     setIsGuestsOpen(false);
   };
 
+   {/* CONFIGURAÇÕES DA Borda */}
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 relative z-10" onClick={handleClickOutside}>
-      <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+    <div className="w-full max-w-full mx-0 px-0 relative z-10" onClick={handleClickOutside}>
+      <div className="bg-white rounded-b-2xl shadow-2xl p-8 border-b border-x border-gray-100">
         {/* Título */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
