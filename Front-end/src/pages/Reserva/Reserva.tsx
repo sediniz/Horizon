@@ -60,187 +60,175 @@ export default function Reserva() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50">
-      {/* Header com informações da busca */}
-      <div className="bg-gradient-to-r from-sky-600 to-cyan-600 shadow-lg border-b-4 border-b-cyan-400 p-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-cyan-200 text-xl">✈️</span>
-              <span className="font-semibold text-white text-shadow">GRU → RIO</span>
-            </div>
-            <div className="text-cyan-200">|</div>
-            <div className="text-white">2 adultos</div>
-          </div>
-          <button className="bg-white/20 hover:bg-white/30 text-white font-medium px-4 py-2 rounded-lg backdrop-blur-sm transition-all duration-300 hover:scale-105">
-            Alterar busca
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+      <style>{`
+        .text-shadow {
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .glass-effect {
+          backdrop-filter: blur(20px);
+          background: rgba(255, 255, 255, 0.25);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+      `}</style>
 
       <div className="max-w-7xl mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar com filtros */}
-          <div className="lg:col-span-1">
-            <div className="bg-gradient-to-br from-sky-50 to-cyan-50 rounded-xl shadow-lg shadow-sky-200/50 border border-cyan-200 p-6 space-y-6">
-              {/* Explorar mapa */}
-              <div className="bg-gradient-to-br from-cyan-100 to-sky-100 rounded-xl p-4 text-center border border-cyan-200 shadow-md">
+          <div className="w-full lg:w-80 lg:flex-shrink-0">
+            <div className="glass-effect rounded-2xl p-6 shadow-xl h-fit border border-white/20 backdrop-blur-sm space-y-6">
+              {/* Header da sidebar */}
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">Filtros</h2>
+              </div>
+
+              {/* Explorar mapa modernizado */}
+              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6 text-center border border-white/30 shadow-lg">
                 <div className="text-4xl mb-2">🗺️</div>
-                <button className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-200">
+                <button className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg">
                   Explorar mapa ›
                 </button>
               </div>
 
               {/* Opções de pagamento */}
-              <div>
-                <button className="flex items-center justify-between w-full text-left font-semibold text-slate-700 mb-3 hover:text-sky-600 transition-colors">
-                  Opções de pagamento
-                  <span className="text-slate-400">⌄</span>
+              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+                <button className="flex items-center justify-between w-full text-left font-bold text-gray-800 mb-4 hover:text-blue-600 transition-colors">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <span>Opções de pagamento</span>
+                  </div>
+                  <span className="text-gray-400">⌄</span>
                 </button>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 hover:bg-sky-50 p-2 rounded-lg transition-colors cursor-pointer">
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
                     <input
                       type="radio"
                       name="pagamento"
                       value="todas"
                       checked={filters.pagamento === 'todas'}
                       onChange={handleFilterChange}
-                      className="text-cyan-500 focus:ring-cyan-300"
+                      className="text-blue-500 focus:ring-blue-300"
                     />
-                    <span className="text-sm text-slate-600">Todas</span>
-                    <span className="text-sm ml-auto bg-sky-100 text-sky-600 px-2 py-1 rounded-full font-medium">669</span>
+                    <span className="text-sm font-medium text-gray-700 flex-1">Todas</span>
+                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">669</span>
                   </label>
-                  <label className="flex items-center gap-2 hover:bg-sky-50 p-2 rounded-lg transition-colors cursor-pointer">
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
                     <input
                       type="radio"
                       name="pagamento"
                       value="parcelas"
                       checked={filters.pagamento === 'parcelas'}
                       onChange={handleFilterChange}
-                      className="text-cyan-500 focus:ring-cyan-300"
+                      className="text-blue-500 focus:ring-blue-300"
                     />
-                    <span className="text-sm text-slate-600">Em parcelas</span>
-                    <span className="text-sm ml-auto bg-sky-100 text-sky-600 px-2 py-1 rounded-full font-medium">669</span>
+                    <span className="text-sm font-medium text-gray-700 flex-1">Em parcelas</span>
+                    <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-bold">669</span>
                   </label>
                 </div>
               </div>
 
               {/* Políticas de cancelamento */}
-              <div>
-                <button className="flex items-center justify-between w-full text-left font-semibold text-slate-700 mb-3 hover:text-sky-600 transition-colors">
-                  Políticas de cancelamento
-                  <span className="text-slate-400">⌄</span>
+              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+                <button className="flex items-center justify-between w-full text-left font-bold text-gray-800 mb-4 hover:text-blue-600 transition-colors">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Políticas de cancelamento</span>
+                  </div>
+                  <span className="text-gray-400">⌄</span>
                 </button>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 hover:bg-sky-50 p-2 rounded-lg transition-colors cursor-pointer">
+                <div className="space-y-3">
+                  <label className="flex items-start gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
                     <input
                       type="checkbox"
                       name="reservaFlexivel"
                       checked={filters.reservaFlexivel}
                       onChange={handleFilterChange}
-                      className="text-cyan-500 focus:ring-cyan-300 rounded"
+                      className="text-green-500 focus:ring-green-300 rounded mt-1"
                     />
                     <div className="flex-1">
-                      <div className="text-sm text-slate-600 font-medium">Reserva flexível</div>
-                      <div className="text-xs text-slate-500">Cancelamento grátis 3 dias ou menos antes do check-in</div>
+                      <div className="text-sm font-medium text-gray-700">Reserva flexível</div>
+                      <div className="text-xs text-gray-500 leading-tight">Cancelamento grátis 3 dias ou menos antes do check-in</div>
                     </div>
-                    <span className="text-sm bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full font-medium">122</span>
+                    <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full font-bold">122</span>
                   </label>
                 </div>
               </div>
 
               {/* Pontuação */}
-              <div>
-                <h3 className="font-semibold text-slate-700 mb-3">Pontuação</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 hover:bg-sky-50 p-2 rounded-lg transition-colors cursor-pointer">
-                    <input type="checkbox" className="text-cyan-500 focus:ring-cyan-300 rounded" />
-                    <span className="text-sm text-slate-600">9 ou mais - Excelente</span>
-                    <span className="text-sm ml-auto bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full font-medium">149</span>
+              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+                <div className="flex items-center space-x-2 mb-4">
+                  <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <h3 className="font-bold text-gray-800">Pontuação</h3>
+                </div>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-emerald-500 focus:ring-emerald-300 rounded" />
+                    <span className="text-sm font-medium text-gray-700 flex-1">9 ou mais - Excelente</span>
+                    <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full font-bold">149</span>
                   </label>
-                  <label className="flex items-center gap-2 hover:bg-sky-50 p-2 rounded-lg transition-colors cursor-pointer">
-                    <input type="checkbox" className="text-cyan-500 focus:ring-cyan-300 rounded" />
-                    <span className="text-sm text-slate-600">8 ou mais - Muito bom</span>
-                    <span className="text-sm ml-auto bg-sky-100 text-sky-600 px-2 py-1 rounded-full font-medium">294</span>
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
+                    <span className="text-sm font-medium text-gray-700 flex-1">8 ou mais - Muito bom</span>
+                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">294</span>
                   </label>
-                  <label className="flex items-center gap-2 hover:bg-sky-50 p-2 rounded-lg transition-colors cursor-pointer">
-                    <input type="checkbox" className="text-cyan-500 focus:ring-cyan-300 rounded" />
-                    <span className="text-sm text-slate-600">7 ou mais - Confortável</span>
-                    <span className="text-sm ml-auto bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-medium">325</span>
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-amber-500 focus:ring-amber-300 rounded" />
+                    <span className="text-sm font-medium text-gray-700 flex-1">7 ou mais - Confortável</span>
+                    <span className="text-xs bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold">325</span>
                   </label>
-                  <label className="flex items-center gap-2 hover:bg-sky-50 p-2 rounded-lg transition-colors cursor-pointer">
-                    <input type="checkbox" className="text-cyan-500 focus:ring-cyan-300 rounded" />
-                    <span className="text-sm text-slate-600">6 ou mais - Bom</span>
-                    <span className="text-sm ml-auto bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-medium">331</span>
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-orange-500 focus:ring-orange-300 rounded" />
+                    <span className="text-sm font-medium text-gray-700 flex-1">6 ou mais - Bom</span>
+                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-bold">331</span>
                   </label>
                 </div>
               </div>
 
               {/* Estrelas */}
-              <div>
-                <h3 className="font-medium text-gray-800 mb-3">Estrelas</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm">Todas as estrelas</span>
-                    <span className="text-sm text-gray-400 ml-auto">669</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm text-yellow-500">⭐⭐⭐⭐⭐</span>
-                    <span className="text-sm text-gray-400 ml-auto">19</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm text-yellow-500">⭐⭐⭐⭐</span>
-                    <span className="text-sm text-gray-400 ml-auto">77</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm text-yellow-500">⭐⭐⭐</span>
-                    <span className="text-sm text-gray-400 ml-auto">121</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm text-yellow-500">⭐⭐</span>
-                    <span className="text-sm text-gray-400 ml-auto">100</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm text-yellow-500">⭐</span>
-                    <span className="text-sm text-gray-400 ml-auto">3</span>
-                  </label>
+              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+                <div className="flex items-center space-x-2 mb-4">
+                  <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <h3 className="font-bold text-gray-800">Estrelas</h3>
                 </div>
-              </div>
-
-              {/* Tipo de hospedagem */}
-              <div>
-                <h3 className="font-medium text-gray-800 mb-3">Tipo de hospedagem</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm">Todas as opções</span>
-                    <span className="text-sm text-gray-400 ml-auto">669</span>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
+                    <span className="text-sm font-medium text-gray-700 flex-1">Todas as estrelas</span>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-bold">669</span>
                   </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm">Casas para Alugar</span>
-                    <span className="text-sm text-gray-400 ml-auto">28</span>
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
+                    <div className="flex items-center flex-1">
+                      <span className="text-lg text-yellow-500">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full font-bold">19</span>
                   </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm">Bed and Breakfasts</span>
-                    <span className="text-sm text-gray-400 ml-auto">1</span>
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
+                    <div className="flex items-center flex-1">
+                      <span className="text-lg text-yellow-500">⭐⭐⭐⭐</span>
+                    </div>
+                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">77</span>
                   </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm">Hotéis Boutique</span>
-                    <span className="text-sm text-gray-400 ml-auto">1</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="text-blue-600" />
-                    <span className="text-sm">Chalés</span>
-                    <span className="text-sm text-gray-400 ml-auto">2</span>
+                  <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
+                    <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
+                    <div className="flex items-center flex-1">
+                      <span className="text-lg text-yellow-500">⭐⭐⭐</span>
+                    </div>
+                    <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-bold">121</span>
                   </label>
                 </div>
               </div>
@@ -248,36 +236,36 @@ export default function Reserva() {
           </div>
 
           {/* Lista de hotéis */}
-          <div className="lg:col-span-3">
+          <div className="flex-1">
             <div className="space-y-6">
               {hoteis.map((hotel) => (
                 <div key={hotel.id} className="bg-white rounded-xl shadow-lg shadow-sky-200/50 border border-cyan-200 hover:shadow-xl hover:shadow-cyan-200/60 hover:scale-[1.02] transition-all duration-300">
-                  <div className="p-6">
-                    <div className="flex gap-4">
-                      <div className="relative">
+                  <div className="p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="relative w-full sm:w-48 flex-shrink-0">
                         <img
                           src={hotel.imagem}
                           alt={hotel.nome}
-                          className="w-48 h-36 object-cover rounded-xl shadow-md"
+                          className="w-full h-48 sm:h-36 object-cover rounded-xl shadow-md"
                         />
                         <div className="absolute top-2 left-2 bg-gradient-to-r from-cyan-500 to-sky-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
                           Oferta
                         </div>
                       </div>
                       <div className="flex-1">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-1">{hotel.nome}</h3>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                          <div className="flex-1 mb-4 sm:mb-0">
+                            <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-1">{hotel.nome}</h3>
                             <p className="text-sm text-slate-600 mb-2">{hotel.localizacao}</p>
-                            <div className="flex items-center gap-3 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                               {hotel.vooIncluido && (
-                                <span className="text-sm text-slate-600 bg-sky-50 px-2 py-1 rounded-lg border border-sky-200">
+                                <span className="text-xs sm:text-sm text-slate-600 bg-sky-50 px-2 py-1 rounded-lg border border-sky-200">
                                   Voo direto SAO <span className="text-sky-600">✈️</span> RIO
                                 </span>
                               )}
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-left sm:text-right">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="bg-gradient-to-r from-cyan-500 to-sky-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-md shadow-cyan-200">
                                 {hotel.avaliacao}
@@ -289,20 +277,20 @@ export default function Reserva() {
                           </div>
                         </div>
                         
-                        <div className="flex justify-between items-end mt-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mt-4 gap-4">
                           <div className="flex flex-col gap-2">
                             {hotel.ofertaInclusiva && (
-                              <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md">
+                              <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md w-fit">
                                 Oferta Inclusiva
                               </span>
                             )}
                             {hotel.restam && (
-                              <p className="text-sm text-red-600 font-medium bg-red-50 px-2 py-1 rounded-lg border border-red-200">
+                              <p className="text-sm text-red-600 font-medium bg-red-50 px-2 py-1 rounded-lg border border-red-200 w-fit">
                                 🔥 Restam apenas {hotel.restam}
                               </p>
                             )}
                           </div>
-                          <div className="text-right">
+                          <div className="text-left sm:text-right">
                             <div className="text-sm text-slate-600 mb-1">
                               Voo + Hospedagem
                             </div>
@@ -310,7 +298,7 @@ export default function Reserva() {
                               Preço por pessoa
                             </div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-cyan-600">
+                              <span className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-cyan-600">
                                 R$ {hotel.preco}
                               </span>
                             </div>
@@ -320,7 +308,7 @@ export default function Reserva() {
                             <div className="text-xs text-slate-500 mb-3">
                               Sem impostos, taxas e encargos
                             </div>
-                            <button className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-200">
+                            <button className="w-full sm:w-auto bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-200">
                               Ver detalhe
                             </button>
                           </div>

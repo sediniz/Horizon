@@ -51,7 +51,6 @@ const InlineCalendar: React.FC<{
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
     
@@ -294,14 +293,6 @@ const Search: React.FC = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [destinationQuery, setDestinationQuery] = useState('');
-
-  // Função para atualizar os campos do formulário
-  const handleInputChange = (field: keyof SearchFormData, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
   // Função para abrir/fechar calendário
   const toggleCalendar = () => {
