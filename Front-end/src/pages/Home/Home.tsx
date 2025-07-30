@@ -19,16 +19,19 @@ function Home() {
     <div className="Home min-h-screen bg-gray-50">
       
       {/* Seção principal com espaçamento */}
-      <main className="space-y-16 pb-16">
+      <main className="space-y-1 pb-16">
+
+      {/* Carousel */}
+        <section>
+          <Carousel images={imageList} />
+        </section>
+
         {/* Search Component */}
         <section className="pt-12">
           <Search />
         </section>
         
-        {/* Carousel */}
-        <section>
-          <Carousel images={imageList} />
-        </section>
+        
         
         {/* Content Block */}
         <section className="px-4">
