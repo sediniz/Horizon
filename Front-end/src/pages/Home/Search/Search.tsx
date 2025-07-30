@@ -51,7 +51,6 @@ const InlineCalendar: React.FC<{
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
     
@@ -295,14 +294,6 @@ const Search: React.FC = () => {
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [destinationQuery, setDestinationQuery] = useState('');
 
-  // Função para atualizar os campos do formulário
-  const handleInputChange = (field: keyof SearchFormData, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
   // Função para abrir/fechar calendário
   const toggleCalendar = () => {
     setIsCalendarOpen(!isCalendarOpen);
@@ -373,9 +364,10 @@ const Search: React.FC = () => {
     setIsGuestsOpen(false);
   };
 
+   {/* CONFIGURAÇÕES DA Borda */}
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 relative z-10" onClick={handleClickOutside}>
-      <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+    <div className="w-full max-w-full mx-0 px-0 relative z-10" onClick={handleClickOutside}>
+      <div className="bg-white rounded-b-2xl shadow-2xl p-8 border-b border-x border-gray-100">
         {/* Título */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
