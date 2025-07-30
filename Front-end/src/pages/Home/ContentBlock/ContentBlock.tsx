@@ -4,6 +4,7 @@ import React from 'react';
 import PraiaImg from '../../../assets/Praia01.png';
 import Paris2Img from '../../../assets/Paris2.png';
 import CancunImg from '../../../assets/cancun.png';
+import IconRenderer from '../../../components/IconRenderer/IconRenderer';
 
 // Definindo o tipo das comodidades
 type Amenity = {
@@ -42,12 +43,12 @@ const packages: PackageProps[] = [
     location: 'Bahia, Brasil',
     discount: 22,
     amenities: [
-      { name: 'WiFi Grátis', icon: '📶' },
-      { name: 'Piscina', icon: '🏊‍♀️' },
-      { name: 'Ar Condicionado', icon: '❄️' },
-      { name: 'Restaurante', icon: '🍽️' },
-      { name: 'Spa', icon: '💆‍♀️' },
-      { name: 'Academia', icon: '💪' }
+      { name: 'WiFi Grátis', icon: 'wifi' },
+      { name: 'Piscina', icon: 'pool' },
+      { name: 'Ar Condicionado', icon: 'ac' },
+      { name: 'Restaurante', icon: 'restaurant' },
+      { name: 'Spa', icon: 'spa' },
+      { name: 'Academia', icon: 'gym' }
     ],
     highlights: ['Café da manhã incluso', 'Vista para o mar', 'Atividades aquáticas']
   },
@@ -64,12 +65,12 @@ const packages: PackageProps[] = [
     location: 'Paris, França',
     discount: 13,
     amenities: [
-      { name: 'WiFi Grátis', icon: '📶' },
-      { name: 'Concierge', icon: '🛎️' },
-      { name: 'Ar Condicionado', icon: '❄️' },
-      { name: 'Room Service', icon: '🛏️' },
-      { name: 'Bar', icon: '🍸' },
-      { name: 'Transfer', icon: '🚗' }
+      { name: 'WiFi Grátis', icon: 'wifi' },
+      { name: 'Concierge', icon: 'concierge' },
+      { name: 'Ar Condicionado', icon: 'ac' },
+      { name: 'Room Service', icon: 'room-service' },
+      { name: 'Bar', icon: 'bar' },
+      { name: 'Transfer', icon: 'car' }
     ],
     highlights: ['City tour incluso', 'Vista da Torre Eiffel', 'Jantar romântico']
   },
@@ -86,12 +87,12 @@ const packages: PackageProps[] = [
     location: 'Cancún, México',
     discount: 20,
     amenities: [
-      { name: 'All Inclusive', icon: '🍹' },
-      { name: 'Praia Privada', icon: '🏖️' },
-      { name: 'Piscina', icon: '🏊‍♀️' },
-      { name: 'Spa', icon: '💆‍♀️' },
-      { name: 'Esportes', icon: '⚽' },
-      { name: 'Shows', icon: '🎭' }
+      { name: 'All Inclusive', icon: 'all-inclusive' },
+      { name: 'Praia Privada', icon: 'beach' },
+      { name: 'Piscina', icon: 'pool' },
+      { name: 'Spa', icon: 'spa' },
+      { name: 'Esportes', icon: 'sports' },
+      { name: 'Shows', icon: 'entertainment' }
     ],
     highlights: ['Todas as refeições incluídas', 'Bebidas liberadas', 'Entretenimento 24h']
   },
@@ -103,17 +104,46 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 !== 0;
 
+  // Estrelas cheias
   for (let i = 0; i < fullStars; i++) {
-    stars.push('⭐');
+    stars.push(
+      <svg key={`full-${i}`} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    );
   }
+
+  // Meia estrela se necessário
   if (hasHalfStar) {
-    stars.push('⭐');
+    stars.push(
+      <svg key="half" className="w-4 h-4 text-yellow-400" viewBox="0 0 24 24">
+        <defs>
+          <linearGradient id="half-fill">
+            <stop offset="50%" stopColor="currentColor"/>
+            <stop offset="50%" stopColor="transparent"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#half-fill)" stroke="currentColor" strokeWidth="1" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    );
+  }
+
+  // Estrelas vazias
+  const emptyStars = 5 - Math.ceil(rating);
+  for (let i = 0; i < emptyStars; i++) {
+    stars.push(
+      <svg key={`empty-${i}`} className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none">
+        <path stroke="currentColor" strokeWidth="1" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    );
   }
 
   return (
     <div className="flex items-center gap-1">
-      <span className="text-yellow-500">{stars.join('')}</span>
-      <span className="text-sm font-medium text-gray-700">{rating}</span>
+      <div className="flex items-center">
+        {stars}
+      </div>
+      <span className="text-sm font-medium text-gray-700 ml-1">{rating}</span>
       <span className="text-xs text-gray-500">({fullStars >= 1 ? `${fullStars} estrelas` : 'sem avaliação'})</span>
     </div>
   );
@@ -184,7 +214,7 @@ const TravelPackages: React.FC = () => {
                   <div className="grid grid-cols-3 gap-2">
                     {pkg.amenities.slice(0, 6).map((amenity, index) => (
                       <div key={index} className="flex items-center gap-1 text-xs text-gray-600">
-                        <span>{amenity.icon}</span>
+                        <IconRenderer iconName={amenity.icon} className="w-4 h-4 text-blue-600" />
                         <span className="truncate">{amenity.name}</span>
                       </div>
                     ))}
@@ -197,7 +227,9 @@ const TravelPackages: React.FC = () => {
                   <ul className="space-y-1">
                     {pkg.highlights.map((highlight, index) => (
                       <li key={index} className="text-xs text-gray-600 flex items-center gap-2">
-                        <span className="text-green-500">✓</span>
+                        <svg className="w-3 h-3 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                        </svg>
                         {highlight}
                       </li>
                     ))}
@@ -209,8 +241,10 @@ const TravelPackages: React.FC = () => {
                   <button className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
                     Reservar Agora
                   </button>
-                  <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    ❤️
+                  <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-red-300 hover:text-red-500 transition-all duration-200 group">
+                    <svg className="w-5 h-5 group-hover:fill-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
                   </button>
                 </div>
               </div>
