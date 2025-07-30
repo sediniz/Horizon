@@ -1,28 +1,37 @@
 import React from 'react';
-import logo from '../../assets/img2.png';
+import logo2 from '../../assets/logo2.png';
 
 const Header: React.FC = () => {
   return (
-    <header className="flex justify-between items-center px-10 py-5 bg-gray-100">
-      <div className="header-left">
-        <img src={logo} alt="Logo da Agência" className="w-30" />
-      </div>
+    <div className=" top-0 left-0 right-0 z-50 w-full">
+      {/* Faixa de fundo translúcida */}
+      
+      {/* Conteúdo do header */}
+      <div className="flex justify-between items-center px-6 pt-2 pb-0">
 
-      <div className="flex gap-6">
-        <button className="bg-transparent border border-gray-700 px-3.5 py-2 rounded-md cursor-pointer font-medium hover:bg-gray-200 transition-colors duration-200">
-          Viagens
-        </button>
-        <button className="bg-transparent border border-gray-700 px-3.5 py-2 rounded-md cursor-pointer font-medium hover:bg-gray-200 transition-colors duration-200">
-          Reservas
-        </button>
-      </div>
+        {/* Logo */}
+        <img
+          src={logo2}
+          alt="Logo2"
+          className="h-20 object-contain"
+        />
 
-      <div>
-        <button className="bg-blue-500 text-white border-0 px-3.5 py-2 rounded-md cursor-pointer hover:bg-blue-600 transition-colors duration-200">
+        {/* Botões centrais */}
+        <div className="flex gap-4">
+          <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+            Viagens
+          </button>
+          <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+            Reservas
+          </button>
+        </div>
+
+        {/* Botão Perfil */}
+        <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
           Perfil
         </button>
       </div>
-    </header>
+    </div>
   );
 };
 
