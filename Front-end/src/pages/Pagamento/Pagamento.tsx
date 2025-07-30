@@ -36,6 +36,7 @@ function Pagamento({ pacoteId: propPacoteId }: PagamentoProps) {
     if (pacoteId) {
       carregarDadosPacote();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pacoteId]);
 
   useEffect(() => {
@@ -54,9 +55,8 @@ function Pagamento({ pacoteId: propPacoteId }: PagamentoProps) {
       setLoading(true);
       const dados = await buscarDadosPacote(pacoteId);
       setPacoteData(dados);
-    } catch (err) {
+    } catch {
       setError('Erro ao carregar dados do pacote');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -73,13 +73,11 @@ function Pagamento({ pacoteId: propPacoteId }: PagamentoProps) {
   //desconto
   const handleAplicarDesconto = async () => {
     if (!formData.desconto || !pacoteData) return;
-    
     try {
       setLoading(true);
       const resultado = await aplicarDesconto(formData.desconto, pacoteId);
       setDescontoAplicado(resultado.desconto);
-      
-    } catch (err) {
+    } catch {
       setError('Código de desconto inválido');
     } finally {
       setLoading(false);
@@ -112,9 +110,8 @@ function Pagamento({ pacoteId: propPacoteId }: PagamentoProps) {
       } else {
         setError('Pagamento não foi aprovado. Tente novamente.');
       }
-    } catch (err) {
+    } catch {
       setError('Erro ao processar pagamento. Tente novamente.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -289,10 +286,10 @@ function Pagamento({ pacoteId: propPacoteId }: PagamentoProps) {
                 
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {['PIX', 'Cartão de Crédito', 'Cartão de Débito', 'Boleto'].map((forma) => (
+                    {(['PIX', 'Cartão de Crédito', 'Cartão de Débito', 'Boleto'] as const).map((forma) => (
                       <button
                         key={forma}
-                        onClick={() => setFormData(prev => ({ ...prev, formaPagamento: forma as any }))}
+                        onClick={() => setFormData(prev => ({ ...prev, formaPagamento: forma }))}
                         className={`p-4 border-2 rounded-lg text-center transition duration-300 ${
                           formData.formaPagamento === forma
                             ? 'border-blue-600 bg-blue-50 text-blue-600'
