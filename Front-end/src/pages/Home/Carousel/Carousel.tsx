@@ -106,17 +106,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
         ))}
       </div>
 
-      {/* Indicador de autoplay */}
-      <div className="flex justify-center mt-4">
-        <div className={`text-sm text-gray-500 flex items-center gap-2 ${
-          isAutoPlaying ? 'opacity-100' : 'opacity-50'
-        }`}>
-          <div className={`w-2 h-2 rounded-full ${
-            isAutoPlaying ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-          }`} />
-          {isAutoPlaying ? 'Reprodução automática ativa' : 'Pausado'}
-        </div>
-      </div>
+     
     </div>
   );
 };
