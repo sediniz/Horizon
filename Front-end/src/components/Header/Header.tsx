@@ -9,6 +9,12 @@ const Header: React.FC = () => {
     transform: 'translate(-50%, -50%) scaleX(1)',
   });
 
+  const [circlingPlaneStyle, setCirclingPlaneStyle] = useState({
+    left: 0,
+    top: 0,
+    transform: 'translate(-50%, -50%) rotate(0deg)',
+  });
+
   const logoRef = useRef<HTMLImageElement>(null);
   const viagensRef = useRef<HTMLButtonElement>(null);
   const reservasRef = useRef<HTMLButtonElement>(null);
@@ -50,9 +56,49 @@ const Header: React.FC = () => {
     flyTo();
   }, []);
 
+  // Animação do avião circulando a logo
+  useEffect(() => {
+    let animationId: number;
+    let angle = 0;
+    const radius = 35; // Circunferência menor ao redor da logo
+    const speed = 0.03; // Velocidade de rotação
+
+    const circleAroundLogo = () => {
+      if (logoRef.current) {
+        const logoRect = logoRef.current.getBoundingClientRect();
+        const logoCenterX = logoRect.left + logoRect.width / 2;
+        const logoCenterY = logoRect.top + logoRect.height / 2 + window.scrollY;
+
+        // Movimento circular de dentro para fora (vertical)
+        const x = logoCenterX + Math.cos(angle) * radius;
+        const y = logoCenterY + Math.sin(angle) * radius;
+        const rotation = (angle * 180) / Math.PI + 90; // Orientação do avião
+
+        setCirclingPlaneStyle({
+          left: x,
+          top: y,
+          transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+        });
+
+        angle += speed;
+        if (angle > Math.PI * 2) angle = 0; // Reinicia após um círculo completo
+      }
+
+      animationId = requestAnimationFrame(circleAroundLogo);
+    };
+
+    circleAroundLogo();
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, []);
+
   return (
     <div className="relative w-full bg-white/20 backdrop-blur-md shadow-md py-4 px-6 z-50">
-      {/* Avião animado com imagem */}
+      {/* Avião animado original */}
       <img
         src={planeIcon}
         alt="Avião"
@@ -61,6 +107,18 @@ const Header: React.FC = () => {
           position: 'absolute',
           ...planeStyle,
           width: '40px',
+        }}
+      />
+
+      {/* Novo avião circulando a logo */}
+      <img
+        src={planeIcon}
+        alt="Avião Circulando"
+        className="absolute pointer-events-none z-40 opacity-75"
+        style={{
+          position: 'absolute',
+          ...circlingPlaneStyle,
+          width: '28px',
         }}
       />
 
