@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Rating from '../../components/Rating/Rating';
 
 export default function Reserva() {
   const [filters, setFilters] = useState({
@@ -212,21 +213,21 @@ export default function Reserva() {
                   <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
                     <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
                     <div className="flex items-center flex-1">
-                      <span className="text-lg text-yellow-500">⭐⭐⭐⭐⭐</span>
+                      <Rating rating={5} size="sm" />
                     </div>
                     <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full font-bold">19</span>
                   </label>
                   <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
                     <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
                     <div className="flex items-center flex-1">
-                      <span className="text-lg text-yellow-500">⭐⭐⭐⭐</span>
+                      <Rating rating={4} size="sm" />
                     </div>
                     <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">77</span>
                   </label>
                   <label className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-lg transition-colors cursor-pointer">
                     <input type="checkbox" className="text-blue-500 focus:ring-blue-300 rounded" />
                     <div className="flex items-center flex-1">
-                      <span className="text-lg text-yellow-500">⭐⭐⭐</span>
+                      <Rating rating={3} size="sm" />
                     </div>
                     <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-bold">121</span>
                   </label>
@@ -237,78 +238,76 @@ export default function Reserva() {
 
           {/* Lista de hotéis */}
           <div className="flex-1">
-            <div className="space-y-6">
+            <div className="space-y-4">
               {hoteis.map((hotel) => (
                 <div key={hotel.id} className="bg-white rounded-xl shadow-lg shadow-sky-200/50 border border-cyan-200 hover:shadow-xl hover:shadow-cyan-200/60 hover:scale-[1.02] transition-all duration-300">
-                  <div className="p-4 lg:p-6">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <div className="relative w-full sm:w-48 flex-shrink-0">
+                  <div className="p-3 lg:p-4">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="relative w-full sm:w-44 flex-shrink-0">
                         <img
                           src={hotel.imagem}
                           alt={hotel.nome}
-                          className="w-full h-48 sm:h-36 object-cover rounded-xl shadow-md"
+                          className="w-full h-40 sm:h-32 object-cover rounded-lg shadow-md"
                         />
-                        <div className="absolute top-2 left-2 bg-gradient-to-r from-cyan-500 to-sky-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
+                        <div className="absolute top-2 left-2 bg-gradient-to-r from-cyan-500 to-sky-500 text-white px-2 py-1 rounded-md text-xs font-bold shadow-lg">
                           Oferta
                         </div>
                       </div>
                       <div className="flex-1">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
-                          <div className="flex-1 mb-4 sm:mb-0">
-                            <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-1">{hotel.nome}</h3>
-                            <p className="text-sm text-slate-600 mb-2">{hotel.localizacao}</p>
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1">
+                          <div className="flex-1 mb-2 sm:mb-0">
+                            <h3 className="text-lg font-bold text-slate-800 mb-1">{hotel.nome}</h3>
+                            <p className="text-sm text-slate-600 mb-1">{hotel.localizacao}</p>
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                               {hotel.vooIncluido && (
-                                <span className="text-xs sm:text-sm text-slate-600 bg-sky-50 px-2 py-1 rounded-lg border border-sky-200">
+                                <span className="text-xs text-slate-600 bg-sky-50 px-2 py-1 rounded-md border border-sky-200">
                                   Voo direto SAO <span className="text-sky-600">✈️</span> RIO
                                 </span>
                               )}
                             </div>
                           </div>
                           <div className="text-left sm:text-right">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="bg-gradient-to-r from-cyan-500 to-sky-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-md shadow-cyan-200">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="bg-gradient-to-r from-cyan-500 to-sky-500 text-white px-2 py-1 rounded-full text-sm font-bold shadow-md shadow-cyan-200">
                                 {hotel.avaliacao}
                               </span>
-                              <div className="text-yellow-500 text-lg">
-                                {'⭐'.repeat(hotel.estrelas)}
-                              </div>
+                              <Rating rating={hotel.estrelas} size="sm" />
                             </div>
                           </div>
                         </div>
                         
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mt-4 gap-4">
-                          <div className="flex flex-col gap-2">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mt-2 gap-3">
+                          <div className="flex flex-col gap-1">
                             {hotel.ofertaInclusiva && (
-                              <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md w-fit">
+                              <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md w-fit">
                                 Oferta Inclusiva
                               </span>
                             )}
                             {hotel.restam && (
-                              <p className="text-sm text-red-600 font-medium bg-red-50 px-2 py-1 rounded-lg border border-red-200 w-fit">
+                              <p className="text-xs text-red-600 font-medium bg-red-50 px-2 py-1 rounded-md border border-red-200 w-fit">
                                 🔥 Restam apenas {hotel.restam}
                               </p>
                             )}
                           </div>
                           <div className="text-left sm:text-right">
-                            <div className="text-sm text-slate-600 mb-1">
+                            <div className="text-xs text-slate-600 mb-1">
                               Voo + Hospedagem
                             </div>
-                            <div className="text-sm text-slate-500 mb-1">
+                            <div className="text-xs text-slate-500 mb-1">
                               Preço por pessoa
                             </div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-cyan-600">
+                              <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-cyan-600">
                                 R$ {hotel.preco}
                               </span>
                             </div>
-                            <div className="text-sm text-slate-600 mb-1">
+                            <div className="text-xs text-slate-600 mb-1">
                               Total 2 pessoas R$ {hotel.preco * 2}
                             </div>
-                            <div className="text-xs text-slate-500 mb-3">
+                            <div className="text-xs text-slate-500 mb-2">
                               Sem impostos, taxas e encargos
                             </div>
-                            <button className="w-full sm:w-auto bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-200">
+                            <button className="w-full sm:w-auto bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-200">
                               Ver detalhe
                             </button>
                           </div>
