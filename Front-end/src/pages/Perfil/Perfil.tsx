@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 // Simulando dados do usuário baseado no modelo Usuario.cs
 interface UsuarioData {
@@ -202,19 +203,21 @@ function Perfil() {
               <h3 className="text-xl font-bold text-gray-800 mb-4">Configurações da Conta</h3>
               <div className="space-y-4">
                 {/* Histórico de Reservas */}
-                <button className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v5H4l5-5z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V10a2 2 0 012-2h4z" />
+                <Link to="/reservas">
+                  <button className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v5H4l5-5z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V10a2 2 0 012-2h4z" />
+                      </svg>
+                      <span className="font-medium">Histórico de Reservas</span>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                    <span className="font-medium">Histórico de Reservas</span>
-                  </div>
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                  </button>
+                </Link>
                 
                 {/* Configurações de conta expandable */}
                 <div className="border border-gray-200 rounded-lg">
