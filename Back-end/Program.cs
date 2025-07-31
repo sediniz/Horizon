@@ -11,27 +11,28 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // URL do seu Vite
+        policy.WithOrigins("http://localhost:5173") // Substitua pela URL do seu Vite
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
 
-// Add services to the container.
+// Controllers e Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configuração do DbContext
+// DbContext
 builder.Services.AddDbContext<HorizonDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registro do repositorio
+// Repositórios
 builder.Services.AddScoped<IQuartoRepository, QuartoRepository>();
 builder.Services.AddScoped<IAvaliacaoRepository, AvaliacaoRepository>();
 builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
@@ -40,8 +41,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPacoteRepository, PacoteRepository>();
 builder.Services.AddScoped<IHotelRepository, HotelRepository>();
 
-
-// Services
+// Serviços
 builder.Services.AddScoped<IQuartoService, QuartoService>();
 builder.Services.AddScoped<IAvaliacaoService, AvaliacaoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
@@ -50,11 +50,8 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IPacoteService, PacoteService>();
 builder.Services.AddScoped<IHotelService, HotelService>();
 
-
-
-
-// Configuração do JWT
-var jwtKey = "Wksv5Ypv"; // Troque por uma chave forte em produção
+// JWT
+var jwtKey = "Wksv5Ypv"; // Use uma chave mais forte em produção
 
 builder.Services.AddAuthentication(options =>
 {
@@ -73,11 +70,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
+// Middleware
 app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -86,13 +85,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // Adicione esta linha para JWT funcionar
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-
 
 
 

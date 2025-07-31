@@ -1,21 +1,82 @@
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import cancunImg from '../../assets/cancun.png';
+import parisImg from '../../assets/Paris2.png';
+import praiaImg from '../../assets/Praia01.png';
 import PacoteInfoCard from "./PacoteInfoCard";
 import ReservaCard from "./ReservaCard";
 import DescricaoPacote from "./DescricaoPacote";
 import AvaliacaoPacote from "./AvaliacaoPacote";
+import { useParams, useNavigate } from "react-router-dom";
+
+// Lista de pacotes (simulando um banco de dados)
+const pacotesData = [
+  {
+    id: 1,
+    local: "Bahia, Brasil",
+    hotel: "Resort Paradise Beach",
+    dataIda: "2025-08-10",
+    dataVolta: "2025-08-16",
+    pessoas: 2,
+    preco: "R$ 2.500 por 6 noites",
+    imagem: praiaImg
+  },
+  {
+    id: 2,
+    local: "Paris, França",
+    hotel: "Hotel Eiffel Luxury",
+    dataIda: "2025-09-15",
+    dataVolta: "2025-09-19",
+    pessoas: 2,
+    preco: "R$ 4.800 por 4 noites",
+    imagem: parisImg
+  },
+  {
+    id: 3,
+    local: "Cancún, México",
+    hotel: "Cancún Paradise Resort",
+    dataIda: "2025-07-20",
+    dataVolta: "2025-07-25",
+    pessoas: 2,
+    preco: "R$ 3.200 por 5 noites",
+    imagem: cancunImg
+  }
+];
 
 const InfoPacote: React.FC = () => {
-  const [local, setLocal] = useState("Recife, Pernambuco");
-  const [hotel, setHotel] = useState("Hotel Paradisus");
-  const [dataIda, setDataIda] = useState("2025-08-10");
-  const [dataVolta, setDataVolta] = useState("2025-08-13");
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [local, setLocal] = useState("Carregando...");
+  const [hotel, setHotel] = useState("Carregando...");
+  const [dataIda, setDataIda] = useState("");
+  const [dataVolta, setDataVolta] = useState("");
   const [pessoas, setPessoas] = useState(2);
+  const [preco, setPreco] = useState("R$ 0");
+  const [imagem, setImagem] = useState(cancunImg);
+  
+  useEffect(() => {
+    // Encontrar o pacote pelo ID
+    const pacoteId = Number(id);
+    const pacote = pacotesData.find(p => p.id === pacoteId);
+    
+    if (pacote) {
+      setLocal(pacote.local);
+      setHotel(pacote.hotel);
+      setDataIda(pacote.dataIda);
+      setDataVolta(pacote.dataVolta);
+      setPessoas(pacote.pessoas);
+      setPreco(pacote.preco);
+      setImagem(pacote.imagem);
+    } else {
+      // Se não encontrar o pacote, redireciona para a home
+      navigate('/');
+    }
+  }, [id, navigate]);
 
   const handleReservar = () => {
     console.log("Reservar pacote");
+    navigate('/pagamento');
   };
 
   const handleModificar = (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => {
@@ -95,8 +156,8 @@ const InfoPacote: React.FC = () => {
         <div className="glass-effect rounded-2xl p-4 shadow-xl border border-white/20 backdrop-blur-sm mb-8">
           <div className="relative h-80 rounded-xl overflow-hidden shadow-lg">
             <img 
-              src={cancunImg} 
-              alt="Cancun" 
+              src={imagem} 
+              alt={local} 
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
@@ -122,7 +183,7 @@ const InfoPacote: React.FC = () => {
           </div>
           <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
             <ReservaCard
-              preco="R$ 400 por 3 noites"
+              preco={preco}
               onReservar={handleReservar}
             />
           </div>
