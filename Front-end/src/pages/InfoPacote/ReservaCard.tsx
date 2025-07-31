@@ -15,10 +15,20 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
   // Array de noites: 3, 5, 7, 9 (pulando de 2 em 2)
   const noitesArray = [3, 5, 7, 9];
   const [precoSelecionado, setPrecoSelecionado] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   // Removido estados de calendário customizado
 
   // Gera os preços multiplicados
   const precosGrid = noitesArray.map(noites => ({ valor: diaria * noites, noites }));
+
+  const handleConfirmarReserva = () => {
+    setShowModal(true);
+  };
+
+  const handleConfirmarModal = () => {
+    setShowModal(false);
+    onReservar();
+  };
 
   return (
     <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 hover:shadow-lg transition-all duration-300">
@@ -31,7 +41,7 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
           </div>
           Reservar Pacote
         </h3>
-        <div className="bg-gradient-to-r from-sky-500 to-cyan-500 text-white px-4 py-2 rounded-lg inline-block font-semibold text-lg shadow-md">
+        <div className="bg-gradient-to-r from-sky-500 to-cyan-500 text-white px-3 py-1 rounded-md inline-block font-medium text-sm shadow-md">
           R$ {diaria} por diária
         </div>
       </div>
@@ -76,7 +86,7 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
 
       <button 
         className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-green-200"
-        onClick={onReservar}
+        onClick={handleConfirmarReserva}
       >
         <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -92,6 +102,55 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
           Cancelamento gratuito até 24h antes
         </div>
       </div>
+
+      {/* Modal de Confirmação */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 max-w-md w-full mx-4 border border-white/30 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Confirmar Reserva</h3>
+              <p className="text-gray-600 mb-2">
+                Você está prestes a reservar o pacote de {precosGrid[precoSelecionado].noites} noites
+              </p>
+              <p className="text-2xl font-bold text-green-600 mb-6">
+                R$ {precosGrid[precoSelecionado].valor}
+              </p>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6 text-left">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-yellow-800">Política de Cancelamento</p>
+                    <p className="text-xs text-yellow-700">Cancelamento gratuito até 24h antes da viagem</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+                  onClick={handleConfirmarModal}
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

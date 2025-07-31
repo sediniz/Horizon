@@ -105,7 +105,7 @@ const DescricaoPacote: React.FC = () => {
           </svg>
           Comodidades
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
           {Object.entries(comodidades).map(([key, value]) => (
             <button
               key={key}
@@ -114,19 +114,19 @@ const DescricaoPacote: React.FC = () => {
               onClick={() => setComodidades(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
             >
               <div className={`
-                bg-white/60 border-2 rounded-xl p-4 text-center transition-all duration-300 hover:scale-105 hover:shadow-md
+                bg-white/60 border-2 rounded-lg p-3 text-center transition-all duration-300 hover:scale-105 hover:shadow-md
                 ${value 
                   ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50' 
                   : 'border-gray-200 bg-white/40 hover:border-gray-300'
                 }
               `}>
                 <div className={`
-                  rounded-full p-3 mb-2 mx-auto w-fit transition-colors
+                  rounded-full p-2 mb-2 mx-auto w-fit transition-colors
                   ${value ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}
                 `}>
                   {icones[key as keyof typeof icones]}
                 </div>
-                <span className="text-sm font-medium text-gray-700 block mb-1">
+                <span className="text-xs font-medium text-gray-700 block mb-1">
                   {nomes[key as keyof typeof nomes]}
                 </span>
                 <span className={`
