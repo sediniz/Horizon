@@ -1,6 +1,7 @@
 // src/components/TravelPackages.tsx
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PraiaImg from '../../../assets/Praia01.png';
 import Paris2Img from '../../../assets/Paris2.png';
 import CancunImg from '../../../assets/cancun.png';
@@ -150,6 +151,13 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
 };
 
 const TravelPackages: React.FC = () => {
+  const navigate = useNavigate();
+
+  {/* funcao pra o click do pacote */}
+  const handlePacoteClick = (pacoteId: number) => {
+    navigate(`/pacote/${pacoteId}`);
+  };
+
   return (
     <section className="bg-gray-50 py-16 px-4">
       <div className="max-w-7xl mx-auto">
@@ -165,6 +173,7 @@ const TravelPackages: React.FC = () => {
             <div
               key={pkg.id}
               className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
+              onClick={() => handlePacoteClick(pkg.id)}
             >
               {/* Imagem com badge de desconto */}
               <div className="relative h-64 overflow-hidden">
@@ -237,8 +246,15 @@ const TravelPackages: React.FC = () => {
                 </div>
 
                 {/* Botões de ação */}
-                <div className="flex gap-2">
-                  <button className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button 
+                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      {/* Rota pra pacote id */}
+                      navigate(`/pacote/${pkg.id}`);
+                    }}
+                  >
                     Reservar Agora
                   </button>
                   <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-red-300 hover:text-red-500 transition-all duration-200 group">
@@ -252,9 +268,13 @@ const TravelPackages: React.FC = () => {
           ))}
         </div>
 
-        {/* Call to Action */}
+        {/* botao de acao */}
         <div className="text-center mt-12">
-          <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+          <button 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+            {/* Rota pra pacote */}
+            onClick={() => navigate('/pacotes')}
+          >
             Ver Todos os Pacotes
           </button>
         </div>
