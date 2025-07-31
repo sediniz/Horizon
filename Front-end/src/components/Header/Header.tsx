@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import LogoTexto from '../../assets/LogoTexto.png';
 import planeIcon from '../../assets/aviao.png';
 import { Link } from 'react-router-dom';
+import { FaUser } from "react-icons/fa";
+
 
 const Header: React.FC = () => {
   const [circlingPlaneStyle, setCirclingPlaneStyle] = useState({
@@ -94,12 +96,12 @@ const Header: React.FC = () => {
         </div>
 
         <Link to="/perfil">
-          <button
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
-          >
-            Perfil
-          </button>
-        </Link>
+  <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2">
+    <FaUser className="w-5 h-5" />
+    Perfil
+  </button>
+</Link>
+
       </div>
     </div>
   );
