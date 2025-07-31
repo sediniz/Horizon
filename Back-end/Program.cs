@@ -7,6 +7,7 @@ using Horizon.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,36 @@ builder.Services.AddCors(options =>
 // Controllers e Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Horizon API", Version = "v1" });
+
+    // Configuração para aceitar JWT no Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Insira o token JWT no formato: Bearer {seu token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 // DbContext
 builder.Services.AddDbContext<HorizonDbContext>(options =>
@@ -51,7 +81,7 @@ builder.Services.AddScoped<IPacoteService, PacoteService>();
 builder.Services.AddScoped<IHotelService, HotelService>();
 
 // JWT
-var jwtKey = "Wksv5Ypv"; // Use uma chave mais forte em produção
+var jwtKey = "wKsv5Ypv"; // Use uma chave mais forte em produção
 
 builder.Services.AddAuthentication(options =>
 {
@@ -91,10 +121,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
-
-
-
-
-
