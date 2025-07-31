@@ -81,7 +81,7 @@ builder.Services.AddScoped<IPacoteService, PacoteService>();
 builder.Services.AddScoped<IHotelService, HotelService>();
 
 // JWT
-var jwtKey = "wKsv5Ypv"; // Use uma chave mais forte em produção
+var jwtKey = "wKsv5YpvwKsv5YpvwKsv5YpvwKsv5Ypv"; // Use uma chave mais forte em produção
 
 builder.Services.AddAuthentication(options =>
 {
