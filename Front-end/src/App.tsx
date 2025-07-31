@@ -1,6 +1,6 @@
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
-import Reserva from './pages/Reserva/Reserva';
+import Reserva from './pages/Reserva/ReservaHist';
 import './output.css';
 
 
