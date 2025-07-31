@@ -43,7 +43,7 @@ namespace Horizon.Controllers
 
         // POST: api/pacotes
 
-        [Authorize]
+        // [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Pacote pacote)
         {

@@ -11,13 +11,13 @@ namespace Horizon.Models
         public decimal Nota { get; set; }
 
         [StringLength(50, ErrorMessage = "O comentário deve ter no máximo 50 caracteres.")]
-        public string ? Comentario { get; set; }
+        public string? Comentario { get; set; }
 
         public DateTime DataAvaliacao { get; set; }
 
         public int IdUsuario { get; set; }
 
-        public int IdPacote { get; set; }
+        public int hotelId { get; set; }
 
     }
 }
