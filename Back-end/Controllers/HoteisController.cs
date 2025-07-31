@@ -1,5 +1,6 @@
 ﻿using Horizon.Models;
 using Horizon.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -33,6 +34,7 @@ namespace Horizon.Controllers
         }
 
         // POST: api/hotel
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateHotel([FromBody] Hotel hotel)
         {
@@ -41,6 +43,7 @@ namespace Horizon.Controllers
         }
 
         // PUT: api/hotel/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateHotel(int id, [FromBody] Hotel hotel)
         {
@@ -50,6 +53,7 @@ namespace Horizon.Controllers
         }
 
         // DELETE: api/hotel/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHotel(int id)
         {
