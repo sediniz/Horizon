@@ -13,7 +13,7 @@ namespace Horizon.Controllers
     public class AutenticacoesController : ControllerBase
     {
         private readonly IService<Usuario> _usuarioRepository;
-        private readonly string _jwtKey = "Wksv5Ypv"; // Mesma chave do Program.cs
+        private readonly string _jwtKey = "wKsv5Ypv"; // Mesma chave do Program.cs
 
         public AutenticacoesController(IService<Usuario> usuarioRepository)
         {
