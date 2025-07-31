@@ -47,39 +47,101 @@ const DescricaoPacote: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 flex flex-col gap-4 min-h-[120px]">
+    <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 hover:shadow-lg transition-all duration-300">
+      <h2 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+        </div>
+        Descrição do Pacote
+      </h2>
+
       {editando ? (
-        <>
+        <div className="space-y-4">
           <textarea
-            className="border rounded px-2 py-1 min-h-[60px]"
+            className="w-full bg-white/70 border border-gray-200 rounded-lg px-4 py-3 min-h-[120px] focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-colors resize-none"
             value={tempDescricao}
             onChange={e => setTempDescricao(e.target.value)}
+            placeholder="Descreva os detalhes do pacote..."
           />
-          <div className="flex gap-2 mt-2">
-            <button className="px-4 py-1 bg-blue-600 text-white rounded" onClick={handleSalvar}>Salvar</button>
-            <button className="px-4 py-1 bg-gray-300 rounded" onClick={() => setEditando(false)}>Cancelar</button>
+          <div className="flex gap-3">
+            <button 
+              className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+              onClick={handleSalvar}
+            >
+              Salvar
+            </button>
+            <button 
+              className="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+              onClick={() => setEditando(false)}
+            >
+              Cancelar
+            </button>
           </div>
-        </>
+        </div>
       ) : (
-        <>
-          <div>{descricao}</div>
-          <button className="mt-2 px-4 py-1 bg-blue-600 text-white rounded" onClick={() => setEditando(true)}>Editar</button>
-        </>
-      )}
-      {/* Comodidades do quarto */}
-      <div className="flex flex-wrap gap-4 mt-4">
-        {Object.entries(comodidades).map(([key, value]) => (
-          <button
-            key={key}
-            type="button"
-            className="flex flex-col items-center w-24 focus:outline-none"
-            onClick={() => setComodidades(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+        <div className="space-y-4">
+          <div className="bg-white/40 rounded-lg p-4 border border-white/20 text-gray-700 leading-relaxed">
+            {descricao}
+          </div>
+          <button 
+            className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+            onClick={() => setEditando(true)}
           >
-            <div className={`rounded-full p-2 mb-1 transition-colors ${value ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-400'}`}>{icones[key as keyof typeof icones]}</div>
-            <span className="text-xs text-center">{nomes[key as keyof typeof nomes]}</span>
-            <span className={`text-xs font-bold ${value ? 'text-green-700' : 'text-gray-400'}`}>{value ? 'Sim' : 'Não'}</span>
+            <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Editar Descrição
           </button>
-        ))}
+        </div>
+      )}
+
+      {/* Comodidades do quarto */}
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          Comodidades
+        </h3>
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+          {Object.entries(comodidades).map(([key, value]) => (
+            <button
+              key={key}
+              type="button"
+              className="group focus:outline-none"
+              onClick={() => setComodidades(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+            >
+              <div className={`
+                bg-white/60 border-2 rounded-lg p-3 text-center transition-all duration-300 hover:scale-105 hover:shadow-md
+                ${value 
+                  ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50' 
+                  : 'border-gray-200 bg-white/40 hover:border-gray-300'
+                }
+              `}>
+                <div className={`
+                  rounded-full p-2 mb-2 mx-auto w-fit transition-colors
+                  ${value ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}
+                `}>
+                  {icones[key as keyof typeof icones]}
+                </div>
+                <span className="text-xs font-medium text-gray-700 block mb-1">
+                  {nomes[key as keyof typeof nomes]}
+                </span>
+                <span className={`
+                  text-xs font-bold px-2 py-1 rounded-full
+                  ${value 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-gray-100 text-gray-500'
+                  }
+                `}>
+                  {value ? 'Incluído' : 'Não incluído'}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
