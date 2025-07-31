@@ -3,6 +3,11 @@ import LogoTexto from '../../assets/LogoTexto.png';
 import planeIcon from '../../assets/aviao.png';
 import { Link } from 'react-router-dom';
 import { FaUser } from "react-icons/fa";
+import { MdBookmarkBorder } from "react-icons/md";
+import { FaGlobeAmericas } from "react-icons/fa";
+
+
+
 
 
 const Header: React.FC = () => {
@@ -80,19 +85,19 @@ const Header: React.FC = () => {
 
         <div className="flex gap-4 items-center">
           <Link to="/pacotes">
-            <button
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
-            >
-              Viagens
-            </button>
-          </Link>
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2">
+    <FaGlobeAmericas className="w-5 h-5" />
+    Viagens
+  </button>
+</Link>
+
           <Link to="/reservas">
-            <button
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
-            >
-              Reservas
-            </button>
-          </Link>
+  <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2">
+    <MdBookmarkBorder className="w-5 h-5" />
+    Reservas
+  </button>
+</Link>
+
         </div>
 
         <Link to="/perfil">
