@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import LogoTexto from '../../assets/LogoTexto.png';
 import planeIcon from '../../assets/aviao.png';
+import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [circlingPlaneStyle, setCirclingPlaneStyle] = useState({
@@ -71,26 +72,34 @@ const Header: React.FC = () => {
 
       {/* Conteúdo do header */}
       <div className="flex justify-between items-center relative">
-        <img ref={logoRef} src={LogoTexto} alt="Horizon - Expanda seus Horizontes" className="h-20 object-contain" />
+        <Link to="/">
+          <img ref={logoRef} src={LogoTexto} alt="Horizon - Expanda seus Horizontes" className="h-20 object-contain cursor-pointer" />
+        </Link>
 
         <div className="flex gap-4 items-center">
-          <button
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
-          >
-            Viagens
-          </button>
-          <button
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
-          >
-            Reservas
-          </button>
+          <Link to="/pacotes">
+            <button
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
+            >
+              Viagens
+            </button>
+          </Link>
+          <Link to="/reservas">
+            <button
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
+            >
+              Reservas
+            </button>
+          </Link>
         </div>
 
-        <button
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
-        >
-          Perfil
-        </button>
+        <Link to="/perfil">
+          <button
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg"
+          >
+            Perfil
+          </button>
+        </Link>
       </div>
     </div>
   );
