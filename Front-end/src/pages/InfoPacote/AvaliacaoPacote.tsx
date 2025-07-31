@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import Rating from "../../components/Rating/Rating";
 
 const mockAvaliacoes = [
   { 
@@ -22,28 +23,14 @@ const mockAvaliacoes = [
 ];
 
 const AvaliacaoPacote: React.FC = () => {
-  const [novaAvaliacao, setNovaAvaliacao] = useState({
-    nome: '',
-    nota: 5,
-    comentario: ''
-  });
-
   const calcularMediaAvaliacoes = () => {
     if (mockAvaliacoes.length === 0) return 0;
     const soma = mockAvaliacoes.reduce((acc, avaliacao) => acc + avaliacao.nota, 0);
     return (soma / mockAvaliacoes.length).toFixed(1);
   };
 
-  const renderStars = (nota: number, size: string = "text-lg") => {
-    return (
-      <div className={`flex items-center ${size} text-yellow-400`}>
-        {[...Array(5)].map((_, i) => (
-          <span key={i}>
-            {i < nota ? '★' : '☆'}
-          </span>
-        ))}
-      </div>
-    );
+  const renderStars = (nota: number, size: string = "lg") => {
+    return <Rating rating={nota} size={size as any} />;
   };
 
   return (
@@ -55,7 +42,7 @@ const AvaliacaoPacote: React.FC = () => {
         <h3 className="text-xl font-bold text-gray-800">Avaliações do Pacote</h3>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-2xl font-bold text-gray-800">{calcularMediaAvaliacoes()}</span>
-          {renderStars(Math.round(Number(calcularMediaAvaliacoes())))}
+          {renderStars(Math.round(Number(calcularMediaAvaliacoes())), "md")}
           <span className="text-gray-600">({mockAvaliacoes.length} avaliações)</span>
         </div>
       </div>
@@ -95,7 +82,7 @@ const AvaliacaoPacote: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="font-semibold text-gray-800">{a.nome}</span>
-                    {renderStars(a.nota, "text-sm")}
+                    {renderStars(a.nota, "sm")}
                   </div>
                   <p className="text-gray-700 text-sm leading-relaxed">{a.comentario}</p>
                 </div>
@@ -104,49 +91,6 @@ const AvaliacaoPacote: React.FC = () => {
           ))}
         </div>
       )}
-
-      <div className="mt-6 pt-4 border-t border-white/30">
-        <h4 className="text-lg font-semibold text-gray-800 mb-4">Deixe sua avaliação</h4>
-        <div className="space-y-4">
-          <div>
-            <input
-              type="text"
-              placeholder="Seu nome"
-              value={novaAvaliacao.nome}
-              onChange={(e) => setNovaAvaliacao(prev => ({ ...prev, nome: e.target.value }))}
-              className="w-full px-4 py-3 rounded-lg bg-white/40 backdrop-blur-sm border border-white/50 text-gray-800 placeholder-gray-600 focus:border-sky-400 focus:outline-none transition-all duration-300 focus:bg-white/60"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-800 font-medium mb-2">Nota:</label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setNovaAvaliacao(prev => ({ ...prev, nota: star }))}
-                  className={`text-2xl transition-all duration-200 ${
-                    star <= novaAvaliacao.nota ? 'text-yellow-400 scale-110' : 'text-gray-300'
-                  } hover:text-yellow-300 hover:scale-125`}
-                >
-                  ★
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <textarea
-              placeholder="Seu comentário..."
-              value={novaAvaliacao.comentario}
-              onChange={(e) => setNovaAvaliacao(prev => ({ ...prev, comentario: e.target.value }))}
-              rows={3}
-              className="w-full px-4 py-3 rounded-lg bg-white/40 backdrop-blur-sm border border-white/50 text-gray-800 placeholder-gray-600 focus:border-sky-400 focus:outline-none transition-all duration-300 resize-none focus:bg-white/60"
-            />
-          </div>
-          <button className="w-full py-3 bg-gradient-to-r from-sky-400 to-cyan-500 text-white font-semibold rounded-lg hover:from-sky-500 hover:to-cyan-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-            Enviar Avaliação
-          </button>
-        </div>
-      </div>
     </div>
   );
 };

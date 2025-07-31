@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import Rating from '../../components/Rating/Rating';
 
 export default function ReservaHist() {
   const [filtroStatus, setFiltroStatus] = useState('todas');
@@ -113,23 +114,19 @@ export default function ReservaHist() {
     }));
   };
 
-  const renderStars = (rating: number, onStarClick: (rating: number) => void) => {
+  const StarRating = ({ rating, onStarClick }: { rating: number, onStarClick: (star: number) => void }) => {
     return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => onStarClick(star)}
-            className={`text-2xl transition-colors ${
-              star <= rating ? 'text-yellow-400' : 'text-gray-300'
-            } hover:text-yellow-400`}
-          >
-            ⭐
-          </button>
-        ))}
-      </div>
+      <Rating 
+        rating={rating} 
+        interactive={true} 
+        onRatingChange={onStarClick}
+        size="xl"
+      />
     );
+  };
+
+  const renderStars = (rating: number, onStarClick: (rating: number) => void) => {
+    return <StarRating rating={rating} onStarClick={onStarClick} />;
   };
 
   const reservas = [
@@ -428,7 +425,7 @@ export default function ReservaHist() {
                     <span>Baixar vouchers</span>
                   </button>
                   <button className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-yellow-700 transition-all duration-200 hover:scale-105">
-                    <span>⭐</span>
+                    <Rating rating={1} size="xs" color="text-yellow-600" />
                     <span>Avaliar viagens</span>
                   </button>
                 </div>
@@ -461,7 +458,7 @@ export default function ReservaHist() {
                           <span className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-2 py-1 rounded-full text-xs font-bold">
                             {reserva.avaliacao}
                           </span>
-                          <span className="text-yellow-500 text-sm">{'⭐'.repeat(reserva.estrelas)}</span>
+                          <Rating rating={reserva.estrelas} size="sm" />
                         </div>
                       </div>
                     </div>
@@ -544,9 +541,10 @@ export default function ReservaHist() {
                             {reserva.status === 'concluida' && (
                               <button 
                                 onClick={() => handleRatingClick(reserva.id)}
-                                className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+                                className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
                               >
-                                ⭐ Avaliar
+                                <Rating rating={1} size="xs" color="text-white" />
+                                Avaliar
                               </button>
                             )}
                             {reserva.status === 'pendente' && (
