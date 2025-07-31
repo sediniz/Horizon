@@ -272,7 +272,6 @@ const TravelPackages: React.FC = () => {
         <div className="text-center mt-12">
           <button 
             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-            {/* Rota pra pacote */}
             onClick={() => navigate('/pacotes')}
           >
             Ver Todos os Pacotes
