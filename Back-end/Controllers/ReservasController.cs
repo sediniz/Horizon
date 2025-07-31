@@ -1,6 +1,7 @@
 ﻿using Horizon.Models;
 using Horizon.Repositories.Interface;
 using Horizon.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -38,6 +39,7 @@ namespace Horizon.Controllers
         }
 
         // POST: api/reservas
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Reserva reserva)
         {
@@ -51,6 +53,7 @@ namespace Horizon.Controllers
         }
 
         // PUT: api/reservas/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Reserva reserva)
         {
@@ -69,6 +72,7 @@ namespace Horizon.Controllers
         }
 
         // DELETE: api/reservas/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -151,7 +155,8 @@ namespace Horizon.Controllers
             return Ok(resultados);
         }
 
-        // GET api/reservas/cliente/{usuarioId}
+        // PUT 
+        [Authorize]
         [HttpPut]
         [Route("atualizarStatus/{id}")]
         public async Task<IActionResult> AtualizarStatus(int id, [FromBody] StatusReserva novoStatus)

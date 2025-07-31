@@ -42,6 +42,7 @@ namespace Horizon.Controllers
         }
 
         // POST: api/usuarios
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateUsuario([FromBody] Usuario usuario)
         {
@@ -51,6 +52,7 @@ namespace Horizon.Controllers
         }
 
         // PUT: api/usuarios/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Usuario usuario)
         {
@@ -69,6 +71,7 @@ namespace Horizon.Controllers
         }
 
         // DELETE: api/usuarios/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
