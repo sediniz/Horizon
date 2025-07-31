@@ -44,6 +44,8 @@ namespace Horizon.Repositories.Implementations
         public async Task<Pacote?> GetByIdAsync(int id)
         {
             return await _context.Pacotes
+                .Include(p => p.Hotel)
+                    .ThenInclude(h => h.Quarto) // Para carregar o quarto também
                 .FirstOrDefaultAsync(p => p.PacoteId == id);
         }
 

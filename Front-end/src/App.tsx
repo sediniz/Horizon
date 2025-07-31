@@ -1,6 +1,6 @@
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
-import Perfil from './pages/Perfil/Perfil';
+import InfoPacote from './pages/InfoPacote/InfoPacote';
 import './output.css';
 
 
@@ -8,7 +8,7 @@ function App() {
   return (
     <div className="App">
       <Header /> 
-      <Perfil />
+      <InfoPacote />
       <Footer />
     </div>
   );

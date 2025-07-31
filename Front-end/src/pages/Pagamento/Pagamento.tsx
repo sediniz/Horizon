@@ -29,7 +29,7 @@ function Pagamento({ pacoteId: propPacoteId }: PagamentoProps) {
   const [parcelamento, setParcelamento] = useState({ valorParcela: 0, parcelas: 3 });
   const [descontoAplicado, setDescontoAplicado] = useState<number>(0);
 
-  const pacoteId = propPacoteId || 2; // fazer para pegar dinamico em vez de setado
+  const pacoteId = propPacoteId || 3; // fazer para pegar dinamico em vez de setado
   const usuarioId = "usuario-exemplo-456"; // corrigir quando fazer o user ficar logado
 
   useEffect(() => {
