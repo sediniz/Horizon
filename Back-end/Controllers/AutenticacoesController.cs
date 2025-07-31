@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Horizon.Models;
+using Horizon.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Horizon.Models;
-using Horizon.Repositories.Interface;
 
 namespace Horizon.Controllers
 {
@@ -12,32 +13,29 @@ namespace Horizon.Controllers
     [ApiController]
     public class AutenticacoesController : ControllerBase
     {
-        private readonly IService<Usuario> _usuarioRepository;
-        private readonly string _jwtKey = "wKsv5Ypv"; // Mesma chave do Program.cs
+        private readonly IUsuarioService _usuarioService;
+        private readonly string _jwtKey = "wKsv5YpvwKsv5YpvwKsv5YpvwKsv5Ypv"; // Atualize aqui e no Program.cs
 
-        public AutenticacoesController(IService<Usuario> usuarioRepository)
+        public AutenticacoesController(IUsuarioService usuarioService)
         {
-            _usuarioRepository = usuarioRepository;
+            _usuarioService = usuarioService;
         }
 
         /// <summary>
         /// Realiza login e retorna um token JWT se o usuário for válido.
         /// </summary>
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // Permite login apenas com o e-mail autorizado
             if (request.Email != "adm123@gmail.com")
                 return Unauthorized("Apenas o e-mail autorizado pode acessar.");
 
-            // Busca o usuário pelo e-mail e senha (em produção, use hash de senha!)
-            var usuario = (await _usuarioRepository.GetAllAsync())
-                .FirstOrDefault(u => u.Email == request.Email && u.Senha == request.Senha);
+            var usuario = await _usuarioService.AuthenticateAsync(request.Email, request.Senha);
 
             if (usuario == null)
                 return Unauthorized("Usuário ou senha inválidos.");
 
-            // Monta os claims do token com base no seu model Usuario
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, usuario.Nome ?? usuario.Email ?? ""),
@@ -57,9 +55,19 @@ namespace Horizon.Controllers
 
             return Ok(new { token = tokenString });
         }
+
+        /// <summary>
+        /// Corrige senhas não hasheadas no banco (uso temporário).
+        /// </summary>
+        [HttpPost("corrigir-senhas")]
+        [AllowAnonymous] // Altere para [Authorize(Roles = "Admin")] se quiser proteger
+        public async Task<IActionResult> CorrigirSenhas()
+        {
+            int totalCorrigidas = await _usuarioService.CorrigirSenhasNaoHasheadasAsync();
+            return Ok(new { senhasCorrigidas = totalCorrigidas });
+        }
     }
 
-    // DTO para requisição de login
     public class LoginRequest
     {
         public string Email { get; set; }

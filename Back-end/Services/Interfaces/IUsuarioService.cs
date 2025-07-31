@@ -25,5 +25,6 @@ namespace Horizon.Services.Interfaces
         // Busca e filtros
         Task<IEnumerable<Usuario>> SearchByNameAsync(string nome);
         Task<Usuario?> GetByCpfPassaporteAsync(string cpfPassaporte);
+        Task<int> CorrigirSenhasNaoHasheadasAsync();
     }
 }
