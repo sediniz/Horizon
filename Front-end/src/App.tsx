@@ -1,6 +1,6 @@
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
-import Reserva from './pages/Reserva/Reserva';
+import Home from './pages/Home/Home';
 import './output.css';
 
 
@@ -8,7 +8,7 @@ function App() {
   return (
     <div className="App">
       <Header /> 
-      <Reserva />
+      <Home />
       <Footer />
     </div>
   );
