@@ -26,12 +26,21 @@ namespace Horizon.Models
         public bool PetFriendly { get; set; }
         public bool Piscina { get; set; }
         public bool Wifi { get; set; }
+
+        public bool CafeDaManha { get; set; }
+        public bool Almoco { get; set; }
+        public bool Jantar { get; set; }
+        public bool AllInclusive { get; set; }
+
         public DateTime DatasDisponiveis { get; set; }
         public decimal ValorDiaria { get; set; }
         public string? Imagens { get; set; }
 
+        public ICollection<Avaliacao>? Avaliacoes { get; set; }
+
         [ForeignKey("Quarto")]
         public int? QuartoId { get; set; }
         public Quarto? Quarto { get; set; }
+        
     }
 }

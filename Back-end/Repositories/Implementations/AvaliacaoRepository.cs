@@ -55,26 +55,26 @@ namespace Horizon.Repositories.Implementations
         public async Task<IEnumerable<Avaliacao>> GetAvaliacoesByHotelIdAsync(int hotelId)
         {
             return await _context.Avaliacoes
-                .Where(a => a.IdPacote == hotelId)
+                .Where(a => a.hotelId == hotelId)
                 .ToListAsync();
         }
 
         public async Task<Avaliacao?> GetAvaliacaoByUsuarioAndHotelAsync(int usuarioId, int hotelId)
         {
             return await _context.Avaliacoes
-                .FirstOrDefaultAsync(a => a.IdUsuario == usuarioId && a.IdPacote == hotelId);
+                .FirstOrDefaultAsync(a => a.IdUsuario == usuarioId && a.hotelId == hotelId);
         }
 
         public async Task<bool> AvaliacaoExistsAsync(int usuarioId, int hotelId)
         {
             return await _context.Avaliacoes
-                .AnyAsync(a => a.IdUsuario == usuarioId && a.IdPacote == hotelId);
+                .AnyAsync(a => a.IdUsuario == usuarioId && a.hotelId == hotelId);
         }
 
         public async Task<double> GetMediaAvaliacoesByHotelIdAsync(int hotelId)
         {
             return await _context.Avaliacoes
-                .Where(a => a.IdPacote == hotelId)
+                .Where(a => a.hotelId == hotelId)
                 .Select(a => (double)a.Nota)
                 .DefaultIfEmpty(0)
                 .AverageAsync();
@@ -83,7 +83,7 @@ namespace Horizon.Repositories.Implementations
         public async Task<int> GetQuantidadeAvaliacoesByHotelIdAsync(int hotelId)
         {
             return await _context.Avaliacoes
-                .CountAsync(a => a.IdPacote == hotelId);
+                .CountAsync(a => a.hotelId == hotelId);
         }
     }
 }

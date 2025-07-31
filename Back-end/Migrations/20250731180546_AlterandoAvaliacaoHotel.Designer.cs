@@ -4,6 +4,7 @@ using Horizon.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Horizon.Migrations
 {
     [DbContext(typeof(HorizonDbContext))]
-    partial class HorizonDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731180546_AlterandoAvaliacaoHotel")]
+    partial class AlterandoAvaliacaoHotel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,15 +64,6 @@ namespace Horizon.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HotelId"));
 
-                    b.Property<bool>("AllInclusive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Almoco")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CafeDaManha")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("DatasDisponiveis")
                         .HasColumnType("datetime2");
 
@@ -82,9 +76,6 @@ namespace Horizon.Migrations
 
                     b.Property<string>("Imagens")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Jantar")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Localizacao")
                         .IsRequired()

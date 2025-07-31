@@ -4,6 +4,7 @@ using Horizon.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Horizon.Migrations
 {
     [DbContext(typeof(HorizonDbContext))]
-    partial class HorizonDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731142917_AddHotelIdToPacotes")]
+    partial class AddHotelIdToPacotes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,18 +40,16 @@ namespace Horizon.Migrations
                     b.Property<DateTime>("DataAvaliacao")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("IdPacote")
+                        .HasColumnType("int");
+
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Nota")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("hotelId")
-                        .HasColumnType("int");
-
                     b.HasKey("IdAvaliacao");
-
-                    b.HasIndex("hotelId");
 
                     b.ToTable("Avaliacoes");
                 });
@@ -60,15 +61,6 @@ namespace Horizon.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HotelId"));
-
-                    b.Property<bool>("AllInclusive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Almoco")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CafeDaManha")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime>("DatasDisponiveis")
                         .HasColumnType("datetime2");
@@ -82,9 +74,6 @@ namespace Horizon.Migrations
 
                     b.Property<string>("Imagens")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Jantar")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Localizacao")
                         .IsRequired()
@@ -300,15 +289,6 @@ namespace Horizon.Migrations
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("Horizon.Models.Avaliacao", b =>
-                {
-                    b.HasOne("Horizon.Models.Hotel", null)
-                        .WithMany("Avaliacoes")
-                        .HasForeignKey("hotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Horizon.Models.Hotel", b =>
                 {
                     b.HasOne("Horizon.Models.Quarto", "Quarto")
@@ -357,11 +337,6 @@ namespace Horizon.Migrations
                     b.Navigation("Hotel");
 
                     b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Horizon.Models.Hotel", b =>
-                {
-                    b.Navigation("Avaliacoes");
                 });
 
             modelBuilder.Entity("Horizon.Models.Reserva", b =>
