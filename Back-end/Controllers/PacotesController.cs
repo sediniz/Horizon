@@ -1,6 +1,7 @@
 ﻿using Horizon.Models;
 using Horizon.Repositories.Interface;
 using Horizon.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Controllers
@@ -41,6 +42,8 @@ namespace Horizon.Controllers
         }
 
         // POST: api/pacotes
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Pacote pacote)
         {
@@ -54,6 +57,8 @@ namespace Horizon.Controllers
         }
 
         // PUT: api/pacotes/{id}
+
+        [Authorize]
         [HttpPut("{id}")]
 
         public async Task<IActionResult> Update(int id, [FromBody] Pacote pacote)
@@ -73,6 +78,8 @@ namespace Horizon.Controllers
         }
 
         // DELETE: api/pacotes/{id}
+
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
