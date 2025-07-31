@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import logo2 from '../../assets/logo2.png';
+import LogoTexto from '../../assets/LogoTexto.png';
 import planeIcon from '../../assets/aviao.png';
 
 const Header: React.FC = () => {
@@ -12,7 +12,7 @@ const Header: React.FC = () => {
   const [circlingPlaneStyle, setCirclingPlaneStyle] = useState({
     left: 0,
     top: 0,
-    transform: 'translate(-50%, -50%) rotate(0deg)',
+    transform: 'translate(-50%, -50/%) rotate(0deg)',
   });
 
   const logoRef = useRef<HTMLImageElement>(null);
@@ -60,7 +60,8 @@ const Header: React.FC = () => {
   useEffect(() => {
     let animationId: number;
     let angle = 0;
-    const radius = 35; // Circunferência menor ao redor da logo
+    const radiusX = 90; // Circunferência vertical
+    const radiusY = 40; // Circunferência horizontal
     const speed = 0.03; // Velocidade de rotação
 
     const circleAroundLogo = () => {
@@ -70,8 +71,8 @@ const Header: React.FC = () => {
         const logoCenterY = logoRect.top + logoRect.height / 2 + window.scrollY;
 
         // Movimento circular de dentro para fora (vertical)
-        const x = logoCenterX + Math.cos(angle) * radius;
-        const y = logoCenterY + Math.sin(angle) * radius;
+        const x = logoCenterX + Math.cos(angle) * radiusX;
+        const y = logoCenterY + Math.sin(angle) * radiusY;
         const rotation = (angle * 180) / Math.PI + 90; // Orientação do avião
 
         setCirclingPlaneStyle({
@@ -127,7 +128,7 @@ const Header: React.FC = () => {
 
       {/* Conteúdo do header */}
       <div className="flex justify-between items-center relative">
-        <img ref={logoRef} src={logo2} alt="Logo2" className="h-20 object-contain" />
+        <img ref={logoRef} src={LogoTexto} alt="Horizon - Expanda seus Horizontes" className="h-20 object-contain" />
 
         <div className="flex gap-4 items-center">
           <button
