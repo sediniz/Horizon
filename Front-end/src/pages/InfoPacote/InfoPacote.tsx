@@ -1,8 +1,6 @@
 
 
 import React, { useState } from "react";
-import { updatePacote } from '../../api/pacoteApi';
-import type { Pacote } from '../../api/pacoteApi';
 import cancunImg from '../../assets/cancun.png';
 import PacoteInfoCard from "./PacoteInfoCard";
 import ReservaCard from "./ReservaCard";
@@ -10,151 +8,148 @@ import DescricaoPacote from "./DescricaoPacote";
 import AvaliacaoPacote from "./AvaliacaoPacote";
 
 const InfoPacote: React.FC = () => {
-  const [pacote, setPacote] = useState<Pacote | null>(null);
-  // Campos extras locais
+  const [local, setLocal] = useState("Recife, Pernambuco");
   const [hotel, setHotel] = useState("Hotel Paradisus");
-  const [mensagem, setMensagem] = useState<string | null>(null);
-  // Não há pacoteId fixo, será criado ao modificar
-
-  // Se quiser carregar um pacote existente, coloque o id aqui
-  // useEffect(() => {
-  //   getPacoteById(pacoteId).then(setPacote).catch(() => setPacote(null));
-  // }, []);
+  const [dataIda, setDataIda] = useState("2025-08-10");
+  const [dataVolta, setDataVolta] = useState("2025-08-13");
+  const [pessoas, setPessoas] = useState(2);
 
   const handleReservar = () => {
     console.log("Reservar pacote");
   };
 
-  // Função para criar pacote (POST)
-  async function createPacote(pacote: Omit<Pacote, 'pacoteId'>): Promise<Pacote> {
-    const resp = await fetch('/api/pacotes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(pacote),
-    });
-    if (!resp.ok) throw new Error('Erro ao criar pacote');
-    return resp.json();
-  }
-
-  const handleModificar = async (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => {
-    // Serializa as datas no campo descricao
-    const descricaoDatas = novo.dataIda && novo.dataVolta ? `DataIda:${novo.dataIda};DataVolta:${novo.dataVolta}` : '';
-    const duracao = novo.dataIda && novo.dataVolta ? Math.max(1, Math.ceil((new Date(novo.dataVolta).getTime() - new Date(novo.dataIda).getTime()) / (1000*60*60*24))) : 0;
-    if (!pacote) {
-      // Cria novo pacote
-      const novoPacote = await createPacote({
-        titulo: novo.local,
-        descricao: descricaoDatas,
-        destino: novo.local,
-        duracao,
-        quantidadeDePessoas: novo.pessoas,
-        valorTotal: 0
-      });
-      setPacote(novoPacote);
-      if (novo.hotel !== undefined) setHotel(novo.hotel);
-      setMensagem('Pacote criado com sucesso!');
-      setTimeout(() => setMensagem(null), 3000);
-      return;
-    }
-    // Atualiza campos locais
+  const handleModificar = (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => {
+    setLocal(novo.local);
     if (novo.hotel !== undefined) setHotel(novo.hotel);
-    // Atualiza backend
-    const pacoteAtualizado: Pacote = {
-      ...pacote,
-      destino: novo.local,
-      quantidadeDePessoas: novo.pessoas,
-      duracao,
-      descricao: descricaoDatas,
-    };
-    await updatePacote(pacoteAtualizado);
-    setPacote(pacoteAtualizado);
-    setMensagem('Pacote modificado com sucesso!');
-    setTimeout(() => setMensagem(null), 3000);
+    setDataIda(novo.dataIda);
+    setDataVolta(novo.dataVolta);
+    setPessoas(novo.pessoas);
   };
 
   const [editandoNome, setEditandoNome] = useState(false);
-  const [novoNome, setNovoNome] = useState(pacote?.destino || "");
-
-  // Extrai dataIda e dataVolta do campo descricao
-  let dataIda = '';
-  let dataVolta = '';
-  if (pacote?.descricao) {
-    const matchIda = pacote.descricao.match(/DataIda:([^;]+)/);
-    const matchVolta = pacote.descricao.match(/DataVolta:([^;]+)/);
-    if (matchIda) dataIda = matchIda[1];
-    if (matchVolta) dataVolta = matchVolta[1];
-  }
+  const [novoNome, setNovoNome] = useState(local);
 
   return (
-    <div className="px-4 py-8 max-w-7xl mx-auto">
-      {mensagem && (
-        <div className="mb-4 p-3 bg-green-100 text-green-800 rounded text-center font-semibold animate-fade-in">
-          {mensagem}
-        </div>
-      )}
-      {/* Nome do lugar acima da imagem */}
-      <div className="flex items-center mb-2 max-w-2xl mx-auto justify-start">
-        {editandoNome ? (
-          <div className="flex items-center gap-2 w-full">
-            <input
-              className="border rounded px-2 py-1 flex-1"
-              value={novoNome}
-              onChange={e => setNovoNome(e.target.value)}
-              autoFocus
-            />
-            <button
-              className="px-3 py-1 bg-green-500 text-white rounded"
-              onClick={async () => {
-                if (!pacote) return;
-                const pacoteAtualizado = { ...pacote, destino: novoNome };
-                await updatePacote(pacoteAtualizado);
-                setPacote(pacoteAtualizado);
-                setEditandoNome(false);
-              }}
-            >Salvar</button>
-            <button
-              className="px-3 py-1 bg-gray-300 rounded"
-              onClick={() => {
-                setNovoNome(pacote?.destino || "");
-                setEditandoNome(false);
-              }}
-            >Cancelar</button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+      <style>{`
+        .glass-effect {
+          backdrop-filter: blur(20px);
+          background: rgba(255, 255, 255, 0.25);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .text-shadow {
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+      `}</style>
+
+      <div className="px-4 py-8 max-w-7xl mx-auto">
+        {/* Header com nome do lugar */}
+        <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm mb-6">
+          <div className="flex items-center justify-between">
+            {editandoNome ? (
+              <div className="flex items-center gap-4 w-full">
+                <input
+                  className="glass-effect rounded-lg px-4 py-2 flex-1 text-lg font-semibold border border-white/30 focus:outline-none focus:ring-2 focus:ring-sky-500/50 text-gray-800"
+                  value={novoNome}
+                  onChange={e => setNovoNome(e.target.value)}
+                  autoFocus
+                />
+                <button
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
+                  onClick={() => {
+                    setLocal(novoNome);
+                    setEditandoNome(false);
+                  }}
+                >
+                  Salvar
+                </button>
+                <button
+                  className="bg-gradient-to-r from-gray-400 to-gray-500 text-white px-6 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
+                  onClick={() => {
+                    setNovoNome(local);
+                    setEditandoNome(false);
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-shadow bg-gradient-to-r from-sky-600 to-cyan-600 bg-clip-text text-transparent">
+                  {local}
+                </h1>
+                <button
+                  className="bg-gradient-to-r from-sky-500 to-cyan-500 text-white px-6 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
+                  onClick={() => setEditandoNome(true)}
+                >
+                  <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Editar
+                </button>
+              </>
+            )}
           </div>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold truncate mr-2 text-left">{pacote?.destino || ''}</h2>
-            <button
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-              onClick={() => setEditandoNome(true)}
-            >Editar</button>
-          </>
-        )}
-      </div>
-      {/* Carrossel (placeholder) */}
-      <div className="mb-8 h-64 bg-gray-200 flex items-center justify-center rounded-lg overflow-hidden">
-        <img src={cancunImg} alt="Cancun" className="w-full h-full object-cover" />
-      </div>
+        </div>
+        {/* Carrossel com imagem estilizada */}
+        <div className="glass-effect rounded-2xl p-4 shadow-xl border border-white/20 backdrop-blur-sm mb-8">
+          <div className="relative h-80 rounded-xl overflow-hidden shadow-lg">
+            <img 
+              src={cancunImg} 
+              alt="Cancun" 
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+            <div className="absolute bottom-4 left-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/30">
+                <span className="text-white font-semibold text-lg">Destino Premium</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      {/* Seção principal com dois cards lado a lado */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <PacoteInfoCard
-          local={pacote?.destino || ''}
-          hotel={hotel}
-          dataIda={dataIda}
-          dataVolta={dataVolta}
-          pessoas={pacote?.quantidadeDePessoas || 1}
-          pacoteId={pacote?.pacoteId}
-          onModificar={handleModificar}
-        />
-        <ReservaCard
-          preco={pacote ? `R$ ${pacote.valorTotal} por ${pacote.duracao} noites` : 'R$ 400 por 3 noites'}
-          onReservar={handleReservar}
-        />
-      </div>
+        {/* Seção principal com cards modernizados */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
+            <PacoteInfoCard
+              local={local}
+              hotel={hotel}
+              dataIda={dataIda}
+              dataVolta={dataVolta}
+              pessoas={pessoas}
+              onModificar={handleModificar}
+            />
+          </div>
+          <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
+            <ReservaCard
+              preco="R$ 400 por 3 noites"
+              onReservar={handleReservar}
+            />
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-        <DescricaoPacote />
-        <AvaliacaoPacote />
+        {/* Seção inferior com descrição e avaliações */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
+            <DescricaoPacote />
+          </div>
+          <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
+            <AvaliacaoPacote />
+          </div>
+        </div>
+
+        {/* Banner promocional */}
+        <div className="mt-8 glass-effect rounded-2xl p-8 shadow-xl border border-white/20 backdrop-blur-sm">
+          <div className="bg-gradient-to-r from-sky-600 via-cyan-600 to-blue-700 rounded-xl p-8 text-white shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold mb-3 text-shadow">Reserve agora e economize até 25%</h3>
+                <p className="text-sky-100 text-lg">Ofertas limitadas para destinos exclusivos</p>
+              </div>
+              <div className="text-6xl opacity-80">🎯</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
