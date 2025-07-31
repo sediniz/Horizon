@@ -26,6 +26,10 @@ namespace Horizon.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
+            // Permite login apenas com o e-mail autorizado
+            if (request.Email != "adm123@gmail.com")
+                return Unauthorized("Apenas o e-mail autorizado pode acessar.");
+
             // Busca o usuário pelo e-mail e senha (em produção, use hash de senha!)
             var usuario = (await _usuarioRepository.GetAllAsync())
                 .FirstOrDefault(u => u.Email == request.Email && u.Senha == request.Senha);
