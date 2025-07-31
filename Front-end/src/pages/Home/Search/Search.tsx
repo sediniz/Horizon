@@ -430,7 +430,7 @@ const Search: React.FC = () => {
               </label>
               <button
                 onClick={toggleCalendar}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -469,7 +469,7 @@ const Search: React.FC = () => {
               </label>
               <button
                 onClick={() => setIsGuestsOpen(!isGuestsOpen)}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -570,7 +570,7 @@ const Search: React.FC = () => {
               <button
                 onClick={handleSearch}
                 disabled={!formData.destination || !formData.checkIn || !formData.checkOut}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 h-14 mb-2"
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 h- mb-2"
               >
                  Buscar
               </button>
