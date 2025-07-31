@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaSearch } from "react-icons/fa";
 
 // Tipos para os dados do formulário
 interface SearchFormData {
@@ -567,13 +568,16 @@ const Search: React.FC = () => {
 
             {/* Botão de Busca */}
             <div className="flex items-end">
-              <button
-                onClick={handleSearch}
-                disabled={!formData.destination || !formData.checkIn || !formData.checkOut}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 h- mb-2"
-              >
-                 Buscar
-              </button>
+              
+<button
+  onClick={handleSearch}
+  disabled={!formData.destination || !formData.checkIn || !formData.checkOut}
+  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 mb-2 flex items-center justify-center gap-2"
+>
+  <FaSearch className="w-5 h-5" />
+  Buscar
+</button>
+
             </div>
           </div>
         </div>
