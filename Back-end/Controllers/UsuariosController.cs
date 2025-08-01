@@ -42,7 +42,7 @@ namespace Horizon.Controllers
         }
 
         // POST: api/usuarios
-        [Authorize]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateUsuario([FromBody] Usuario usuario)
         {

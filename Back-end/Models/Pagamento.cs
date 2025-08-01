@@ -23,5 +23,9 @@ namespace Horizon.Models
         [ForeignKey("Reserva")]
         public int ReservaId { get; set; }
         public Reserva? Reserva { get; set; }
+        
+        // Campos para integração com Stripe
+        public string? StripePaymentIntentId { get; set; }
+        public string? StripeClientSecret { get; set; }
     }
 }
