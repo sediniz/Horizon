@@ -5,7 +5,6 @@ import Home from './pages/Home/Home';
 import PacotesGerais from './pages/PacotesGerais/PacotesGerais';
 import Pagamento from './pages/Pagamento/Pagamento';
 import Perfil from './pages/Perfil/Perfil';
-import Reserva from './pages/Reserva/Reserva';
 import ReservaHist from './pages/Reserva/ReservaHist';
 import Admin from './pages/Admin/Admin';
 import { AuthProvider } from './contexts/AuthContext';
@@ -25,7 +24,6 @@ function App() {
             <Route path="/pacote/:id" element={<InfoPacote />} />
             <Route path="/pagamento" element={<Pagamento />} />
             <Route path="/perfil" element={<Perfil />} />
-            <Route path="/reserva" element={<Reserva />} />
             <Route path="/reservas" element={<ReservaHist />} />
             <Route path="/admin" element={<Admin />} />
           </Routes> 
