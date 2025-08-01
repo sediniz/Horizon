@@ -68,6 +68,7 @@ const footerButtons = [
   {
     label: 'Sobre nós',
     info: 'Conheça a trajetória da Horizon Travel, nosso propósito e os valores que guiam nosso trabalho.'
+    
   },
   {
     label: 'Carreiras',
@@ -78,9 +79,16 @@ const footerButtons = [
     info: 'Acesse press kits, releases e informações oficiais para veículos de comunicação e jornalistas.'
   },
   {
-    label: 'Investidores',
-    info: 'Descubra oportunidades de investimento e acompanhe os resultados da Horizon Travel.'
-  },
+  label: 'Investidores',
+  info: `Sócios e desenvolvedores da Horizon Travel:
+📌 Lucas Roberto Pereira Balbino
+📌 Mateus da Silva Chaves
+📌 Matheus Sena Diniz
+📌 Matheus Garcia da Silva
+📌 Manoel Silva Ferreira de Santana
+📌 Raul Vitor Melo da Silva`
+}
+,
   {
     label: 'Blog',
     info: 'Explore artigos, guias e curiosidades sobre destinos, experiências e tendências de viagem.'
@@ -269,7 +277,24 @@ const Footer: React.FC = () => {
                 className="bg-white rounded-xl shadow-2xl p-6 min-w-[280px] max-w-xs text-center"
               >
                 <h4 className="font-bold text-lg mb-2 text-blue-700">{popup.label}</h4>
-                <p className="text-gray-700 mb-4">{popup.info}</p>
+                {/* Conteúdo especial para Sobre nós */}
+                {popup.label === 'Sobre nós' ? (
+                  <div>
+                    <img
+                      src="src/assets/team.png"
+                      alt="Equipe Horizon"
+                      className="mx-auto mb-3 w-20 h-20 object-contain rounded-full shadow"
+                    />
+                    <p className="text-gray-700 mb-4">
+                      Conheça a trajetória da Horizon Travel, nosso propósito e os valores que guiam nosso trabalho.<br />
+                      <span className="text-sm text-gray-500">
+                         Fundada em 2025,  nossa equipe é formada por profissionais apaixonados por tecnologia e altamente recomendados para o seu projeto.
+                      </span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-700 mb-4">{popup.info}</p>
+                )}
                 <button
                   className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                   onClick={() => setPopup(null)}
