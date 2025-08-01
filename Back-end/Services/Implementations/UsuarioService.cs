@@ -233,5 +233,25 @@ namespace Horizon.Services.Implementations
             return new string(Enumerable.Repeat(chars, 8)
                 .Select(s => s[random.Next(s.Length)]).ToArray()) + "1!";
         }
+        public async Task<int> CorrigirSenhasNaoHasheadasAsync()
+        {
+            var usuarios = await _usuarioRepository.GetAllAsync();
+            int atualizados = 0;
+
+            foreach (var usuario in usuarios)
+            {
+                // Verifica se a senha não está hasheada (BCrypt começa com "$2a$")
+                if (!string.IsNullOrWhiteSpace(usuario.Senha) && !usuario.Senha.StartsWith("$2a$"))
+                {
+                    usuario.Senha = BCrypt.Net.BCrypt.HashPassword(usuario.Senha);
+                    await _usuarioRepository.UpdateAsync(usuario);
+                    atualizados++;
+                }
+            }
+
+            await _usuarioRepository.SaveChangesAsync();
+            return atualizados;
+        }
+
     }
 }

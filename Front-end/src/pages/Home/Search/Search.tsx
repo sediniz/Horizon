@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaSearch } from "react-icons/fa";
 
 // Tipos para os dados do formulário
 interface SearchFormData {
@@ -145,23 +146,23 @@ const InlineCalendar: React.FC<{
     
     return (
       <div className="flex-1">
-        <div className="text-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">
+        <div className="text-center mb-3">
+          <h3 className="text-base font-semibold text-gray-800">
             {monthNames[monthDate.getMonth()]} {monthDate.getFullYear()}
           </h3>
         </div>
         
         {/* Dias da semana */}
-        <div className="grid grid-cols-7 gap-2 mb-4">
+        <div className="grid grid-cols-7 gap-1 mb-2">
           {dayNames.map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-gray-500 py-3">
+            <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">
               {day}
             </div>
           ))}
         </div>
         
         {/* Dias do mês */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1">
           {days.map((date, index) => {
             const dateStr = formatDate(date);
             const isCurrentMonthDay = isCurrentMonth(date, monthDate);
@@ -176,7 +177,7 @@ const InlineCalendar: React.FC<{
                 onClick={() => handleDateClick(date)}
                 disabled={isPast}
                 className={`
-                  h-12 w-12 text-sm font-medium transition-all duration-200 rounded-lg
+                  h-7 w-7 text-xs font-medium transition-all duration-200 rounded-lg
                   ${!isCurrentMonthDay ? 'text-gray-300' : 'text-gray-700'}
                   ${isPast ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-blue-50 cursor-pointer'}
                   ${selected && dateStr === tempCheckIn ? 'bg-purple-600 text-white' : ''}
@@ -195,41 +196,41 @@ const InlineCalendar: React.FC<{
   };
 
   return (
-    <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl p-8 mt-2 z-30 min-w-[800px]">
+    <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 mt-2 z-30 min-w-[485px]">
       {/* Header com navegação */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-4">
         <button
           onClick={goToPrevMonth}
-          className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl font-bold"
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors text-base font-bold"
         >
           ←
         </button>
-        <div className="flex gap-12">
-          <span className="text-xl font-semibold text-gray-800">
+        <div className="flex gap-4">
+          <span className="text-base font-semibold text-gray-800">
             {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
           </span>
-          <span className="text-xl font-semibold text-gray-800">
+          <span className="text-base font-semibold text-gray-800">
             {monthNames[nextMonth.getMonth()]} {nextMonth.getFullYear()}
           </span>
         </div>
         <button
           onClick={goToNextMonth}
-          className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl font-bold"
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors text-base font-bold"
         >
           →
         </button>
       </div>
 
       {/* Dois meses lado a lado */}
-      <div className="flex gap-12 mb-8">
+      <div className="flex gap-3 mb-4">
         {renderMonth(currentMonth)}
         {renderMonth(nextMonth)}
       </div>
 
       {/* Informações da seleção */}
-      <div className="border-t pt-6">
+      <div className="border-t pt-3">
         <div className="flex justify-between items-center">
-          <div className="flex gap-8 text-base">
+          <div className="flex gap-4 text-sm">
             <div>
               <span className="text-gray-600">Check-in: </span>
               <span className="font-semibold text-purple-600">
@@ -252,23 +253,23 @@ const InlineCalendar: React.FC<{
             )}
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex gap-2">
             <button
               onClick={handleClear}
-              className="px-5 py-3 text-gray-600 hover:text-gray-800 transition-colors font-medium"
+              className="px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors font-medium text-sm"
             >
               Limpar
             </button>
             <button
               onClick={onClose}
-              className="px-5 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
             >
               Cancelar
             </button>
             <button
               onClick={handleApply}
               disabled={!tempCheckIn || !tempCheckOut}
-              className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
             >
               Aplicar
             </button>
@@ -430,7 +431,7 @@ const Search: React.FC = () => {
               </label>
               <button
                 onClick={toggleCalendar}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -469,7 +470,7 @@ const Search: React.FC = () => {
               </label>
               <button
                 onClick={() => setIsGuestsOpen(!isGuestsOpen)}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-left bg-white hover:bg-gray-50"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -567,13 +568,16 @@ const Search: React.FC = () => {
 
             {/* Botão de Busca */}
             <div className="flex items-end">
-              <button
-                onClick={handleSearch}
-                disabled={!formData.destination || !formData.checkIn || !formData.checkOut}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 h-14 mb-2"
-              >
-                 Buscar
-              </button>
+              
+<button
+  onClick={handleSearch}
+  disabled={!formData.destination || !formData.checkIn || !formData.checkOut}
+  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 mb-2 flex items-center justify-center gap-2"
+>
+  <FaSearch className="w-5 h-5" />
+  Buscar
+</button>
+
             </div>
           </div>
         </div>

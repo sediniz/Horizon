@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 
 // Ícones SVG inline para cada comodidade
 const icones = {
@@ -28,10 +27,22 @@ const nomes = {
   Disponibilidade: 'Disponível',
 };
 
-const DescricaoPacote: React.FC = () => {
-  const [descricao, setDescricao] = useState("Descrição do que tem no pacote");
+interface DescricaoPacoteProps {
+  descricaoTexto?: string;
+}
+
+const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto }) => {
+  const [descricao, setDescricao] = useState(descricaoTexto || "Descrição do que tem no pacote");
   const [editando, setEditando] = useState(false);
   const [tempDescricao, setTempDescricao] = useState(descricao);
+  
+  // Update descricao when props change
+  useEffect(() => {
+    if (descricaoTexto) {
+      setDescricao(descricaoTexto);
+      setTempDescricao(descricaoTexto);
+    }
+  }, [descricaoTexto]);
   // Estados dos booleanos (poderiam vir de props ou API)
   const [comodidades, setComodidades] = useState({
     AmbienteClimatizado: true,

@@ -257,8 +257,8 @@ const TravelPackages: React.FC = () => {
                   >
                     Reservar Agora
                   </button>
-                  <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-red-300 hover:text-red-500 transition-all duration-200 group">
-                    <svg className="w-5 h-5 group-hover:fill-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-red-50 hover:border-red-400 transition-all duration-200 group/heart">
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-red-500 group-hover/heart:text-red-600 group-hover/heart:fill-red-600 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                     </svg>
                   </button>

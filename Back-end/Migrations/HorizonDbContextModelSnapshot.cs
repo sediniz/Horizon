@@ -37,16 +37,18 @@ namespace Horizon.Migrations
                     b.Property<DateTime>("DataAvaliacao")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IdPacote")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Nota")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("hotelId")
+                        .HasColumnType("int");
+
                     b.HasKey("IdAvaliacao");
+
+                    b.HasIndex("hotelId");
 
                     b.ToTable("Avaliacoes");
                 });
@@ -58,6 +60,15 @@ namespace Horizon.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HotelId"));
+
+                    b.Property<bool>("AllInclusive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Almoco")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CafeDaManha")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("DatasDisponiveis")
                         .HasColumnType("datetime2");
@@ -71,6 +82,9 @@ namespace Horizon.Migrations
 
                     b.Property<string>("Imagens")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Jantar")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Localizacao")
                         .IsRequired()
@@ -126,6 +140,9 @@ namespace Horizon.Migrations
                     b.Property<int>("Duracao")
                         .HasColumnType("int");
 
+                    b.Property<int>("HotelId")
+                        .HasColumnType("int");
+
                     b.Property<int>("QuantidadeDePessoas")
                         .HasColumnType("int");
 
@@ -137,6 +154,8 @@ namespace Horizon.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("PacoteId");
+
+                    b.HasIndex("HotelId");
 
                     b.ToTable("Pacotes");
                 });
@@ -281,6 +300,15 @@ namespace Horizon.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("Horizon.Models.Avaliacao", b =>
+                {
+                    b.HasOne("Horizon.Models.Hotel", null)
+                        .WithMany("Avaliacoes")
+                        .HasForeignKey("hotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Horizon.Models.Hotel", b =>
                 {
                     b.HasOne("Horizon.Models.Quarto", "Quarto")
@@ -288,6 +316,17 @@ namespace Horizon.Migrations
                         .HasForeignKey("QuartoId");
 
                     b.Navigation("Quarto");
+                });
+
+            modelBuilder.Entity("Horizon.Models.Pacote", b =>
+                {
+                    b.HasOne("Horizon.Models.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hotel");
                 });
 
             modelBuilder.Entity("Horizon.Models.Pagamento", b =>
@@ -318,6 +357,11 @@ namespace Horizon.Migrations
                     b.Navigation("Hotel");
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Horizon.Models.Hotel", b =>
+                {
+                    b.Navigation("Avaliacoes");
                 });
 
             modelBuilder.Entity("Horizon.Models.Reserva", b =>

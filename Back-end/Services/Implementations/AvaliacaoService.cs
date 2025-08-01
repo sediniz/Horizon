@@ -26,12 +26,12 @@ namespace Horizon.Services.Implementations
 
         public async Task<Avaliacao> AddAsync(Avaliacao avaliacao)
         {
-            var exists = await _avaliacaoRepository.AvaliacaoExistsAsync(avaliacao.IdUsuario, avaliacao.IdPacote);
+            var exists = await _avaliacaoRepository.AvaliacaoExistsAsync(avaliacao.IdUsuario, avaliacao.hotelId);
             if (exists)
-                throw new InvalidOperationException("Usuário já avaliou este pacote.");
+                throw new InvalidOperationException("Usuário já avaliou este hotel.");
 
-            if (avaliacao.Nota < 0 || avaliacao.Nota > 10)
-                throw new ArgumentOutOfRangeException(nameof(avaliacao.Nota), "A nota deve estar entre 0 e 10.");
+            if (avaliacao.Nota < 0 || avaliacao.Nota > 5)
+                throw new ArgumentOutOfRangeException(nameof(avaliacao.Nota), "A nota deve estar entre 0 e 5.");
 
             //hora que a pessoa fez a avaliação
             avaliacao.DataAvaliacao = DateTime.UtcNow;
@@ -50,7 +50,7 @@ namespace Horizon.Services.Implementations
 
             // grante que usuario e pacote são os mesmos da avaliação existente
             avaliacao.IdUsuario = existente.IdUsuario;
-            avaliacao.IdPacote = existente.IdPacote;
+            avaliacao.hotelId = existente.hotelId;
             avaliacao.DataAvaliacao = existente.DataAvaliacao;
 
             return await _avaliacaoRepository.UpdateAsync(avaliacao);
@@ -81,7 +81,7 @@ namespace Horizon.Services.Implementations
 
         public Task SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            return _avaliacaoRepository.SaveChangesAsync();
         }
     }
 }

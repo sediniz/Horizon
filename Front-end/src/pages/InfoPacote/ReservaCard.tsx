@@ -5,21 +5,78 @@ import React, { useState } from "react";
 
 interface ReservaCardProps {
   preco: string;
-  onReservar: () => void;
+  valorDiaria?: number;
+  valorTotal?: number;
+  duracaoPacote?: number;
+  dataIda?: string;
+  dataVolta?: string;
+  pessoas?: number; // Número de pessoas no pacote
+  onReservar: (valorPacoteSelecionado: number) => void;
 }
 
-const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
-
-  // Valor base da diária
-  const diaria = 400;
-  // Array de noites: 3, 5, 7, 9 (pulando de 2 em 2)
-  const noitesArray = [3, 5, 7, 9];
+const ReservaCard: React.FC<ReservaCardProps> = ({ 
+  valorDiaria = 400, 
+  duracaoPacote = 5,
+  dataIda = '',
+  dataVolta = '',
+  pessoas = 1,
+  onReservar 
+}) => {
+  // Valor base da diária por pessoa - usa o valor do backend ou o default
+  const diaria = valorDiaria;
+  
+  // Formatar as datas para exibição
+  const formatarDataParaExibicao = (dataString: string) => {
+    if (!dataString) return '';
+    try {
+      const data = new Date(dataString);
+      return data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return dataString;
+    }
+  };
+  // Array de noites, baseado na duração padrão do pacote
+  const noitesArray = React.useMemo(() => {
+    // Duração do pacote como opção central
+    const baseNoites = duracaoPacote || 5;
+    
+    // Criar opções ao redor da duração base
+    // Por exemplo, se duracaoPacote = 7, opções serão [3, 5, 7, 9]
+    return [
+      Math.max(3, baseNoites - 4), // Mínimo de 3 noites
+      Math.max(baseNoites - 2, 3), // Mínimo de 3 noites
+      baseNoites,
+      baseNoites + 2
+    ].filter((v, i, a) => a.indexOf(v) === i); // Remove duplicados
+  }, [duracaoPacote]);
   const [precoSelecionado, setPrecoSelecionado] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  // Removido estados de calendário customizado
-
-  // Gera os preços multiplicados
-  const precosGrid = noitesArray.map(noites => ({ valor: diaria * noites, noites }));
+  const [dataVoltaCalculada, setDataVoltaCalculada] = useState(dataVolta);
+  
+  // Gera os preços multiplicados (diária por pessoa x noites x pessoas)
+  const precosGrid = noitesArray.map(noites => ({ 
+    valor: diaria * noites * pessoas,  // Valor total (diária x noites x pessoas)
+    valorPorPessoa: diaria * noites,   // Valor por pessoa (diária x noites)
+    noites 
+  }));
+  
+  // Atualiza a data de volta quando o número de noites mudar
+  React.useEffect(() => {
+    if (dataIda && precoSelecionado !== null) {
+      try {
+        const dataIdaObj = new Date(dataIda);
+        const novaDataVolta = new Date(dataIdaObj);
+        novaDataVolta.setDate(dataIdaObj.getDate() + precosGrid[precoSelecionado].noites);
+        setDataVoltaCalculada(novaDataVolta.toISOString().split('T')[0]);
+      } catch (e) {
+        console.error("Erro ao calcular nova data de volta:", e);
+      }
+    }
+  }, [dataIda, precoSelecionado, precosGrid]);
 
   const handleConfirmarReserva = () => {
     setShowModal(true);
@@ -27,7 +84,10 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
 
   const handleConfirmarModal = () => {
     setShowModal(false);
-    onReservar();
+    // Pegar o valor do pacote selecionado atual
+    const valorPacoteSelecionado = precoSelecionado !== null ? precosGrid[precoSelecionado].valor : 0;
+    console.log("Valor do pacote selecionado a ser passado:", valorPacoteSelecionado);
+    onReservar(valorPacoteSelecionado);
   };
 
   return (
@@ -42,8 +102,21 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
           Reservar Pacote
         </h3>
         <div className="bg-gradient-to-r from-sky-500 to-cyan-500 text-white px-3 py-1 rounded-md inline-block font-medium text-sm shadow-md">
-          R$ {diaria} por diária
+          R$ {diaria.toFixed(2).replace('.', ',')} por pessoa/diária
         </div>
+        
+        {dataIda && dataVolta && (
+          <div className="mt-2 text-sm text-gray-600">
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>
+                {formatarDataParaExibicao(dataIda)} - {formatarDataParaExibicao(precoSelecionado !== null ? dataVoltaCalculada : dataVolta)}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mb-6">
@@ -61,10 +134,12 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
               `}
               onClick={() => {
                 setPrecoSelecionado(idx);
+                console.log(`Selecionado pacote ${idx} com valor ${item.valor}`);
               }}
             >
-              <div className="font-bold text-lg">R$ {item.valor}</div>
-              <div className="text-sm opacity-90">{item.noites} noites</div>
+              <div className="font-bold text-lg">R$ {item.valor.toFixed(2).replace('.', ',')}</div>
+              <div className="text-sm opacity-90">{item.noites} noites ({pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'})</div>
+              <div className="text-xs opacity-80">R$ {item.valorPorPessoa.toFixed(2).replace('.', ',')} por pessoa</div>
             </button>
           ))}
         </div>
@@ -75,10 +150,19 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
           <div className="text-center">
             <div className="text-sm text-green-700 font-medium">Pacote Selecionado</div>
             <div className="text-lg font-bold text-green-800">
-              R$ {precosGrid[precoSelecionado].valor} por {precosGrid[precoSelecionado].noites} noites
+              R$ {precosGrid[precoSelecionado].valor.toFixed(2).replace('.', ',')} total
+            </div>
+            <div className="text-sm text-green-700 mt-1">
+              {precosGrid[precoSelecionado].noites} noites • {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'} • R$ {precosGrid[precoSelecionado].valorPorPessoa.toFixed(2).replace('.', ',')} por pessoa
             </div>
             <div className="text-sm text-green-600">
-              Economize R$ {(precosGrid[precoSelecionado].noites * diaria * 0.1).toFixed(0)} com este pacote!
+              {precosGrid[precoSelecionado].noites === duracaoPacote ? (
+                <span>Duração recomendada!</span>
+              ) : precosGrid[precoSelecionado].noites > duracaoPacote ? (
+                <span>Aproveite mais {precosGrid[precoSelecionado].noites - duracaoPacote} noites!</span>
+              ) : (
+                <span>Economize R$ {((duracaoPacote - precosGrid[precoSelecionado].noites) * diaria * 0.1).toFixed(2).replace('.', ',')}!</span>
+              )}
             </div>
           </div>
         </div>
@@ -114,12 +198,34 @@ const ReservaCard: React.FC<ReservaCardProps> = ({  onReservar }) => {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Confirmar Reserva</h3>
-              <p className="text-gray-600 mb-2">
-                Você está prestes a reservar o pacote de {precosGrid[precoSelecionado].noites} noites
+              <p className="text-gray-600 mb-1">
+                Você está prestes a reservar o pacote de {precosGrid[precoSelecionado].noites} noites para {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}
               </p>
-              <p className="text-2xl font-bold text-green-600 mb-6">
-                R$ {precosGrid[precoSelecionado].valor}
-              </p>
+              
+              {dataIda && (
+                <div className="flex items-center justify-center gap-2 text-gray-600 mb-3 text-sm">
+                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>
+                    De {formatarDataParaExibicao(dataIda)} até {formatarDataParaExibicao(dataVoltaCalculada)}
+                  </span>
+                </div>
+              )}
+              
+              <div className="text-center mb-6">
+                <p className="text-2xl font-bold text-green-600">
+                  R$ {precosGrid[precoSelecionado].valor.toFixed(2).replace('.', ',')}
+                </p>
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  <span className="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                    {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}
+                  </span>
+                  <span className="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                    R$ {precosGrid[precoSelecionado].valorPorPessoa.toFixed(2).replace('.', ',')} por pessoa
+                  </span>
+                </div>
+              </div>
               
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6 text-left">
                 <div className="flex items-start gap-2">

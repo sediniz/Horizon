@@ -3,6 +3,7 @@ import PageHeader from './components/PageHeader';
 import FilterSection from './components/FilterSection';
 import PackageList from './components/PackageList';
 import { getAllPacotes } from '../../api/pacotes';
+import { getHoteisByIds } from '../../api/hoteis';
 import { convertAPIPackagesToPackages } from '../../utils/packageConverter';
 import type { FilterState } from './types';
 import type { PackageProps } from './types';
@@ -24,16 +25,42 @@ const PacotesGerais: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        console.log('Carregando pacotes da API...');
+        console.log('🚀 Carregando pacotes da API...');
         const pacotesAPI = await getAllPacotes();
-        console.log('Pacotes recebidos:', pacotesAPI);
+        console.log('📦 Pacotes recebidos:', pacotesAPI);
         
-        const convertedPackages = convertAPIPackagesToPackages(pacotesAPI);
-        console.log('Pacotes convertidos:', convertedPackages);
+        // Extrair IDs únicos dos hotéis
+        const hotelIds = [...new Set(pacotesAPI.map(p => p.hotelId))];
+        console.log('🏨 IDs dos hotéis para carregar:', hotelIds);
+        
+        // Carregar dados dos hotéis
+        const hoteis = await getHoteisByIds(hotelIds);
+        console.log('🏨 Hotéis carregados:', hoteis);
+        console.log('⭐ Avaliações dos hotéis:', hoteis.map(h => ({ 
+          hotel: h.nome, 
+          avaliacoes: h.avaliacoes?.length || 0,
+          mediaNotas: h.avaliacoes?.length ? 
+            (h.avaliacoes.reduce((sum, av) => sum + av.nota, 0) / h.avaliacoes.length).toFixed(1) 
+            : 'N/A'
+        })));
+        
+        // Criar um mapa hotelId -> hotel para lookup rápido
+        const hotelMap = new Map(hoteis.map(hotel => [hotel.hotelId, hotel]));
+        
+        // Combinar pacotes com dados dos hotéis
+        const pacotesComHotel = pacotesAPI.map(pacote => ({
+          ...pacote,
+          hotel: hotelMap.get(pacote.hotelId)
+        }));
+        
+        console.log('🔗 Pacotes combinados com hotéis:', pacotesComHotel);
+        
+        const convertedPackages = convertAPIPackagesToPackages(pacotesComHotel);
+        console.log('✅ Pacotes convertidos:', convertedPackages);
         
         setPackages(convertedPackages);
       } catch (err) {
-        console.error('Erro ao carregar pacotes:', err);
+        console.error('❌ Erro ao carregar pacotes:', err);
         setError('Falha ao carregar pacotes. Tente novamente mais tarde.');
         
         // Em caso de erro, usar dados mockados como fallback

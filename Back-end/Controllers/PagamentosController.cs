@@ -1,8 +1,10 @@
 using Horizon.Models;
+using Horizon.Models.Requests;
 using Horizon.Repositories.Interface;
 using Horizon.Services.Implementations;
 using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 
 namespace Horizon.Controllers
 {
@@ -11,10 +13,15 @@ namespace Horizon.Controllers
     public class PagamentosController : ControllerBase
     {
         private readonly IPagamentoService _pagamentoService;
+        private readonly IStripeService _stripeService;
+        private readonly IUsuarioService _usuarioService;
+        private readonly IPacoteService _pacoteService;
+        private readonly IReservaService _reservaService;
 
-        public PagamentosController(IPagamentoService pagamentoRepository)
+        public PagamentosController(IPagamentoService pagamentoService, IStripeService stripeService)
         {
-            _pagamentoService = pagamentoRepository;
+            _pagamentoService = pagamentoService;
+            _stripeService = stripeService;
         }
 
         [HttpGet]
@@ -72,5 +79,202 @@ namespace Horizon.Controllers
             await _pagamentoService.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpPost("criar-intent")]
+        public async Task<IActionResult> CriarIntent([FromBody] PaymentIntentRequest request)
+        {
+            if (request.ValorTotal <= 0)
+            {
+                return BadRequest(new { mensagem = "Valor total deve ser maior que zero" });
+            }
+
+            try
+            {
+                var intent = await _stripeService.CreatePaymentIntentAsync(request.ValorTotal);
+                
+                // Criar um registro de pagamento com status pendente
+                var pagamento = new Pagamento
+                {
+                    ReservaId = request.ReservaId,
+                    TipoPagamento = request.TipoPagamento ?? "Cartão de Crédito",
+                    StatusPagamento = "Pendente",
+                    ValorPagamento = request.ValorTotal,
+                    DataPagamento = DateTime.Now,
+                    StripePaymentIntentId = intent.Id,
+                    StripeClientSecret = intent.ClientSecret
+                };
+
+                await _pagamentoService.AddAsync(pagamento);
+                await _pagamentoService.SaveChangesAsync();
+
+                return Ok(new { 
+                    pagamentoId = pagamento.PagamentoId,
+                    clientSecret = intent.ClientSecret 
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao criar intent de pagamento", erro = ex.Message });
+            }
+        }
+
+        [HttpPost("confirmar-pagamento/{id}")]
+        public async Task<IActionResult> ConfirmarPagamento(int id)
+        {
+            var pagamento = await _pagamentoService.GetByIdAsync(id);
+            if (pagamento == null)
+            {
+                return NotFound(new { mensagem = "Pagamento não encontrado" });
+            }
+
+            if (string.IsNullOrEmpty(pagamento.StripePaymentIntentId))
+            {
+                return BadRequest(new { mensagem = "Este pagamento não possui um ID de intent do Stripe" });
+            }
+
+            try
+            {
+                var intent = await _stripeService.GetPaymentIntentAsync(pagamento.StripePaymentIntentId);
+
+                // Verificar status do pagamento no Stripe
+                if (intent.Status == "succeeded")
+                {
+                    pagamento.StatusPagamento = "Aprovado";
+                    await _pagamentoService.UpdateAsync(pagamento);
+                    await _pagamentoService.SaveChangesAsync();
+                    return Ok(new { mensagem = "Pagamento aprovado com sucesso" });
+                }
+                else
+                {
+                    return Ok(new { mensagem = "Pagamento ainda não foi processado ou foi recusado", status = intent.Status });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao confirmar pagamento", erro = ex.Message });
+            }
+        }
+
+        [HttpPost("webhook")]
+        public async Task<IActionResult> StripeWebhook()
+        {
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+
+            try
+            {
+                var stripeEvent = Stripe.EventUtility.ConstructEvent(
+                    json,
+                    Request.Headers["Stripe-Signature"],
+                    "whsec_sua_chave_webhook_aqui" // Substitua pela sua chave de webhook
+                );
+
+                // Processar eventos relevantes do Stripe
+                if (stripeEvent.Type == "payment_intent.succeeded") // Corrigido para usar a string literal correta
+                {
+                    var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+
+                    // Encontrar o pagamento correspondente no banco de dados
+                    var pagamentos = await _pagamentoService.GetAllAsync();
+                    var pagamento = pagamentos.FirstOrDefault(p => p.StripePaymentIntentId == paymentIntent.Id);
+
+                    if (pagamento != null)
+                    {
+                        pagamento.StatusPagamento = "Aprovado";
+                        await _pagamentoService.UpdateAsync(pagamento);
+                        await _pagamentoService.SaveChangesAsync();
+                    }
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensagem = "Erro no webhook", erro = ex.Message });
+            }
+        }
+
+        [HttpPost("processar")]
+        public async Task<IActionResult> ProcessarPagamento([FromBody] ProcessarPagamentoRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest(new { mensagem = "Dados de pagamento inválidos" });
+            }
+
+            try
+            {
+                // Verificar se o usuário existe
+                var usuario = await _usuarioService.GetByIdAsync(int.Parse(request.UsuarioId));
+                if (usuario == null)
+                {
+                    return BadRequest(new { mensagem = "Usuário não encontrado" });
+                }
+
+                // Obter informações do pacote
+                var pacote = await _pacoteService.GetByIdAsync(request.PacoteId);
+                if (pacote == null)
+                {
+                    return BadRequest(new { mensagem = "Pacote não encontrado" });
+                }
+
+                // Converter data da string para DateTime
+                DateTime dataInicio;
+                if (!DateTime.TryParse(request.Data, out dataInicio))
+                {
+                    dataInicio = DateTime.Now.AddDays(30); // Fallback: 30 dias a partir de hoje
+                }
+
+                // Calcular data de fim com base na duração do pacote
+                // Ou usar a duração personalizada se disponível
+                int duracao = request.Duracao > 0 ? request.Duracao : pacote.Duracao;
+                var dataFim = dataInicio.AddDays(duracao);
+
+                // Criar uma nova reserva usando o modelo correto
+                var reserva = new Reserva
+                {
+                    Status = StatusReserva.Confirmada,
+                    DataInicio = dataInicio,
+                    DataFim = dataFim,
+                    UsuarioId = int.Parse(request.UsuarioId),
+                    HotelId = pacote.HotelId // Assumindo que o pacote tem um HotelId
+                };
+
+                // Adicionar a reserva
+                await _reservaService.AddAsync(reserva);
+                await _reservaService.SaveChangesAsync();
+
+                // Criar um pagamento associado à reserva
+                var pagamento = new Pagamento
+                {
+                    ReservaId = reserva.ReservaId,
+                    TipoPagamento = request.FormaPagamento,
+                    StatusPagamento = "Aprovado",
+                    ValorPagamento = request.ValorTotal,
+                    DataPagamento = DateTime.Now,
+                    StripePaymentIntentId = request.PaymentMethodId ?? string.Empty
+                };
+
+                // Adicionar o pagamento
+                await _pagamentoService.AddAsync(pagamento);
+                await _pagamentoService.SaveChangesAsync();
+
+                // Retornar o resultado
+                return Ok(new
+                {
+                    id = pagamento.PagamentoId.ToString(),
+                    status = "aprovado",
+                    valor = pagamento.ValorPagamento,
+                    codigoPagamento = $"PAG{pagamento.PagamentoId}",
+                    numeroPedido = $"RES{reserva.ReservaId}",
+                    message = "Pagamento processado com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao processar pagamento", erro = ex.Message });
+            }
+        }
     }
+
+
 }

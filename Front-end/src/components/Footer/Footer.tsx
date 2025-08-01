@@ -1,6 +1,140 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+
+const hospedagemButtons = [
+  {
+    label: 'Acomodações',
+    info: 'Explore opções que vão desde quartos simples e funcionais até suítes de luxo com vista panorâmica. Perfeito para todo tipo de viajante.'
+  },
+  {
+    label: 'Hotéis',
+    info: 'Hospede-se em hotéis bem localizados, com café da manhã incluído, serviço de quarto, academia e outras comodidades para tornar sua estadia impecável.'
+  },
+  {
+    label: 'Pousadas',
+    info: 'Viva a experiência acolhedora de pousadas familiares, com ambientes rústicos e atendimento personalizado que fazem você se sentir em casa.'
+  },
+  {
+    label: 'Resorts',
+    info: 'Aproveite resorts com estrutura completa: piscinas, spa, áreas de lazer e atividades para crianças. Ideal para férias tranquilas e em grupo.'
+  },
+];
+
+const footerButtons = [
+  ...hospedagemButtons,
+  {
+    label: 'Apartamentos',
+    info: 'Apartamentos equipados com cozinha, Wi-Fi e lavanderia, ideais para quem busca privacidade e praticidade em estadias prolongadas.'
+  },
+  {
+    label: 'Passeios',
+    info: 'Escolha entre city tours, passeios guiados, trilhas ecológicas ou tours gastronômicos que revelam os segredos do destino.'
+  },
+  {
+    label: 'Aventuras',
+    info: 'Mergulho, rafting, tirolesa, escalada e muito mais! Para os amantes de adrenalina e natureza.'
+  },
+  {
+    label: 'Cultura Local',
+    info: 'Participe de festivais, visite museus e monumentos históricos, e mergulhe nos costumes e tradições locais.'
+  },
+  {
+    label: 'Gastronomia',
+    info: 'Delicie-se com pratos típicos, chefs renomados e restaurantes escondidos que oferecem sabores autênticos e experiências únicas.'
+  },
+  {
+    label: 'Atividades',
+    info: 'Programações para todos os perfis: bem-estar, esportes, oficinas criativas, yoga ao pôr do sol, e muito mais.'
+  },
+  {
+    label: 'Central de Ajuda',
+    info: 'Suporte 24h, informações práticas, dúvidas frequentes e assistência personalizada durante sua jornada.'
+  },
+  {
+    label: 'Cancelamento',
+    info: 'Entenda prazos, taxas e condições de cancelamento com transparência e facilidade.'
+  },
+  {
+    label: 'Opções de segurança',
+    info: 'Tudo sobre protocolos sanitários, seguro viagem, suporte médico e medidas preventivas durante sua estadia.'
+  },
+  {
+    label: 'Contato',
+    info: 'Fale conosco via chat, telefone ou e-mail. Estamos sempre disponíveis para ajudar!'
+  },
+  {
+    label: 'Feedback',
+    info: 'Sua opinião é essencial! Compartilhe suas impressões para melhorarmos ainda mais seu atendimento.'
+  },
+  {
+    label: 'Sobre nós',
+    info: 'Conheça a trajetória da Horizon Travel, nosso propósito e os valores que guiam nosso trabalho.'
+    
+  },
+  {
+    label: 'Carreiras',
+    info: 'Junte-se ao nosso time! Veja vagas abertas e benefícios para quem busca crescer no turismo.'
+  },
+  {
+    label: 'Imprensa',
+    info: 'Acesse press kits, releases e informações oficiais para veículos de comunicação e jornalistas.'
+  },
+  {
+  label: 'Investidores',
+  info: `Sócios e desenvolvedores da Horizon Travel:
+📌 Lucas Roberto Pereira Balbino
+📌 Mateus da Silva Chaves
+📌 Matheus Sena Diniz
+📌 Matheus Garcia da Silva
+📌 Manoel Silva Ferreira de Santana
+📌 Raul Vitor Melo da Silva`
+}
+,
+  {
+    label: 'Blog',
+    info: 'Explore artigos, guias e curiosidades sobre destinos, experiências e tendências de viagem.'
+  },
+  {
+    label: 'Privacidade',
+    info: 'Saiba como protegemos seus dados e garantimos a segurança das suas informações pessoais.'
+  },
+  {
+    label: 'Termos',
+    info: 'Leia as condições de uso dos nossos serviços e saiba seus direitos e deveres como usuário.'
+  },
+  {
+    label: 'Mapa do site',
+    info: 'Encontre tudo facilmente com nosso guia de navegação por seções e serviços.'
+  },
+  {
+    label: 'Informações da empresa',
+    info: 'Confira dados institucionais, estrutura organizacional e canais oficiais da Horizon Travel.'
+  },
+];
 
 const Footer: React.FC = () => {
+  const [popup, setPopup] = useState<{ label: string; info: string } | null>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setPopup(null);
+      }
+    }
+    if (popup) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [popup]);
+
+  // Função para abrir popup pelo nome do botão
+  const handleButtonClick = (label: string) => {
+    const btn = footerButtons.find(b => b.label === label);
+    if (btn) setPopup(btn);
+  };
+
   return (
     <footer className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 text-gray-800 py-12">
       <style>{`
@@ -13,123 +147,108 @@ const Footer: React.FC = () => {
           text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
       `}</style>
-      
       <div className="max-w-7xl mx-auto px-4">
         <div className="glass-effect rounded-2xl p-8 shadow-xl border border-white/20 backdrop-blur-sm">
-          {/* Navegação principal */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Seção Hospedagem */}
             <div>
               <h3 className="font-bold text-gray-800 mb-4">Hospedagem</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Acomodações</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Hotéis</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Pousadas</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Resorts</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Apartamentos</a></li>
+                {hospedagemButtons.map((btn) => (
+                  <li key={btn.label}>
+                    <button
+                      type="button"
+                      className="text-gray-600 hover:text-sky-600 transition-colors text-sm w-full text-left"
+                      onClick={() => handleButtonClick(btn.label)}
+                    >
+                      {btn.label}
+                    </button>
+                  </li>
+                ))}
+                <li>
+                  <button
+                    type="button"
+                    className="text-gray-600 hover:text-sky-600 transition-colors text-sm w-full text-left"
+                    onClick={() => handleButtonClick('Apartamentos')}
+                  >
+                    Apartamentos
+                  </button>
+                </li>
               </ul>
             </div>
-
             {/* Seção Experiências */}
             <div>
               <h3 className="font-bold text-gray-800 mb-4">Experiências</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Passeios</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Aventuras</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Cultura Local</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Gastronomia</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Atividades</a></li>
+                {['Passeios', 'Aventuras', 'Cultura Local', 'Gastronomia', 'Atividades'].map(label => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      className="text-gray-600 hover:text-sky-600 transition-colors text-sm w-full text-left"
+                      onClick={() => handleButtonClick(label)}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
-
             {/* Seção Suporte */}
             <div>
               <h3 className="font-bold text-gray-800 mb-4">Suporte</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Central de Ajuda</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Cancelamento</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Opções de segurança</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Contato</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Feedback</a></li>
+                {['Central de Ajuda', 'Cancelamento', 'Opções de segurança', 'Contato', 'Feedback'].map(label => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      className="text-gray-600 hover:text-sky-600 transition-colors text-sm w-full text-left"
+                      onClick={() => handleButtonClick(label)}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
-
             {/* Seção Empresa */}
             <div>
               <h3 className="font-bold text-gray-800 mb-4">Horizon Travel</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Sobre nós</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Carreiras</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Imprensa</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Investidores</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-sky-600 transition-colors text-sm">Blog</a></li>
+                {['Sobre nós', 'Carreiras', 'Imprensa', 'Investidores', 'Blog'].map(label => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      className="text-gray-600 hover:text-sky-600 transition-colors text-sm w-full text-left"
+                      onClick={() => handleButtonClick(label)}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
-
           {/* Linha divisória */}
           <div className="border-t border-gray-300/30 pt-8">
-            {/* Informações de contato */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-white/30 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-full flex items-center justify-center shadow-md">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 text-sm">Telefone</h4>
-                    <span className="text-gray-600 text-sm">(11) 99999-9999</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-white/30 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center shadow-md">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 text-sm">Email</h4>
-                    <span className="text-gray-600 text-sm">contato@horizon.com</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-white/30 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center shadow-md">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 text-sm">Localização</h4>
-                    <span className="text-gray-600 text-sm">São Paulo, Brasil</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Seção inferior com copyright e links legais */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                 <span>&copy; 2025 Horizon Travel, Inc.</span>
                 <span>•</span>
-                <a href="#" className="hover:text-sky-600 transition-colors">Privacidade</a>
-                <span>•</span>
-                <a href="#" className="hover:text-sky-600 transition-colors">Termos</a>
-                <span>•</span>
-                <a href="#" className="hover:text-sky-600 transition-colors">Mapa do site</a>
-                <span>•</span>
-                <a href="#" className="hover:text-sky-600 transition-colors">Informações da empresa</a>
+                {['Privacidade', 'Termos', 'Mapa do site', 'Informações da empresa'].map(label => (
+                  <React.Fragment key={label}>
+                    <button
+                      type="button"
+                      className="hover:text-sky-600 transition-colors"
+                      onClick={() => handleButtonClick(label)}
+                    >
+                      {label}
+                    </button>
+                    <span>•</span>
+                  </React.Fragment>
+                ))}
               </div>
-
-              {/* Redes sociais */}
+              {/* Redes sociais (mantidas como estão) */}
               <div className="flex items-center gap-4">
                 <a href="#" className="w-8 h-8 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-md">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -149,6 +268,42 @@ const Footer: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Popup */}
+          {popup && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+              <div
+                ref={popupRef}
+                className="bg-white rounded-xl shadow-2xl p-6 min-w-[280px] max-w-xs text-center"
+              >
+                <h4 className="font-bold text-lg mb-2 text-blue-700">{popup.label}</h4>
+                {/* Conteúdo especial para Sobre nós */}
+                {popup.label === 'Sobre nós' ? (
+                  <div>
+                    <img
+                      src="src/assets/team.png"
+                      alt="Equipe Horizon"
+                      className="mx-auto mb-3 w-20 h-20 object-contain rounded-full shadow"
+                    />
+                    <p className="text-gray-700 mb-4">
+                      Conheça a trajetória da Horizon Travel, nosso propósito e os valores que guiam nosso trabalho.<br />
+                      <span className="text-sm text-gray-500">
+                         Fundada em 2025,  nossa equipe é formada por profissionais apaixonados por tecnologia e altamente recomendados para o seu projeto.
+                      </span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-700 mb-4">{popup.info}</p>
+                )}
+                <button
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  onClick={() => setPopup(null)}
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </footer>
