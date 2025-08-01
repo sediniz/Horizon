@@ -2,22 +2,29 @@ import axios from 'axios';
 import { apiRequest } from './config';
 // Tipos para as reservas
 export interface Reserva {
-  id: number;
+  id: number; // ou reservaId dependendo do backend
   codigo: string;
   destino: string;
   hotel: string;
-  dataViagem: string;
-  dataReserva: string;
+  dataViagem: string; // ou dataInicio/dataFim
+  dataReserva: string; // ou dataCriacao
   status: 'confirmada' | 'pendente' | 'concluida' | 'cancelada';
-  valor: number;
-  pessoas: number;
-  imagem: string;
-  voo: string;
-  avaliacao: number;
-  estrelas: number;
+  valor: number; // ou valorTotal
+  pessoas: number; // ou quantidadePessoas
+  imagem?: string; // opcional, pode vir do hotel/pacote
+  voo?: string; // opcional, pode não existir no backend
+  avaliacao?: number; // opcional, pode vir de tabela separada
+  estrelas?: number; // opcional, pode vir do hotel
   userId?: number;
   pacoteId?: number;
+  hotelId?: number; // campo que provavelmente existe no backend
   observacoes?: string;
+  // Campos que podem existir no backend:
+  dataInicio?: string;
+  dataFim?: string;
+  dataCriacao?: string;
+  valorTotal?: number;
+  quantidadePessoas?: number;
 }
 export interface NovaReserva {
   pacoteId: number;
