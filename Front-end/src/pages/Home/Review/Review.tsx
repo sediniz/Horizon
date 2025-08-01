@@ -1,72 +1,10 @@
 import React, { useState } from 'react';
-import img1 from '../../../assets/img1.jpeg';
-
-// Dados das avaliações com informações detalhadas dos hotéis
-const reviews = [
-  {
-    id: 1,
-    name: "Maria Carolina",
-    initials: "MC",
-    verified: "Viajante verificada",
-    rating: 5.0,
-    title: "Uma experiência absolutamente incrível!",
-    comment: "A viagem foi perfeita do início ao fim. O hotel tinha uma vista deslumbrante, o atendimento foi excepcional e cada detalhe foi cuidadosamente planejado. Definitivamente superou todas as minhas expectativas. Recomendo para qualquer pessoa que busca uma experiência de viagem inesquecível.",
-    date: "15 de julho, 2025",
-    type: "Viagem em família",
-    image: img1,
-    bgColor: "from-blue-400 to-blue-600",
-    hotel: {
-      name: "Resort Paradise Bahia",
-      location: "Costa do Sauípe, Bahia",
-      stars: 5,
-      amenities: ["Piscina", "Spa", "All Inclusive", "Wi-Fi"],
-      category: "Resort de Luxo"
-    }
-  },
-  {
-    id: 2,
-    name: "João Pedro",
-    initials: "JP",
-    verified: "Viajante verificado",
-    rating: 4.8,
-    title: "Serviço impecável e localização perfeita!",
-    comment: "Fiquei hospedado por uma semana e a experiência foi fantástica. A equipe do hotel foi muito atenciosa, os quartos eram limpos e confortáveis. A localização é privilegiada, próxima a pontos turísticos importantes. Com certeza voltarei!",
-    date: "8 de julho, 2025",
-    type: "Viagem de negócios",
-    image: img1,
-    bgColor: "from-green-400 to-green-600",
-    hotel: {
-      name: "Hotel Business Center",
-      location: "Centro, São Paulo",
-      stars: 4,
-      amenities: ["Centro de Negócios", "Academia", "Wi-Fi", "Estacionamento"],
-      category: "Hotel Executivo"
-    }
-  },
-  {
-    id: 3,
-    name: "Ana Clara",
-    initials: "AC",
-    verified: "Viajante verificada",
-    rating: 4.9,
-    title: "Lua de mel dos sonhos!",
-    comment: "Escolhemos este destino para nossa lua de mel e foi a decisão perfeita. O quarto tinha uma vista incrível para o mar, o spa era relaxante e as refeições estavam deliciosas. Cada momento foi especial e romântico. Recomendamos para todos os casais!",
-    date: "25 de junho, 2025",
-    type: "Lua de mel",
-    image: img1,
-    bgColor: "from-pink-400 to-pink-600",
-    hotel: {
-      name: "Romantic Beach Resort",
-      location: "Copacabana, Rio de Janeiro",
-      stars: 5,
-      amenities: ["Vista para o Mar", "Spa de Casais", "Restaurante Gourmet", "Suíte Romântica"],
-      category: "Resort Romântico"
-    }
-  }
-];
+import { useAvaliacoes } from '../../../hooks/useAvaliacoes';
+import type { AvaliacaoFormatada } from '../../../services/avaliacaoService';
 
 const Review: React.FC = () => {
   const [currentReview, setCurrentReview] = useState(0);
+  const { reviews, loading, error } = useAvaliacoes();
 
   const nextReview = () => {
     setCurrentReview((prev) => (prev + 1) % reviews.length);
@@ -75,6 +13,47 @@ const Review: React.FC = () => {
   const prevReview = () => {
     setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="Review max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-lg">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Carregando avaliações...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && reviews.length === 0) {
+    return (
+      <div className="Review max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-lg">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="mb-4">
+              <svg className="w-16 h-16 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="text-gray-600 mb-2">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não há reviews, não renderiza o componente
+  if (!loading && reviews.length === 0) {
+    return null;
+  }
 
   const review = reviews[currentReview];
   return (
@@ -202,7 +181,7 @@ const Review: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">Comodidades:</p>
                 <div className="flex flex-wrap gap-1">
-                  {review.hotel.amenities.map((amenity, index) => (
+                  {review.hotel.amenities.map((amenity: string, index: number) => (
                     <span
                       key={index}
                       className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
@@ -219,7 +198,7 @@ const Review: React.FC = () => {
 
       {/* Indicadores de navegação */}
       <div className="flex justify-center mt-4 space-x-2">
-        {reviews.map((_, index) => (
+        {reviews.map((_: AvaliacaoFormatada, index: number) => (
           <button
             key={index}
             onClick={() => setCurrentReview(index)}
@@ -231,6 +210,15 @@ const Review: React.FC = () => {
           />
         ))}
       </div>
+
+      {/* Status da fonte dos dados (apenas para desenvolvimento) */}
+      {error && (
+        <div className="text-center mt-2">
+          <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
+            Exibindo dados de exemplo
+          </span>
+        </div>
+      )}
     </div>
   );
 };
