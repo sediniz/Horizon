@@ -10,20 +10,30 @@ const IconRenderer: React.FC<IconRendererProps> = ({ iconName, className = "w-5 
     switch (name) {
       case 'wifi':
         return (
-          <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 6c3.79 0 7.17 2.13 8.82 5.5.12.25.12.55 0 .8C19.17 15.87 15.79 18 12 18s-7.17-2.13-8.82-5.5c-.12-.25-.12-.55 0-.8C4.83 8.13 8.21 6 12 6zm0-2C7.03 4 2.73 6.8 1 11c.03.04.04.09.08.13C2.73 17.2 7.03 20 12 20s9.27-2.8 11-7.87c.04-.04.05-.09.08-.13C21.27 6.8 16.97 4 12 4zm0 5c-1.38 0-2.5 1.12-2.5 2.5S10.62 14 12 14s2.5-1.12 2.5-2.5S13.38 9 12 9z"/>
+          <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
           </svg>
         );
       case 'pool':
         return (
-          <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-            <path d="M2 17h20v2H2zm1.15-4.05L4 11.47l.85 1.48c.54.97 1.54 1.55 2.65 1.55s2.11-.58 2.65-1.55L12 10.47l1.85 2.48c.54.97 1.54 1.55 2.65 1.55s2.11-.58 2.65-1.55L20 11.47l.85 1.48c.54.97 1.54 1.55 2.65 1.55v2c-1.67 0-3.15-.91-3.92-2.37L18 12.65l-1.58 1.48c-.77 1.46-2.25 2.37-3.92 2.37s-3.15-.91-3.92-2.37L7 12.65l-1.58 1.48C4.65 15.59 3.17 16.5 1.5 16.5v-2c1.11 0 2.11-.58 2.65-1.55zM9.5 8C10.33 8 11 7.33 11 6.5S10.33 5 9.5 5 8 5.67 8 6.5 8.67 8 9.5 8z"/>
+          <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" strokeMiterlimit="10">
+            <path d="M22.5,14.86V22.5H1.5V14.86h1a3.46,3.46,0,0,0,4.77,0h0a3.45,3.45,0,0,0,4.76,0h0a3.45,3.45,0,0,0,4.76,0h0a3.46,3.46,0,0,0,4.77,0h1Z"/>
+            <path d="M7.23,14.86V4.36A2.86,2.86,0,0,1,10.09,1.5"/>
+            <path d="M14.86,15.79V4.36A2.86,2.86,0,0,1,17.73,1.5"/>
+            <line x1="7.23" y1="6.27" x2="14.86" y2="6.27"/>
+            <line x1="7.23" y1="11.05" x2="14.86" y2="11.05"/>
           </svg>
         );
       case 'ac':
         return (
-          <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" strokeMiterlimit="10">
+            <path d="M22.5,3.41v7.64A1.9,1.9,0,0,1,20.59,13H17.73V10.09H6.27V13H3.41a1.9,1.9,0,0,1-1.91-1.9V3.41A1.9,1.9,0,0,1,3.41,1.5H20.59A1.9,1.9,0,0,1,22.5,3.41Z"/>
+            <line x1="8.18" y1="12.95" x2="6.27" y2="12.95"/>
+            <line x1="17.73" y1="12.95" x2="15.82" y2="12.95"/>
+            <path d="M10.09,13v4.78a1.91,1.91,0,0,1-1.91,1.91h0a1.92,1.92,0,0,1-1.91-1.91h0"/>
+            <path d="M13.91,13v7.64a1.9,1.9,0,0,0,1.91,1.91h0a1.91,1.91,0,0,0,1.91-1.91h0"/>
+            <line x1="17.73" y1="5.32" x2="19.64" y2="5.32"/>
+            <line x1="4.36" y1="5.32" x2="15.82" y2="5.32"/>
           </svg>
         );
       case 'restaurant':
@@ -46,14 +56,26 @@ const IconRenderer: React.FC<IconRendererProps> = ({ iconName, className = "w-5 
         );
       case 'concierge':
         return (
-          <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" strokeMiterlimit="10">
+            <path d="M8.17,1.5h7.65a0,0,0,0,1,0,0V8.2A3.83,3.83,0,0,1,12,12h0A3.83,3.83,0,0,1,8.17,8.2V1.5a0,0,0,0,1,0,0Z"/>
+            <line x1="8.17" y1="5.33" x2="18.7" y2="5.33"/>
+            <path d="M4.35,23.5V19.67A7.65,7.65,0,0,1,12,12h0a7.65,7.65,0,0,1,7.65,7.65V23.5"/>
+            <line x1="9.13" y1="17.76" x2="11.04" y2="17.76"/>
+            <line x1="9.13" y1="21.59" x2="11.04" y2="21.59"/>
+            <polyline points="8.93 12.66 12.96 15.85 12.96 23.5"/>
           </svg>
         );
       case 'room-service':
         return (
-          <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-            <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H9v-7H1v11h18V7z"/>
+          <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" strokeMiterlimit="10">
+            <path d="M5.28,7.2H18.67a1.91,1.91,0,0,1,1.91,1.91v6.7a0,0,0,0,1,0,0H5.28a0,0,0,0,1,0,0V7.2A0,0,0,0,1,5.28,7.2Z"/>
+            <circle cx="5.28" cy="20.59" r="1.91"/>
+            <circle cx="20.59" cy="20.59" r="1.91"/>
+            <line x1="5.28" y1="18.67" x2="5.28" y2="15.8"/>
+            <line x1="20.59" y1="18.67" x2="20.59" y2="15.8"/>
+            <polyline points="5.28 8.15 5.28 3.37 0.5 1.46"/>
+            <path d="M12.93,2.41h0a3.83,3.83,0,0,1,3.83,3.83v1a0,0,0,0,1,0,0H9.11a0,0,0,0,1,0,0v-1a3.83,3.83,0,0,1,3.83-3.83Z"/>
+            <line x1="12.93" y1="0.5" x2="12.93" y2="2.41"/>
           </svg>
         );
       case 'bar':
@@ -76,10 +98,13 @@ const IconRenderer: React.FC<IconRendererProps> = ({ iconName, className = "w-5 
         );
       case 'beach':
         return (
-          <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13.127 14.56l1.43 1.43c3.39-3.4 3.39-8.95 0-12.34l-1.43 1.43c2.59 2.58 2.59 6.78 0 9.48z"/>
-            <path d="M17.42 10.19l1.43 1.43c1.19-1.2 1.19-3.14 0-4.34l-1.43 1.43c.39.39.39 1.02 0 1.48z"/>
-            <circle cx="9" cy="13" r="8"/>
+          <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" strokeMiterlimit="10">
+            <path d="M8.18,16.8,5,13.57A2,2,0,0,0,3.52,13h0a2,2,0,0,0-2,2h0a2,2,0,0,0,.59,1.43l4.18,4.18H20.59A1.9,1.9,0,0,0,22.5,18.7h0a1.9,1.9,0,0,0-1.91-1.9Z"/>
+            <line x1="6.27" y1="23.48" x2="6.27" y2="20.61"/>
+            <line x1="19.64" y1="23.48" x2="19.64" y2="20.61"/>
+            <polygon points="20.59 8.21 3.41 8.21 12 1.52 20.59 8.21"/>
+            <line x1="12" y1="16.8" x2="12" y2="8.2"/>
+            <line x1="12" y1="23.48" x2="12" y2="20.61"/>
           </svg>
         );
       case 'sports':
