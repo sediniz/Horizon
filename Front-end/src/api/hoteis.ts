@@ -84,3 +84,46 @@ export const getHoteisByIds = async (hotelIds: number[]): Promise<HotelAPI[]> =>
     throw new Error('Falha ao carregar hotéis');
   }
 };
+
+// Função para criar um novo hotel (admin)
+export const createHotel = async (hotel: Omit<HotelAPI, 'hotelId'>): Promise<HotelAPI> => {
+  try {
+    const response = await apiRequest('/hoteis', {
+      method: 'POST',
+      data: hotel,
+    });
+    console.log('🏨 Hotel criado:', response);
+    return response;
+  } catch (error) {
+    console.error('Erro ao criar hotel:', error);
+    throw new Error('Falha ao criar hotel');
+  }
+};
+
+// Função para atualizar um hotel (admin)
+export const updateHotel = async (id: number, hotel: Partial<HotelAPI>): Promise<HotelAPI> => {
+  try {
+    const response = await apiRequest(`/hoteis/${id}`, {
+      method: 'PUT',
+      data: hotel,
+    });
+    console.log(`🏨 Hotel ${id} atualizado:`, response);
+    return response;
+  } catch (error) {
+    console.error(`Erro ao atualizar hotel ${id}:`, error);
+    throw new Error('Falha ao atualizar hotel');
+  }
+};
+
+// Função para deletar um hotel (admin)
+export const deleteHotel = async (id: number): Promise<void> => {
+  try {
+    await apiRequest(`/hoteis/${id}`, {
+      method: 'DELETE',
+    });
+    console.log(`🏨 Hotel ${id} deletado`);
+  } catch (error) {
+    console.error(`Erro ao deletar hotel ${id}:`, error);
+    throw new Error('Falha ao deletar hotel');
+  }
+};
