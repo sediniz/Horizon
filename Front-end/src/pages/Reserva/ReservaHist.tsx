@@ -335,7 +335,11 @@ export default function ReservaHist() {
       {error && !loading && (
         <div className="max-w-2xl mx-auto p-4 mt-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <div className="text-4xl mb-4">⚠️</div>
+            <div className="flex justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-12 text-red-600">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+            </div>
             <h3 className="text-xl font-bold text-red-800 mb-2">Erro ao carregar reservas</h3>
             <p className="text-red-600 mb-4">{error}</p>
             <p className="text-sm text-red-500 mb-4">Exibindo dados de exemplo enquanto isso.</p>
@@ -367,7 +371,10 @@ export default function ReservaHist() {
               {/* Estatísticas */}
               <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-4 text-white border border-blue-300/30 shadow-lg">
                 <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                  📊 Resumo das Viagens
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                  </svg>
+                  Resumo das Viagens
                 </h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -653,8 +660,11 @@ export default function ReservaHist() {
                                 </button>
                                 <button 
                                   onClick={() => handleCancelClick(reserva.id)}
-                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
                                 >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
                                   Cancelar
                                 </button>
                               </>
@@ -670,22 +680,31 @@ export default function ReservaHist() {
                             )}
                             {reserva.status === 'pendente' && (
                               <>
-                                <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
-                                  💳 Pagar
+                                <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                                  </svg>
+                                  Pagar
                                 </button>
                                 <button 
                                   onClick={() => handleCancelClick(reserva.id)}
-                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
                                 >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
                                   Cancelar
                                 </button>
                               </>
                             )}
                             <button 
                               onClick={() => handleBaixarVoucher(reserva.id)}
-                              className="bg-white/60 backdrop-blur-sm text-blue-700 border border-blue-300 hover:bg-white/80 hover:border-blue-400 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+                              className="bg-white/60 backdrop-blur-sm text-blue-700 border border-blue-300 hover:bg-white/80 hover:border-blue-400 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
                             >
-                              📄 Voucher
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                              </svg>
+                              Comprovante
                             </button>
                           </div>
                           <div className="text-right">
@@ -739,7 +758,11 @@ export default function ReservaHist() {
           <div className="bg-white rounded-xl max-w-md w-full shadow-2xl shadow-sky-200/50 border-t-4 border-t-red-500">
             <div className="p-6">
               <div className="text-center mb-6">
-                <div className="text-6xl mb-4">⚠️</div>
+                <div className="flex justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-16 text-red-600">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                  </svg>
+                </div>
                 <h2 className="text-2xl font-bold text-slate-800 mb-2">Confirmar Cancelamento</h2>
                 {(() => {
                   const reserva = reservas.find(r => r.id === selectedReserva);
@@ -751,8 +774,11 @@ export default function ReservaHist() {
                 })()}
               </div>
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-amber-800">
-                  <span className="font-semibold">⚠️ Atenção:</span> Esta ação não pode ser desfeita. O cancelamento pode estar sujeito a taxas conforme a política de cancelamento.
+                <p className="text-sm text-amber-800 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4 text-amber-600 flex-shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                  </svg>
+                  <span><span className="font-semibold">Atenção:</span> Esta ação não pode ser desfeita. O cancelamento pode estar sujeito a taxas conforme a política de cancelamento.</span>
                 </p>
               </div>
               <div className="flex gap-3">
@@ -861,8 +887,11 @@ export default function ReservaHist() {
                   </div>
                 )}
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-4">
-                  <p className="text-sm text-amber-800">
-                    <span className="font-semibold">⚠️ Atenção:</span> O cancelamento pode estar sujeito a taxas conforme a política de cancelamento do pacote.
+                  <p className="text-sm text-amber-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4 text-amber-600 flex-shrink-0">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <span><span className="font-semibold">Atenção:</span> O cancelamento pode estar sujeito a taxas conforme a política de cancelamento do pacote.</span>
                   </p>
                 </div>
                 <div className="flex gap-3 pt-4">
