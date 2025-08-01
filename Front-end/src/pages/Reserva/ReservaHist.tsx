@@ -163,10 +163,10 @@ export default function ReservaHist() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      alert('Voucher baixado com sucesso!');
+      alert('Comprovante baixado com sucesso!');
     } catch (err) {
-      console.error('Erro ao baixar voucher:', err);
-      alert('Erro ao baixar voucher. Tente novamente.');
+      console.error('Erro ao baixar comprovante:', err);
+      alert('Erro ao baixar comprovante. Tente novamente.');
     }
   };
   const handleRatingChange = (field: keyof typeof ratingData, value: number | string) => {
@@ -538,7 +538,9 @@ export default function ReservaHist() {
                     }}
                     className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-blue-700 transition-all duration-200 hover:scale-105"
                   >
-                    <span>📧</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                    </svg>
                     <span>Reenviar confirmação</span>
                   </button>
                   <button 
@@ -547,13 +549,15 @@ export default function ReservaHist() {
                       if (reservasAtivas.length > 0) {
                         reservasAtivas.forEach(reserva => handleBaixarVoucher(reserva.id));
                       } else {
-                        alert('Não há reservas com vouchers disponíveis.');
+                        alert('Não há reservas com comprovantes disponíveis.');
                       }
                     }}
                     className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-green-700 transition-all duration-200 hover:scale-105"
                   >
-                    <span>📄</span>
-                    <span>Baixar vouchers</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                    <span>Baixar comprovante</span>
                   </button>
                   <button className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-yellow-700 transition-all duration-200 hover:scale-105">
                     <Rating rating={1} size="xs" color="text-yellow-600" />
@@ -674,7 +678,7 @@ export default function ReservaHist() {
                                 onClick={() => handleRatingClick(reserva.id)}
                                 className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
                               >
-                                <Rating rating={1} size="xs" color="text-white" />
+                                <Rating rating={5} size="xs" color="text-white" />
                                 Avaliar
                               </button>
                             )}
