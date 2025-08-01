@@ -1,6 +1,7 @@
 import React from 'react';
 import IconRenderer from '../../../components/IconRenderer/IconRenderer';
 import StarRating from './StarRating';
+import { useNavigate } from 'react-router-dom';
 import type { PackageProps } from '../types';
 
 interface PackageCardProps {
@@ -8,8 +9,17 @@ interface PackageCardProps {
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
+  const navigate = useNavigate();
+
+  const handleViewPackage = () => {
+    navigate(`/pacote/${pkg.id}`);
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <div 
+      className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer" 
+      onClick={handleViewPackage}
+    >
       <div className="flex flex-col lg:flex-row">
         {/* Imagem */}
         <div className="lg:w-1/3 relative h-65 lg:h-auto lg:min-h-full">
@@ -92,10 +102,22 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
               </div>
 
               <div className="flex flex-col gap-2">
-                <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                  Reservar Agora
+                <button 
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/pacote/${pkg.id}`);
+                  }}
+                >
+                  Ver Detalhes
                 </button>
-                <button className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                <button 
+                  className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Adicionar aos favoritos (implementar no futuro)
+                  }}
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                   </svg>

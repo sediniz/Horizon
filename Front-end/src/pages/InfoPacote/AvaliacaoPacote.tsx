@@ -1,36 +1,42 @@
 import React from "react";
 import Rating from "../../components/Rating/Rating";
+import type { AvaliacaoAPI } from "../../api/hoteis";
 
-const mockAvaliacoes = [
-  { 
-    nome: "João", 
-    nota: 5, 
-    comentario: "Ótimo pacote! Recomendo.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
-  },
-  { 
-    nome: "Maria", 
-    nota: 4, 
-    comentario: "Muito bom, mas poderia ter mais opções.",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
-  },
-  { 
-    nome: "Carlos", 
-    nota: 3, 
-    comentario: "Satisfeito, mas o hotel era simples.",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-  },
+// Avatar fallbacks para casos em que não temos imagem do usuário
+const avatarFallbacks = [
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
 ];
 
-const AvaliacaoPacote: React.FC = () => {
+// Nomes de usuários para exibição caso não tenha o nome real
+const nomesFallback = ["Usuário", "Cliente", "Hóspede", "Viajante", "Turista"];
+
+interface AvaliacaoPacoteProps {
+  avaliacoes?: AvaliacaoAPI[];
+}
+
+const AvaliacaoPacote: React.FC<AvaliacaoPacoteProps> = ({ avaliacoes = [] }) => {
   const calcularMediaAvaliacoes = () => {
-    if (mockAvaliacoes.length === 0) return 0;
-    const soma = mockAvaliacoes.reduce((acc, avaliacao) => acc + avaliacao.nota, 0);
-    return (soma / mockAvaliacoes.length).toFixed(1);
+    if (avaliacoes.length === 0) return 0;
+    const soma = avaliacoes.reduce((acc, avaliacao) => acc + avaliacao.nota, 0);
+    return (soma / avaliacoes.length).toFixed(1);
   };
 
   const renderStars = (nota: number, size: string = "lg") => {
     return <Rating rating={nota} size={size as any} />;
+  };
+  
+  // Função para obter um avatar aleatório
+  const getRandomAvatar = (index: number) => {
+    return avatarFallbacks[index % avatarFallbacks.length];
+  };
+  
+  // Função para obter um nome aleatório
+  const getRandomNome = (index: number) => {
+    return nomesFallback[index % nomesFallback.length];
   };
 
   return (
@@ -43,11 +49,11 @@ const AvaliacaoPacote: React.FC = () => {
         <div className="ml-auto flex items-center gap-2">
           <span className="text-2xl font-bold text-gray-800">{calcularMediaAvaliacoes()}</span>
           {renderStars(Math.round(Number(calcularMediaAvaliacoes())), "md")}
-          <span className="text-gray-600">({mockAvaliacoes.length} avaliações)</span>
+          <span className="text-gray-600">({avaliacoes.length} avaliações)</span>
         </div>
       </div>
 
-      {mockAvaliacoes.length === 0 ? (
+      {avaliacoes.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.013 8.013 0 01-7-4L5 15l1-1h5a8 8 0 008-8z" />
@@ -56,13 +62,13 @@ const AvaliacaoPacote: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4 max-h-64 overflow-y-auto">
-          {mockAvaliacoes.map((a, idx) => (
-            <div key={idx} className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/30 shadow-sm">
+          {avaliacoes.map((avaliacao, idx) => (
+            <div key={avaliacao.idAvaliacao} className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/30 shadow-sm">
               <div className="flex items-start gap-4 mb-3">
                 <div className="flex-shrink-0">
                   <img 
-                    src={a.avatar} 
-                    alt={`Avatar de ${a.nome}`}
+                    src={avatarFallbacks[idx % avatarFallbacks.length]} 
+                    alt={`Avatar de Usuário ${avaliacao.idUsuario}`}
                     className="w-12 h-12 rounded-full object-cover border-2 border-white/30 shadow-lg"
                     onError={(e) => {
                       // Fallback para inicial se a imagem não carregar
@@ -76,15 +82,16 @@ const AvaliacaoPacote: React.FC = () => {
                     }}
                   />
                   <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-full items-center justify-center text-white font-bold shadow-lg hidden">
-                    {a.nome.charAt(0)}
+                    U{avaliacao.idUsuario}
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-800">{a.nome}</span>
-                    {renderStars(a.nota, "sm")}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-gray-800">Usuário {avaliacao.idUsuario}</span>
+                    {renderStars(avaliacao.nota, "sm")}
                   </div>
-                  <p className="text-gray-700 text-sm leading-relaxed">{a.comentario}</p>
+                  <p className="text-gray-700 text-sm leading-relaxed">{avaliacao.comentario}</p>
+                  <p className="text-gray-500 text-xs mt-2">{new Date(avaliacao.dataAvaliacao).toLocaleDateString()}</p>
                 </div>
               </div>
             </div>
