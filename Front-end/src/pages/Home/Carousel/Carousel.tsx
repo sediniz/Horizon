@@ -6,43 +6,29 @@ interface CarouselProps {
 
 const Carousel: React.FC<CarouselProps> = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const interval = setInterval(() => {
-      nextSlide();
+      setCurrentIndex((prev) => (prev + 1) % images.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [currentIndex, isAutoPlaying]);
+  }, [images.length, isAutoPlaying]);
 
   const nextSlide = () => {
-    setIsVisible(false);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % images.length);
-      setIsVisible(true);
-    }, 300);
+    setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
   const prevSlide = () => {
-    setIsVisible(false);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-      setIsVisible(true);
-    }, 300);
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const goToSlide = (index: number) => {
     if (index === currentIndex) return;
-
-    setIsVisible(false);
-    setTimeout(() => {
-      setCurrentIndex(index);
-      setIsVisible(true);
-    }, 300);
+    setCurrentIndex(index);
   };
 
   const handleMouseEnter = () => setIsAutoPlaying(false);
@@ -54,14 +40,20 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative overflow-hidden shadow-2xl">
-        <img
-          src={images[currentIndex]}
-          alt={`Destino ${currentIndex + 1}`}
-          className={`w-full h-[500px] object-cover transition-all duration-300 ease-in-out ${
-            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-          }`}
-        />
+      <div className="relative overflow-hidden shadow-2xl h-[500px]">
+        <div 
+          className="flex transition-transform duration-500 ease-in-out h-full"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {images.map((image, index) => (
+            <img
+              key={index}
+              src={image}
+              alt={`Destino ${index + 1}`}
+              className="w-full h-full object-cover flex-shrink-0"
+            />
+          ))}
+        </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
