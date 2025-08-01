@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Rating from '../../components/Rating/Rating';
-
+import { reservasApi } from '../../api/reservas';
+import type { Reserva, CancelamentoReserva, AvaliacaoReserva } from '../../api/reservas';
 export default function ReservaHist() {
   const [filtroStatus, setFiltroStatus] = useState('todas');
   const [filtroData, setFiltroData] = useState('todas');
@@ -8,6 +9,9 @@ export default function ReservaHist() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState<number | null>(null);
+  const [reservas, setReservas] = useState<Reserva[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [cancelData, setCancelData] = useState({
     nome: '',
     data: '',
@@ -22,7 +26,6 @@ export default function ReservaHist() {
     custoBeneficio: 0,
     comentario: ''
   });
-
   const motivosCancelamento = [
     'Mudança de planos pessoais',
     'Problemas de saúde',
@@ -32,12 +35,10 @@ export default function ReservaHist() {
     'Condições climáticas desfavoráveis',
     'Outro motivo'
   ];
-
   const handleCancelClick = (reservaId: number) => {
     setSelectedReserva(reservaId);
     setShowConfirmModal(true);
   };
-
   const handleConfirmCancel = () => {
     setShowConfirmModal(false);
     setShowCancelModal(true);
@@ -48,7 +49,6 @@ export default function ReservaHist() {
       motivoPersonalizado: ''
     });
   };
-
   const handleRatingClick = (reservaId: number) => {
     setSelectedReserva(reservaId);
     setShowRatingModal(true);
@@ -61,8 +61,7 @@ export default function ReservaHist() {
       comentario: ''
     });
   };
-
-  const handleCancelSubmit = (e: React.FormEvent) => {
+  const handleCancelSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cancelData.nome || !cancelData.data || !cancelData.motivo) {
       alert('Por favor, preencha todos os campos obrigatórios.');
@@ -74,38 +73,108 @@ export default function ReservaHist() {
       return;
     }
     
-    // Encontrar a reserva sendo cancelada
-    const reserva = reservas.find(r => r.id === selectedReserva);
-    const reservaInfo = reserva ? `${reserva.hotel} - ${reserva.destino}` : 'Reserva';
+    if (!selectedReserva) return;
     
-    // Aqui você implementaria a lógica de cancelamento
-    alert(`Solicitação de cancelamento para ${reservaInfo} enviada com sucesso!`);
-    setShowCancelModal(false);
-    setSelectedReserva(null);
+    try {
+      // Encontrar a reserva sendo cancelada
+      const reserva = reservas.find(r => r.id === selectedReserva);
+      const reservaInfo = reserva ? `${reserva.hotel} - ${reserva.destino}` : 'Reserva';
+      
+      // Chamar API para cancelar
+      const dadosCancelamento: CancelamentoReserva = {
+        reservaId: selectedReserva,
+        nome: cancelData.nome,
+        data: cancelData.data,
+        motivo: cancelData.motivo,
+        motivoPersonalizado: cancelData.motivoPersonalizado
+      };
+      
+      await reservasApi.cancelarReserva(dadosCancelamento);
+      
+      // Atualizar estado local
+      setReservas(prev => prev.map(r => 
+        r.id === selectedReserva ? { ...r, status: 'cancelada' as const } : r
+      ));
+      
+      alert(`Solicitação de cancelamento para ${reservaInfo} enviada com sucesso!`);
+      setShowCancelModal(false);
+      setSelectedReserva(null);
+    } catch (err) {
+      console.error('Erro ao cancelar reserva:', err);
+      alert('Erro ao cancelar a reserva. Tente novamente.');
+    }
   };
-
-  const handleRatingSubmit = (e: React.FormEvent) => {
+  const handleRatingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (ratingData.geral === 0) {
       alert('Por favor, dê uma avaliação geral.');
       return;
     }
     
-    const reserva = reservas.find(r => r.id === selectedReserva);
-    const reservaInfo = reserva ? `${reserva.hotel} - ${reserva.destino}` : 'Reserva';
+    if (!selectedReserva) return;
     
-    alert(`Avaliação para ${reservaInfo} enviada com sucesso! Obrigado pelo seu feedback.`);
-    setShowRatingModal(false);
-    setSelectedReserva(null);
+    try {
+      const reserva = reservas.find(r => r.id === selectedReserva);
+      const reservaInfo = reserva ? `${reserva.hotel} - ${reserva.destino}` : 'Reserva';
+      
+      // Chamar API para avaliar
+      const avaliacaoData: AvaliacaoReserva = {
+        reservaId: selectedReserva,
+        geral: ratingData.geral,
+        limpeza: ratingData.limpeza,
+        localizacao: ratingData.localizacao,
+        servico: ratingData.servico,
+        custoBeneficio: ratingData.custoBeneficio,
+        comentario: ratingData.comentario
+      };
+      
+      await reservasApi.avaliarReserva(avaliacaoData);
+      
+      alert(`Avaliação para ${reservaInfo} enviada com sucesso! Obrigado pelo seu feedback.`);
+      setShowRatingModal(false);
+      setSelectedReserva(null);
+    } catch (err) {
+      console.error('Erro ao avaliar reserva:', err);
+      alert('Erro ao enviar a avaliação. Tente novamente.');
+    }
   };
-
+  // Handler para reenviar confirmação
+  const handleReenviarConfirmacao = async (reservaId: number) => {
+    try {
+      await reservasApi.reenviarConfirmacao(reservaId);
+      alert('Confirmação reenviada com sucesso para seu e-mail!');
+    } catch (err) {
+      console.error('Erro ao reenviar confirmação:', err);
+      alert('Erro ao reenviar confirmação. Tente novamente.');
+    }
+  };
+  // Handler para baixar voucher
+  const handleBaixarVoucher = async (reservaId: number) => {
+    try {
+      const voucherBlob = await reservasApi.baixarVoucher(reservaId);
+      
+      // Criar um link temporário para download
+      const url = window.URL.createObjectURL(voucherBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `voucher-reserva-${reservaId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      alert('Voucher baixado com sucesso!');
+    } catch (err) {
+      console.error('Erro ao baixar voucher:', err);
+      alert('Erro ao baixar voucher. Tente novamente.');
+    }
+  };
   const handleRatingChange = (field: keyof typeof ratingData, value: number | string) => {
     setRatingData(prev => ({
       ...prev,
       [field]: value
     }));
   };
-
   const handleCancelDataChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCancelData(prev => ({
@@ -113,7 +182,6 @@ export default function ReservaHist() {
       [name]: value
     }));
   };
-
   const StarRating = ({ rating, onStarClick }: { rating: number, onStarClick: (star: number) => void }) => {
     return (
       <Rating 
@@ -124,74 +192,90 @@ export default function ReservaHist() {
       />
     );
   };
-
   const renderStars = (rating: number, onStarClick: (rating: number) => void) => {
     return <StarRating rating={rating} onStarClick={onStarClick} />;
   };
-
-  const reservas = [
-    {
-      id: 1,
-      codigo: "HZ2025001",
-      destino: "Rio de Janeiro",
-      hotel: "Rede Andrade Lapa Hotel",
-      dataViagem: "10/08/2025 - 17/08/2025",
-      dataReserva: "15/07/2025",
-      status: "confirmada",
-      valor: 1186,
-      pessoas: 2,
-      imagem: "/src/assets/img1.jpeg",
-      voo: "GRU → GIG",
-      avaliacao: 8.3,
-      estrelas: 3
-    },
-    {
-      id: 2,
-      codigo: "HZ2025002",
-      destino: "Copacabana",
-      hotel: "Américas Copacabana Hotel",
-      dataViagem: "25/09/2025 - 02/10/2025",
-      dataReserva: "10/08/2025",
-      status: "pendente",
-      valor: 2120,
-      pessoas: 2,
-      imagem: "/src/assets/img2.png",
-      voo: "GRU → GIG",
-      avaliacao: 8.2,
-      estrelas: 4
-    },
-    {
-      id: 3,
-      codigo: "HZ2024012",
-      destino: "Fernando de Noronha",
-      hotel: "Hotel Paradise Island",
-      dataViagem: "15/12/2024 - 22/12/2024",
-      dataReserva: "20/11/2024",
-      status: "concluida",
-      valor: 3500,
-      pessoas: 2,
-      imagem: "/src/assets/Praia01.png",
-      voo: "GRU → FEN",
-      avaliacao: 9.1,
-      estrelas: 5
-    },
-    {
-      id: 4,
-      codigo: "HZ2024008",
-      destino: "Paris",
-      hotel: "Hotel Le Marais",
-      dataViagem: "05/06/2024 - 15/06/2024",
-      dataReserva: "20/04/2024",
-      status: "cancelada",
-      valor: 4200,
-      pessoas: 2,
-      imagem: "/src/assets/Paris2.png",
-      voo: "GRU → CDG",
-      avaliacao: 8.8,
-      estrelas: 4
-    }
-  ];
-
+  // Carregar reservas da API
+  useEffect(() => {
+    const carregarReservas = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // TODO: Pegar userId do contexto de autenticação
+        const reservasCarregadas = await reservasApi.buscarReservas(1);
+        setReservas(reservasCarregadas);
+      } catch (err) {
+        console.error('Erro ao carregar reservas:', err);
+        setError(err instanceof Error ? err.message : 'Erro ao carregar reservas');
+        // Fallback para dados mock em caso de erro
+        setReservas([
+          {
+            id: 1,
+            codigo: "HZ2025001",
+            destino: "Rio de Janeiro",
+            hotel: "Rede Andrade Lapa Hotel",
+            dataViagem: "10/08/2025 - 17/08/2025",
+            dataReserva: "15/07/2025",
+            status: "confirmada" as const,
+            valor: 1186,
+            pessoas: 2,
+            imagem: "/src/assets/img1.jpeg",
+            voo: "GRU → GIG",
+            avaliacao: 8.3,
+            estrelas: 3
+          },
+          {
+            id: 2,
+            codigo: "HZ2025002",
+            destino: "Copacabana",
+            hotel: "Américas Copacabana Hotel",
+            dataViagem: "25/09/2025 - 02/10/2025",
+            dataReserva: "10/08/2025",
+            status: "pendente" as const,
+            valor: 2120,
+            pessoas: 2,
+            imagem: "/src/assets/img2.png",
+            voo: "GRU → GIG",
+            avaliacao: 8.2,
+            estrelas: 4
+          },
+          {
+            id: 3,
+            codigo: "HZ2024012",
+            destino: "Fernando de Noronha",
+            hotel: "Hotel Paradise Island",
+            dataViagem: "15/12/2024 - 22/12/2024",
+            dataReserva: "20/11/2024",
+            status: "concluida" as const,
+            valor: 3500,
+            pessoas: 2,
+            imagem: "/src/assets/Praia01.png",
+            voo: "GRU → FEN",
+            avaliacao: 9.1,
+            estrelas: 5
+          },
+          {
+            id: 4,
+            codigo: "HZ2024008",
+            destino: "Paris",
+            hotel: "Hotel Le Marais",
+            dataViagem: "05/06/2024 - 15/06/2024",
+            dataReserva: "20/04/2024",
+            status: "cancelada" as const,
+            valor: 4200,
+            pessoas: 2,
+            imagem: "/src/assets/Paris2.png",
+            voo: "GRU → CDG",
+            avaliacao: 8.8,
+            estrelas: 4
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    carregarReservas();
+  }, []);
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'confirmada':
@@ -206,7 +290,6 @@ export default function ReservaHist() {
         return 'bg-slate-100 text-slate-800 border-slate-200';
     }
   };
-
   const getStatusText = (status: string) => {
     switch (status) {
       case 'confirmada':
@@ -221,14 +304,12 @@ export default function ReservaHist() {
         return status;
     }
   };
-
   const reservasFiltradas = reservas.filter(reserva => {
     if (filtroStatus !== 'todas' && reserva.status !== filtroStatus) {
       return false;
     }
     return true;
   });
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       <style>{`
@@ -241,7 +322,34 @@ export default function ReservaHist() {
           border: 1px solid rgba(255, 255, 255, 0.18);
         }
       `}</style>
-
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-lg text-gray-600">Carregando suas reservas...</p>
+          </div>
+        </div>
+      )}
+      {/* Error State */}
+      {error && !loading && (
+        <div className="max-w-2xl mx-auto p-4 mt-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h3 className="text-xl font-bold text-red-800 mb-2">Erro ao carregar reservas</h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <p className="text-sm text-red-500 mb-4">Exibindo dados de exemplo enquanto isso.</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Main Content */}
+      {!loading && (
       <div className="max-w-7xl mx-auto p-4">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar com filtros */}
@@ -256,7 +364,6 @@ export default function ReservaHist() {
                 </div>
                 <h2 className="text-xl font-bold text-gray-800">Filtros</h2>
               </div>
-
               {/* Estatísticas */}
               <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-4 text-white border border-blue-300/30 shadow-lg">
                 <h3 className="font-bold text-white mb-4 flex items-center gap-2">
@@ -281,7 +388,6 @@ export default function ReservaHist() {
                   </div>
                 </div>
               </div>
-
               {/* Filtro por status */}
               <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
                 <div className="flex items-center space-x-2 mb-4">
@@ -361,7 +467,6 @@ export default function ReservaHist() {
                   </label>
                 </div>
               </div>
-
               {/* Filtro por período */}
               <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
                 <div className="flex items-center space-x-2 mb-4">
@@ -406,7 +511,6 @@ export default function ReservaHist() {
                   </label>
                 </div>
               </div>
-
               {/* Ações rápidas */}
               <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
                 <div className="flex items-center space-x-2 mb-4">
@@ -416,11 +520,31 @@ export default function ReservaHist() {
                   <h3 className="font-bold text-gray-800">Ações Rápidas</h3>
                 </div>
                 <div className="space-y-3">
-                  <button className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-blue-700 transition-all duration-200 hover:scale-105">
+                  <button 
+                    onClick={() => {
+                      const ultimaReserva = reservas.find(r => r.status === 'confirmada' || r.status === 'pendente');
+                      if (ultimaReserva) {
+                        handleReenviarConfirmacao(ultimaReserva.id);
+                      } else {
+                        alert('Não há reservas ativas para reenviar confirmação.');
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-blue-700 transition-all duration-200 hover:scale-105"
+                  >
                     <span>📧</span>
                     <span>Reenviar confirmação</span>
                   </button>
-                  <button className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-green-700 transition-all duration-200 hover:scale-105">
+                  <button 
+                    onClick={() => {
+                      const reservasAtivas = reservas.filter(r => r.status === 'confirmada' || r.status === 'concluida');
+                      if (reservasAtivas.length > 0) {
+                        reservasAtivas.forEach(reserva => handleBaixarVoucher(reserva.id));
+                      } else {
+                        alert('Não há reservas com vouchers disponíveis.');
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-green-700 transition-all duration-200 hover:scale-105"
+                  >
                     <span>📄</span>
                     <span>Baixar vouchers</span>
                   </button>
@@ -432,7 +556,6 @@ export default function ReservaHist() {
               </div>
             </div>
           </div>
-
           {/* Lista de reservas */}
           <div className="flex-1">
             <div className="space-y-6">
@@ -462,7 +585,6 @@ export default function ReservaHist() {
                         </div>
                       </div>
                     </div>
-
                     {/* Conteúdo Principal */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       {/* Imagem */}
@@ -478,7 +600,6 @@ export default function ReservaHist() {
                           </div>
                         </div>
                       </div>
-
                       {/* Informações */}
                       <div className="lg:col-span-2 space-y-4">
                         {/* Detalhes da Viagem */}
@@ -502,7 +623,6 @@ export default function ReservaHist() {
                             <p className="font-bold text-gray-800">{reserva.dataReserva}</p>
                           </div>
                         </div>
-
                         {/* Detalhes Extras */}
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="flex items-center gap-2 bg-blue-100 px-3 py-1 rounded-full">
@@ -518,7 +638,6 @@ export default function ReservaHist() {
                             <span className="text-sm font-medium text-purple-800">{reserva.pessoas} pessoas</span>
                           </div>
                         </div>
-
                         {/* Valor e Ações */}
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pt-4 border-t border-white/20">
                           <div className="flex flex-wrap gap-2">
@@ -560,7 +679,10 @@ export default function ReservaHist() {
                                 </button>
                               </>
                             )}
-                            <button className="bg-white/60 backdrop-blur-sm text-blue-700 border border-blue-300 hover:bg-white/80 hover:border-blue-400 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                            <button 
+                              onClick={() => handleBaixarVoucher(reserva.id)}
+                              className="bg-white/60 backdrop-blur-sm text-blue-700 border border-blue-300 hover:bg-white/80 hover:border-blue-400 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+                            >
                               📄 Voucher
                             </button>
                           </div>
@@ -578,7 +700,6 @@ export default function ReservaHist() {
                 </div>
               ))}
             </div>
-
             {reservasFiltradas.length === 0 && (
               <div className="glass-effect rounded-2xl shadow-xl border border-white/20 backdrop-blur-sm p-10 text-center">
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -596,7 +717,6 @@ export default function ReservaHist() {
                 </div>
               </div>
             )}
-
             {/* Banner promocional */}
             <div className="mt-8 bg-gradient-to-r from-sky-600 via-cyan-600 to-blue-700 rounded-xl p-8 text-white shadow-xl shadow-sky-300/30 border border-cyan-400">
               <div className="flex items-center justify-between">
@@ -610,7 +730,7 @@ export default function ReservaHist() {
           </div>
         </div>
       </div>
-
+      )} {/* Closing for main content conditional */}
       {/* Modal de Confirmação de Cancelamento */}
       {showConfirmModal && selectedReserva && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -628,13 +748,11 @@ export default function ReservaHist() {
                   );
                 })()}
               </div>
-
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
                 <p className="text-sm text-amber-800">
                   <span className="font-semibold">⚠️ Atenção:</span> Esta ação não pode ser desfeita. O cancelamento pode estar sujeito a taxas conforme a política de cancelamento.
                 </p>
               </div>
-
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowConfirmModal(false)}
@@ -653,7 +771,6 @@ export default function ReservaHist() {
           </div>
         </div>
       )}
-
       {/* Modal de Cancelamento */}
       {showCancelModal && selectedReserva && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -678,7 +795,6 @@ export default function ReservaHist() {
                   ✕
                 </button>
               </div>
-
               <form onSubmit={handleCancelSubmit} className="space-y-5">
                 <div>
                   <label className="block text-slate-700 font-semibold mb-2">
@@ -694,7 +810,6 @@ export default function ReservaHist() {
                     required
                   />
                 </div>
-
                 <div>
                   <label className="block text-slate-700 font-semibold mb-2">
                     Data <span className="text-red-500">*</span>
@@ -708,7 +823,6 @@ export default function ReservaHist() {
                     required
                   />
                 </div>
-
                 <div>
                   <label className="block text-slate-700 font-semibold mb-2">
                     Motivo do Cancelamento <span className="text-red-500">*</span>
@@ -728,7 +842,6 @@ export default function ReservaHist() {
                     ))}
                   </select>
                 </div>
-
                 {cancelData.motivo === 'Outro motivo' && (
                   <div>
                     <label className="block text-slate-700 font-semibold mb-2">
@@ -745,13 +858,11 @@ export default function ReservaHist() {
                     />
                   </div>
                 )}
-
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-4">
                   <p className="text-sm text-amber-800">
                     <span className="font-semibold">⚠️ Atenção:</span> O cancelamento pode estar sujeito a taxas conforme a política de cancelamento do pacote.
                   </p>
                 </div>
-
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
@@ -772,7 +883,6 @@ export default function ReservaHist() {
           </div>
         </div>
       )}
-
       {/* Modal de Avaliação */}
       {showRatingModal && selectedReserva && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -797,7 +907,6 @@ export default function ReservaHist() {
                   ✕
                 </button>
               </div>
-
               <form onSubmit={handleRatingSubmit} className="space-y-6">
                 {/* Avaliação Geral */}
                 <div>
@@ -806,7 +915,6 @@ export default function ReservaHist() {
                   </label>
                   {renderStars(ratingData.geral, (rating) => handleRatingChange('geral', rating))}
                 </div>
-
                 {/* Avaliações Específicas */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -826,7 +934,6 @@ export default function ReservaHist() {
                     {renderStars(ratingData.custoBeneficio, (rating) => handleRatingChange('custoBeneficio', rating))}
                   </div>
                 </div>
-
                 {/* Comentário */}
                 <div>
                   <label className="block text-slate-700 font-semibold mb-2">
@@ -840,13 +947,11 @@ export default function ReservaHist() {
                     placeholder="Conte-nos sobre sua experiência..."
                   />
                 </div>
-
                 <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 border-2 border-emerald-200 rounded-xl p-4">
                   <p className="text-sm text-emerald-800">
                     <span className="font-semibold">💚 Sua opinião é importante!</span> Sua avaliação ajuda outros viajantes a fazerem melhores escolhas.
                   </p>
                 </div>
-
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
