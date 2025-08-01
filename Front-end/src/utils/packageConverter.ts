@@ -1,4 +1,5 @@
 import type { PacoteAPI } from '../api/pacotes';
+import type { HotelAPI } from '../api/hoteis';
 import type { PackageProps } from '../pages/PacotesGerais/types';
 
 // Imagens padrão para os pacotes (podem ser expandidas conforme necessário)
@@ -11,7 +12,40 @@ const defaultImages = [
   'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
 ];
 
-// Comodidades padrão baseadas no tipo de destino
+// Função para converter comodidades do hotel (booleanos) para formato frontend
+const getHotelAmenities = (hotel?: HotelAPI) => {
+  const amenities = [];
+  
+  if (!hotel) {
+    // Se não tem hotel, usar comodidades padrão baseadas no destino
+    return [];
+  }
+  
+  // Converter booleanos do hotel para objetos com ícone
+  if (hotel.wifi) {
+    amenities.push({ name: "Wi-Fi Gratuito", icon: "wifi" });
+  }
+  
+  if (hotel.estacionamento) {
+    amenities.push({ name: "Estacionamento", icon: "car" });
+  }
+  
+  if (hotel.piscina) {
+    amenities.push({ name: "Piscina", icon: "swimming-pool" });
+  }
+  
+  if (hotel.petFriendly) {
+    amenities.push({ name: "Pet Friendly", icon: "heart" });
+  }
+  
+  // Adicionar algumas comodidades padrão
+  amenities.push({ name: "Café da Manhã", icon: "coffee" });
+  amenities.push({ name: "Ar Condicionado", icon: "snowflake" });
+  
+  return amenities;
+};
+
+// Comodidades padrão baseadas no tipo de destino (fallback)
 const getDefaultAmenities = (destino: string) => {
   const destinoLower = destino.toLowerCase();
   
@@ -66,23 +100,39 @@ const getDefaultHighlights = (duracao: number, destino: string) => {
   return highlights;
 };
 
-// Função para gerar rating baseado no preço e destino
-const generateRating = (valorTotal: number, destino: string): number => {
-  // Rating base entre 3.5 e 5.0
-  let rating = 3.5;
+// Função para calcular rating baseado nas avaliações reais do hotel
+const calculateRating = (hotel?: HotelAPI): number => {
+  console.log('⭐ Calculando rating para hotel:', hotel?.nome || 'Hotel não informado');
   
-  // Aumentar rating para destinos mais caros (assumindo maior qualidade)
-  if (valorTotal > 5000) rating += 0.8;
-  else if (valorTotal > 3000) rating += 0.5;
-  else if (valorTotal > 1500) rating += 0.3;
-  
-  // Adicionar variação baseada no destino
-  if (destino.toLowerCase().includes('luxury') || destino.toLowerCase().includes('resort')) {
-    rating += 0.4;
+  // Se não tem hotel ou não tem avaliações, usar rating padrão
+  if (!hotel) {
+    console.log('❌ Hotel não fornecido - usando rating padrão 4.0');
+    return 4.0;
   }
   
-  // Garantir que não passe de 5.0
-  return Math.min(rating, 5.0);
+  if (!hotel.avaliacoes) {
+    console.log('❌ Hotel sem campo avaliacoes - usando rating padrão 4.0');
+    return 4.0;
+  }
+  
+  if (hotel.avaliacoes.length === 0) {
+    console.log('❌ Hotel sem avaliações - usando rating padrão 4.0');
+    return 4.0;
+  }
+  
+  console.log(`✅ Hotel com ${hotel.avaliacoes.length} avaliações:`, hotel.avaliacoes.map(a => `Nota: ${a.nota}`));
+  
+  // Calcular média das avaliações
+  const somaNotas = hotel.avaliacoes.reduce((soma, avaliacao) => soma + avaliacao.nota, 0);
+  const mediaNotas = somaNotas / hotel.avaliacoes.length;
+  
+  console.log(`📊 Média calculada: ${mediaNotas.toFixed(2)}`);
+  
+  // Garantir que a nota está entre 0 e 5
+  const finalRating = Math.max(0, Math.min(5, mediaNotas));
+  console.log(`⭐ Rating final: ${finalRating}`);
+  
+  return finalRating;
 };
 
 // Função para formatar duração no padrão hoteleiro (dias/noites)
@@ -102,24 +152,35 @@ const formatDuration = (duracao: number): string => {
 
 // Função principal para converter PacoteAPI para PackageProps
 export const convertAPIToPackage = (pacoteAPI: PacoteAPI, index: number = 0): PackageProps => {
-  const rating = generateRating(pacoteAPI.valorTotal, pacoteAPI.destino);
-  const amenities = getDefaultAmenities(pacoteAPI.destino);
+  const rating = calculateRating(pacoteAPI.hotel);
+  
+  // Usar comodidades do hotel se disponível, senão usar padrão baseado no destino
+  const amenities = pacoteAPI.hotel 
+    ? getHotelAmenities(pacoteAPI.hotel)
+    : getDefaultAmenities(pacoteAPI.destino);
+    
   const highlights = getDefaultHighlights(pacoteAPI.duracao, pacoteAPI.destino);
   
   // Determinar se há desconto (removido - será implementado no backend)
   const discount = undefined;
   const originalPrice = undefined;
   
+  // Usar nome do hotel real se disponível
+  const hotelName = pacoteAPI.hotel?.nome || `Hotel ${pacoteAPI.destino.split(' ')[0]} Premium`;
+  
+  // Usar imagem do hotel se disponível, senão usar padrão
+  const image = pacoteAPI.hotel?.imagens || defaultImages[index % defaultImages.length];
+  
   return {
     id: pacoteAPI.pacoteId,
     title: pacoteAPI.titulo,
-    hotelName: `Hotel ${pacoteAPI.destino.split(' ')[0]} Premium`, // Nome de hotel simulado
+    hotelName,
     price: `R$ ${pacoteAPI.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
     originalPrice,
     duration: formatDuration(pacoteAPI.duracao),
-    image: defaultImages[index % defaultImages.length],
+    image,
     rating: Math.round(rating * 10) / 10, // Arredondar para 1 casa decimal
-    reviewCount: Math.floor(Math.random() * 500) + 50, // Reviews simuladas
+    reviewCount: pacoteAPI.hotel?.avaliacoes?.length || 0, // Usar contagem real de avaliações
     location: pacoteAPI.destino,
     amenities,
     highlights,

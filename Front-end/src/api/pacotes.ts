@@ -1,4 +1,5 @@
 import { apiRequest } from './config';
+import type { HotelAPI } from './hoteis';
 
 // Interface que corresponde ao modelo Pacote do backend
 export interface PacoteAPI {
@@ -9,6 +10,8 @@ export interface PacoteAPI {
   duracao: number;
   quantidadeDePessoas: number;
   valorTotal: number;
+  hotelId: number; // Campo que vem do backend
+  hotel?: HotelAPI; // Relacionamento opcional (caso seja incluído)
 }
 
 // Interface para filtros de busca
@@ -24,7 +27,9 @@ export interface PacoteFiltros {
 export const getAllPacotes = async (): Promise<PacoteAPI[]> => {
   try {
     const response = await apiRequest('/pacotes');
-    console.log('Pacotes recebidos da API:', response);
+    console.log(' Pacotes recebidos da API:', response);
+    console.log(' Estrutura do primeiro pacote:', response[0]);
+    console.log(' Hotel incluído?', response[0]?.hotel ? 'SIM' : 'NÃO');
     return response;
   } catch (error) {
     console.error('Erro ao buscar pacotes:', error);
