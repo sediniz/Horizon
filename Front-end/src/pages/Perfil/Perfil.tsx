@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Simulando dados do usuário baseado no modelo Usuario.cs
 interface UsuarioData {
@@ -15,27 +16,65 @@ interface UsuarioData {
 // Dados mockados do usuário (em um projeto real, viria de uma API)
 const mockUserData: UsuarioData = {
   usuarioId: 1,
-  nome: "João Silva",
-  email: "joao.silva@email.com",
-  telefone: "(11) 99999-9999",
-  cpfPassaporte: "123.456.789-00",
+  nome: "Usuário Anônimo",
+  email: "usuario@exemplo.com",
+  telefone: "Não informado",
+  cpfPassaporte: "Não informado",
   tipoUsuario: "Cliente"
 };
 
 function Perfil() {
-  const [userData, setUserData] = useState<UsuarioData>(mockUserData);
+  const { usuario, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Usar dados reais do usuário logado ou fallback para dados vazios
+  const realUserData: UsuarioData = usuario ? {
+    usuarioId: usuario.usuarioId || 0,
+    nome: usuario.nome || "Nome não informado",
+    email: usuario.email || "email@exemplo.com",
+    telefone: usuario.telefone || "Não informado",
+    cpfPassaporte: usuario.cpfPassaporte || "Não informado",
+    tipoUsuario: usuario.tipoUsuario || "Cliente"
+  } : mockUserData;
+
+  const [userData, setUserData] = useState<UsuarioData>(realUserData);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<UsuarioData>(mockUserData);
+  const [editForm, setEditForm] = useState<UsuarioData>(realUserData);
   const [isAccountSettingsExpanded, setIsAccountSettingsExpanded] = useState(false);
 
+  // Atualizar dados quando o usuário mudar (login/logout)
+  useEffect(() => {
+    if (usuario) {
+      const updatedUserData: UsuarioData = {
+        usuarioId: usuario.usuarioId || 0,
+        nome: usuario.nome || "Nome não informado",
+        email: usuario.email || "email@exemplo.com",
+        telefone: usuario.telefone || "Não informado",
+        cpfPassaporte: usuario.cpfPassaporte || "Não informado",
+        tipoUsuario: usuario.tipoUsuario || "Cliente"
+      };
+      setUserData(updatedUserData);
+      setEditForm(updatedUserData);
+    } else {
+      // Se não há usuário logado, redirecionar para login
+      navigate('/login');
+    }
+  }, [usuario, navigate]);
+
   // Função para gerar iniciais do nome
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined | null) => {
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return 'U'; // Fallback para "User"
+    }
+    
     return name
+      .trim()
       .split(' ')
+      .filter(word => word.length > 0) // Remove palavras vazias
       .map(word => word.charAt(0))
       .join('')
       .toUpperCase()
-      .slice(0, 2);
+      .slice(0, 2) || 'U'; // Fallback caso não consiga gerar iniciais
   };
 
   // Função para lidar com mudanças no formulário
@@ -48,10 +87,24 @@ function Perfil() {
   };
 
   // Função para salvar alterações
-  const handleSave = () => {
-    setUserData(editForm);
-    setIsEditing(false);
-    // Aqui você faria a chamada para a API para salvar os dados
+  const handleSave = async () => {
+    try {
+      // Aqui você faria a chamada para a API para salvar os dados
+      // const response = await fetch('/api/usuarios/atualizar', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(editForm)
+      // });
+      
+      // Por enquanto, apenas atualizar localmente
+      setUserData(editForm);
+      setIsEditing(false);
+      
+      // TODO: Após implementar a API, também atualizar o contexto de autenticação
+      console.log('Dados atualizados:', editForm);
+    } catch (error) {
+      console.error('Erro ao salvar dados:', error);
+    }
   };
 
   // Função para cancelar edição
@@ -59,6 +112,24 @@ function Perfil() {
     setEditForm(userData);
     setIsEditing(false);
   };
+
+  // Se não há usuário logado, mostrar mensagem de login necessário
+  if (!usuario) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Login Necessário</h2>
+          <p className="text-gray-600 mb-6">Você precisa estar logado para ver seu perfil.</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Fazer Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="Perfil min-h-screen bg-gray-50">
@@ -265,7 +336,13 @@ function Perfil() {
 
             {/* Logout Button */}
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <button className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+              <button 
+                onClick={() => {
+                  usuario && logout();
+                  navigate('/');
+                }}
+                className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
