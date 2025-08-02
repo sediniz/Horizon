@@ -41,7 +41,10 @@ namespace Horizon.Controllers
             {
                 new Claim(ClaimTypes.Name, usuario.Nome ?? usuario.Email ?? ""),
                 new Claim(ClaimTypes.NameIdentifier, usuario.UsuarioId.ToString()),
-                new Claim(ClaimTypes.Role, usuario.TipoUsuario ?? "Usuario")
+                new Claim(ClaimTypes.Role, usuario.TipoUsuario ?? "Usuario"),
+                new Claim(ClaimTypes.Email, usuario.Email ?? ""),
+                new Claim("telefone", usuario.Telefone ?? ""),
+                new Claim("cpfPassaporte", usuario.CpfPassaporte ?? "")
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtKey));

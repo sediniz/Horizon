@@ -6,6 +6,8 @@ interface UsuarioAuth {
   usuarioId: number;
   nome: string;
   email: string;
+  telefone: string;
+  cpfPassaporte: string;
   tipoUsuario: string;
 }
 
@@ -80,13 +82,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // Decodificar o token JWT para extrair informações do usuário
         const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('Payload do JWT:', payload); // Debug
         
         const userData: UsuarioAuth = {
-          usuarioId: parseInt(payload.nameid),
-          nome: payload.unique_name,
-          email: email,
-          tipoUsuario: payload.role,
+          usuarioId: parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]) || 0,
+          nome: payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || 'Usuário',
+          email: payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || email || 'email@exemplo.com',
+          telefone: payload.telefone || '',
+          cpfPassaporte: payload.cpfPassaporte || '',
+          tipoUsuario: payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || 'Cliente',
         };
+
+        console.log('Dados do usuário extraídos:', userData); // Debug
 
         // Salvar no localStorage
         localStorage.setItem('horizon_token', token);

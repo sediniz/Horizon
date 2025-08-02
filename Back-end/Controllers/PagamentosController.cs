@@ -18,10 +18,18 @@ namespace Horizon.Controllers
         private readonly IPacoteService _pacoteService;
         private readonly IReservaService _reservaService;
 
-        public PagamentosController(IPagamentoService pagamentoService, IStripeService stripeService)
+        public PagamentosController(
+            IPagamentoService pagamentoService, 
+            IStripeService stripeService,
+            IUsuarioService usuarioService,
+            IPacoteService pacoteService,
+            IReservaService reservaService)
         {
             _pagamentoService = pagamentoService;
             _stripeService = stripeService;
+            _usuarioService = usuarioService;
+            _pacoteService = pacoteService;
+            _reservaService = reservaService;
         }
 
         [HttpGet]
@@ -55,7 +63,7 @@ namespace Horizon.Controllers
         {
             if (id != pagamento.PagamentoId)
             {
-                return BadRequest("ID não corresponde ao pagamento informado.");
+                return BadRequest("ID nï¿½o corresponde ao pagamento informado.");
             }
             var existingPagamento = await _pagamentoService.GetByIdAsync(id);
             if (existingPagamento == null)
@@ -96,7 +104,7 @@ namespace Horizon.Controllers
                 var pagamento = new Pagamento
                 {
                     ReservaId = request.ReservaId,
-                    TipoPagamento = request.TipoPagamento ?? "Cartão de Crédito",
+                    TipoPagamento = request.TipoPagamento ?? "Cartï¿½o de Crï¿½dito",
                     StatusPagamento = "Pendente",
                     ValorPagamento = request.ValorTotal,
                     DataPagamento = DateTime.Now,
@@ -124,12 +132,12 @@ namespace Horizon.Controllers
             var pagamento = await _pagamentoService.GetByIdAsync(id);
             if (pagamento == null)
             {
-                return NotFound(new { mensagem = "Pagamento não encontrado" });
+                return NotFound(new { mensagem = "Pagamento nï¿½o encontrado" });
             }
 
             if (string.IsNullOrEmpty(pagamento.StripePaymentIntentId))
             {
-                return BadRequest(new { mensagem = "Este pagamento não possui um ID de intent do Stripe" });
+                return BadRequest(new { mensagem = "Este pagamento nï¿½o possui um ID de intent do Stripe" });
             }
 
             try
@@ -146,7 +154,7 @@ namespace Horizon.Controllers
                 }
                 else
                 {
-                    return Ok(new { mensagem = "Pagamento ainda não foi processado ou foi recusado", status = intent.Status });
+                    return Ok(new { mensagem = "Pagamento ainda nï¿½o foi processado ou foi recusado", status = intent.Status });
                 }
             }
             catch (Exception ex)
@@ -198,23 +206,33 @@ namespace Horizon.Controllers
         {
             if (request == null)
             {
-                return BadRequest(new { mensagem = "Dados de pagamento inválidos" });
+                return BadRequest(new { mensagem = "Dados de pagamento invÃ¡lidos" });
             }
 
             try
             {
-                // Verificar se o usuário existe
-                var usuario = await _usuarioService.GetByIdAsync(int.Parse(request.UsuarioId));
-                if (usuario == null)
+                // Validar se o UsuarioId Ã© um nÃºmero vÃ¡lido
+                if (string.IsNullOrEmpty(request.UsuarioId) || !int.TryParse(request.UsuarioId, out int usuarioIdInt))
                 {
-                    return BadRequest(new { mensagem = "Usuário não encontrado" });
+                    return BadRequest(new { mensagem = $"ID do usuÃ¡rio invÃ¡lido. Recebido: '{request.UsuarioId}'. Esperado: um nÃºmero inteiro vÃ¡lido." });
                 }
 
-                // Obter informações do pacote
+                // Para usuÃ¡rio convidado (ID 1), permitir sem verificaÃ§Ã£o
+                // Para outros usuÃ¡rios, verificar se existe no sistema
+                if (usuarioIdInt != 1)
+                {
+                    var usuario = await _usuarioService.GetByIdAsync(usuarioIdInt);
+                    if (usuario == null)
+                    {
+                        return BadRequest(new { mensagem = $"UsuÃ¡rio com ID {usuarioIdInt} nÃ£o encontrado no sistema." });
+                    }
+                }
+
+                // Obter informaÃ§Ãµes do pacote
                 var pacote = await _pacoteService.GetByIdAsync(request.PacoteId);
                 if (pacote == null)
                 {
-                    return BadRequest(new { mensagem = "Pacote não encontrado" });
+                    return BadRequest(new { mensagem = "Pacote nÃ£o encontrado" });
                 }
 
                 // Converter data da string para DateTime
@@ -224,8 +242,7 @@ namespace Horizon.Controllers
                     dataInicio = DateTime.Now.AddDays(30); // Fallback: 30 dias a partir de hoje
                 }
 
-                // Calcular data de fim com base na duração do pacote
-                // Ou usar a duração personalizada se disponível
+                // Calcular data de fim com base na duraÃ§Ã£o do pacote
                 int duracao = request.Duracao > 0 ? request.Duracao : pacote.Duracao;
                 var dataFim = dataInicio.AddDays(duracao);
 
@@ -235,15 +252,15 @@ namespace Horizon.Controllers
                     Status = StatusReserva.Confirmada,
                     DataInicio = dataInicio,
                     DataFim = dataFim,
-                    UsuarioId = int.Parse(request.UsuarioId),
-                    HotelId = pacote.HotelId // Assumindo que o pacote tem um HotelId
+                    UsuarioId = usuarioIdInt,
+                    HotelId = pacote.HotelId
                 };
 
                 // Adicionar a reserva
                 await _reservaService.AddAsync(reserva);
                 await _reservaService.SaveChangesAsync();
 
-                // Criar um pagamento associado à reserva
+                // Criar um pagamento associado Ã  reserva
                 var pagamento = new Pagamento
                 {
                     ReservaId = reserva.ReservaId,
@@ -266,6 +283,7 @@ namespace Horizon.Controllers
                     valor = pagamento.ValorPagamento,
                     codigoPagamento = $"PAG{pagamento.PagamentoId}",
                     numeroPedido = $"RES{reserva.ReservaId}",
+                    reservaId = reserva.ReservaId,
                     message = "Pagamento processado com sucesso"
                 });
             }
