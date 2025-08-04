@@ -522,7 +522,7 @@ export default function ReservaHist() {
               <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-white/30">
                 <div className="flex items-center space-x-2 mb-4">
                   <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <path strokeLinecap="round" stroke-linejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   <h3 className="font-bold text-gray-800">Ações Rápidas</h3>
                 </div>
@@ -577,7 +577,9 @@ export default function ReservaHist() {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 pb-4 border-b border-white/20">
                       <div className="flex items-center gap-3 mb-2 sm:mb-0">
                         <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">{reserva.codigo.slice(-3)}</span>
+                          <span className="text-white font-bold text-sm">
+                            {reserva.codigo ? reserva.codigo.slice(-3) : '---'}
+                          </span>
                         </div>
                         <div>
                           <h3 className="text-lg font-bold text-gray-800">{reserva.hotel}</h3>
@@ -714,7 +716,7 @@ export default function ReservaHist() {
                           <div className="text-right">
                             <div className="text-sm text-gray-600 mb-1">Valor Total</div>
                             <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                              R$ {reserva.valor.toLocaleString()}
+                              R$ {Number.isFinite(reserva.valor) ? reserva.valor.toLocaleString() : '--'}
                             </div>
                             <div className="text-xs text-gray-500">Para {reserva.pessoas} pessoas</div>
                           </div>
