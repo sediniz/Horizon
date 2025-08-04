@@ -24,13 +24,27 @@ namespace Horizon.Models
         [Required]
         public DateTime DataFim { get; set; }
 
+        [Required]
+        public DateTime DataReserva { get; set; } = DateTime.Now;
+
+        public DateTime? DataViagem { get; set; }
+
+        public int QuantidadePessoas { get; set; } = 1;
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal ValorTotal { get; set; }
+
         [ForeignKey("Usuario")]
         public int UsuarioId { get; set; }
         public Usuario? Usuario { get; set; }
 
         [ForeignKey("Hotel")]
-        public int HotelId { get; set; }
+        public int? HotelId { get; set; }
         public Hotel? Hotel { get; set; }
+
+        [ForeignKey("Pacote")]
+        public int? PacoteId { get; set; }
+        public Pacote? Pacote { get; set; }
 
         public ICollection<Pagamento>? Pagamentos { get; set; }
     }
