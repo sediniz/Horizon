@@ -33,6 +33,10 @@ export interface HotelAPI {
   petFriendly: boolean;
   piscina: boolean;
   wifi: boolean;
+  cafeDaManha: boolean;
+  almoco: boolean;
+  jantar: boolean;
+  allInclusive: boolean;
   datasDisponiveis: string;
   valorDiaria: number;
   imagens: string;
@@ -103,6 +107,7 @@ export const createHotel = async (hotel: Omit<HotelAPI, 'hotelId'>): Promise<Hot
 // Função para atualizar um hotel (admin)
 export const updateHotel = async (id: number, hotel: Partial<HotelAPI>): Promise<HotelAPI> => {
   try {
+    console.log(`🔄 Atualizando hotel ${id} com dados:`, hotel);
     const response = await apiRequest(`/hoteis/${id}`, {
       method: 'PUT',
       data: hotel,
@@ -111,6 +116,7 @@ export const updateHotel = async (id: number, hotel: Partial<HotelAPI>): Promise
     return response;
   } catch (error) {
     console.error(`Erro ao atualizar hotel ${id}:`, error);
+    console.error('Dados enviados:', hotel);
     throw new Error('Falha ao atualizar hotel');
   }
 };
@@ -125,5 +131,41 @@ export const deleteHotel = async (id: number): Promise<void> => {
   } catch (error) {
     console.error(`Erro ao deletar hotel ${id}:`, error);
     throw new Error('Falha ao deletar hotel');
+  }
+};
+
+// Função para obter comodidades disponíveis baseadas nos hotéis do banco
+export const getAvailableAmenities = async () => {
+  try {
+    const hoteis = await getAllHoteis();
+    
+    // Definir as comodidades com seus ícones correspondentes
+    const amenityMap = [
+      { key: 'wifi', name: 'Wi-Fi Gratuito', icon: 'wifi' },
+      { key: 'estacionamento', name: 'Estacionamento', icon: 'car' },
+      { key: 'piscina', name: 'Piscina', icon: 'swimming-pool' },
+      { key: 'petFriendly', name: 'Pet Friendly', icon: 'heart' },
+      { key: 'cafeDaManha', name: 'Café da Manhã', icon: 'coffee' },
+      { key: 'almoco', name: 'Almoço', icon: 'utensils' },
+      { key: 'jantar', name: 'Jantar', icon: 'utensils' },
+      { key: 'allInclusive', name: 'All Inclusive', icon: 'star' }
+    ];
+    
+    // Verificar quais comodidades estão disponíveis nos hotéis
+    const availableAmenities = amenityMap.filter(amenity => 
+      hoteis.some(hotel => hotel[amenity.key as keyof HotelAPI] === true)
+    );
+    
+    console.log('🏨 Comodidades disponíveis nos hotéis:', availableAmenities);
+    return availableAmenities;
+  } catch (error) {
+    console.error('Erro ao obter comodidades:', error);
+    // Retornar comodidades padrão em caso de erro
+    return [
+      { name: 'Wi-Fi Gratuito', icon: 'wifi' },
+      { name: 'Estacionamento', icon: 'car' },
+      { name: 'Piscina', icon: 'swimming-pool' },
+      { name: 'Pet Friendly', icon: 'heart' }
+    ];
   }
 };

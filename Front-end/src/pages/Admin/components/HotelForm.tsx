@@ -23,6 +23,10 @@ const HotelForm: React.FC<HotelFormProps> = ({
     petFriendly: initialData.petFriendly || false,
     piscina: initialData.piscina || false,
     wifi: initialData.wifi || true,
+    cafeDaManha: initialData.cafeDaManha || false,
+    almoco: initialData.almoco || false,
+    jantar: initialData.jantar || false,
+    allInclusive: initialData.allInclusive || false,
     valorDiaria: initialData.valorDiaria || 0,
     imagens: initialData.imagens || '',
     datasDisponiveis: initialData.datasDisponiveis || new Date().toISOString().split('T')[0],
@@ -215,6 +219,50 @@ const HotelForm: React.FC<HotelFormProps> = ({
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">Pet Friendly</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="cafeDaManha"
+                checked={formData.cafeDaManha}
+                onChange={handleCheckboxChange}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Café da Manhã</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="almoco"
+                checked={formData.almoco}
+                onChange={handleCheckboxChange}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Almoço</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="jantar"
+                checked={formData.jantar}
+                onChange={handleCheckboxChange}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Jantar</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="allInclusive"
+                checked={formData.allInclusive}
+                onChange={handleCheckboxChange}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">All Inclusive</span>
             </label>
           </div>
         </div>
