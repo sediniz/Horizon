@@ -17,7 +17,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  
+
   const [circlingPlaneStyle, setCirclingPlaneStyle] = useState({
     left: 0,
     top: 0,
@@ -127,21 +127,28 @@ const Header: React.FC = () => {
           <img ref={logoRef} src={HorizonLogoBorda} alt="Horizon - Expanda seus Horizontes" className="h-20 object-contain cursor-pointer" />
         </Link>
 
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-5 items-center">
           <Link to="/pacotes">
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2">
-    <FaGlobeAmericas className="w-5 h-5" />
-    Viagens
-  </button>
-</Link>
+            <button className="group relative bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative flex items-center gap-2">
+                <FaGlobeAmericas className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="tracking-wide">Viagens</span>
+              </div>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/0 via-white/10 to-white/0 group-hover:animate-pulse"></div>
+            </button>
+          </Link>
 
           <Link to="/reservas">
-  <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2">
-    <MdBookmarkBorder className="w-5 h-5" />
-    Reservas
-  </button>
-</Link>
-
+            <button className="group relative bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 text-white px-6 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative flex items-center gap-2">
+                <MdBookmarkBorder className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                <span className="tracking-wide">Reservas</span>
+              </div>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/0 via-white/10 to-white/0 group-hover:animate-pulse"></div>
+            </button>
+          </Link>
         </div>
 
         {/* Botão de Perfil com Dropdown para usuário logado */}
@@ -150,10 +157,14 @@ const Header: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2"
+                className="group relative bg-gradient-to-r from-violet-500 via-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20 backdrop-blur-sm"
               >
-                <FaUser className="w-5 h-5" />
-                {usuario?.nome || 'Perfil'}
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-400 via-purple-500 to-indigo-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center gap-2">
+                  <FaUser className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="tracking-wide">{usuario?.nome || 'Perfil'}</span>
+                </div>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/0 via-white/10 to-white/0 group-hover:animate-pulse"></div>
               </button>
 
               {/* Dropdown Menu */}
@@ -163,7 +174,7 @@ const Header: React.FC = () => {
                     <p className="text-sm font-medium text-gray-800">{usuario?.nome}</p>
                     <p className="text-sm text-gray-600">{usuario?.email}</p>
                   </div>
-                  
+
                   <Link 
                     to="/perfil" 
                     onClick={() => setShowUserDropdown(false)}
@@ -187,7 +198,7 @@ const Header: React.FC = () => {
                   </Link>
 
                   <hr className="my-2" />
-                  
+
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -205,10 +216,14 @@ const Header: React.FC = () => {
           ) : (
             <button
               onClick={handlePerfilClick}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2"
+              className="group relative bg-gradient-to-r from-violet-500 via-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20 backdrop-blur-sm"
             >
-              <FaUser className="w-5 h-5" />
-              Entrar
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-400 via-purple-500 to-indigo-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative flex items-center gap-2">
+                <FaUser className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                <span className="tracking-wide">Entrar</span>
+              </div>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/0 via-white/10 to-white/0 group-hover:animate-pulse"></div>
             </button>
           )}
         </div>

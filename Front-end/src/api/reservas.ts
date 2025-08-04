@@ -183,6 +183,17 @@ export const reservasApi = {
       throw new Error('Não foi possível reenviar a confirmação');
     }
   },
+  // Confirmar status da reserva
+  async confirmarStatus(reservaId: number): Promise<void> {
+    try {
+      await apiRequest(`/reservas/${reservaId}/confirmar-status`, {
+        method: 'POST'
+      });
+    } catch (error) {
+      console.error('Erro ao confirmar status:', error);
+      throw new Error('Não foi possível confirmar o status da reserva');
+    }
+  },
   // Baixar voucher da reserva
   async baixarVoucher(reservaId: number): Promise<Blob> {
     try {
