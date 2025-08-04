@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import LogoTexto from '../../assets/LogoTexto.png';
+import HorizonLogoBorda from '../../assets/HorizonLogoBorda.png';
 import planeIcon from '../../assets/aviao.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser } from "react-icons/fa";
@@ -124,7 +124,7 @@ const Header: React.FC = () => {
       {/* Conteúdo do header */}
       <div className="flex justify-between items-center relative">
         <Link to="/">
-          <img ref={logoRef} src={LogoTexto} alt="Horizon - Expanda seus Horizontes" className="h-20 object-contain cursor-pointer" />
+          <img ref={logoRef} src={HorizonLogoBorda} alt="Horizon - Expanda seus Horizontes" className="h-20 object-contain cursor-pointer" />
         </Link>
 
         <div className="flex gap-4 items-center">
