@@ -170,16 +170,16 @@ const Header: React.FC = () => {
           />
         </Link>
 
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center md:gap-4 gap-2 md:justify-center justify-start">
           <Link to="/pacotes">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold text-lg hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold text-lg hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer md:scale-100 scale-80 origin-right">
     <FaGlobeAmericas className="w-5 h-5 text-blue-600" />
     Viagens
   </div>
 </Link>
 
           <Link to="/reservas">
-  <div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold text-lg hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer">
+  <div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold text-lg hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer md:scale-100 scale-80 origin-left">
     <MdBookmarkBorder className="w-5 h-5 text-blue-600" />
     Reservas
   </div>
@@ -193,10 +193,10 @@ const Header: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white md:px-8 md:py-4 p-3 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center md:gap-2 gap-0 justify-center"
               >
                 <FaUser className="w-5 h-5" />
-                {usuario?.nome || 'Perfil'}
+                <span className="hidden md:inline">{usuario?.nome || 'Perfil'}</span>
               </button>
 
               {/* Dropdown Menu */}
@@ -248,10 +248,10 @@ const Header: React.FC = () => {
           ) : (
             <button
               onClick={handlePerfilClick}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center gap-2"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white md:px-8 md:py-4 p-3 rounded-full font-semibold text-lg hover:scale-105 transition-transform shadow-lg flex items-center md:gap-2 gap-0 justify-center"
             >
               <FaUser className="w-5 h-5" />
-              Entrar
+              <span className="hidden md:inline">Entrar</span>
             </button>
           )}
         </div>
