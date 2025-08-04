@@ -142,8 +142,23 @@ const calculateRating = (hotel?: HotelAPI): number => {
   console.log(`📈 É array?`, Array.isArray(hotel.avaliacoes));
   
   if (!hotel.avaliacoes) {
-    console.log('❌ Hotel sem campo avaliacoes - usando rating padrão 4.0');
-    return 4.0;
+    console.log('❌ Hotel sem campo avaliacoes - FAZENDO TESTE COM AVALIAÇÕES MOCK');
+    // TESTE: Vamos simular avaliações para ver se funciona
+    const avaliacoesTest = [
+      { nota: 4.5, comentario: 'Ótima localização!' },
+      { nota: 3.8, comentario: 'Bom custo-benefício' },
+      { nota: 5.0, comentario: 'Perfeito!' }
+    ];
+    
+    console.log('🧪 Usando avaliações de teste:', avaliacoesTest);
+    const somaNotas = avaliacoesTest.reduce((soma, av: any) => soma + av.nota, 0);
+    const mediaNotas = somaNotas / avaliacoesTest.length;
+    const finalRating = Math.max(0, Math.min(5, mediaNotas));
+    
+    console.log(`🧪 TESTE - Soma: ${somaNotas}, Média: ${mediaNotas.toFixed(2)}, Rating final: ${finalRating}`);
+    console.log('=== FIM TESTE ===\n');
+    
+    return finalRating; // Isso deve retornar ~4.43
   }
   
   if (hotel.avaliacoes.length === 0) {
