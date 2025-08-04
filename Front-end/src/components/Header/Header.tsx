@@ -38,7 +38,7 @@ const Header: React.FC = () => {
       if (logoRef.current) {
         const logoRect = logoRef.current.getBoundingClientRect();
         const logoCenterX = logoRect.left + logoRect.width / 2;
-        const logoCenterY = logoRect.top + logoRect.height / 2 + window.scrollY;
+        const logoCenterY = logoRect.top + logoRect.height / 2; // Removido window.scrollY
 
         // Movimento circular de dentro para fora (vertical)
         const x = logoCenterX + Math.cos(angle) * radiusX;
@@ -106,14 +106,13 @@ const Header: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full bg-white/20 backdrop-blur-md shadow-md py-4 px-6 z-50">
+    <div className="sticky top-0 w-full bg-white/20 backdrop-blur-md shadow-md py-4 px-6 z-50">
       {/* Avião circulando a logo */}
       <img
         src={planeIcon}
         alt="Avião Circulando"
-        className="absolute pointer-events-none z-50 opacity-75"
+        className="fixed pointer-events-none z-50 opacity-75"
         style={{
-          position: 'absolute',
           ...circlingPlaneStyle,
           width: '28px',
         }}

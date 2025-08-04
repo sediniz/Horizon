@@ -94,6 +94,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
       onClose();
       resetForm();
       setMode('login');
+      // Restore body scroll
+      document.body.style.overflow = 'unset';
     }
   };
 
@@ -103,34 +105,46 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     }
   };
 
+  // Prevent body scroll when modal is open
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   console.log(' Modal está aberto:', isOpen);
 
   return (
     <div 
-      className="fixed inset-0 z-40 p-4" 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4" 
       style={{ 
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.6)',
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
-        bottom: 0
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        overflowY: 'auto'
       }}
       onClick={handleBackdropClick}
     >
-      {/* Container centralizador */}
-      <div className="flex items-center justify-center min-h-screen">
-        {/* Modal */}
-        <div 
-          className="relative bg-white rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto transform"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: 'relative',
-            zIndex: 45
-          }}
-        >
+      {/* Modal */}
+      <div 
+        className="relative bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto transform"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          zIndex: 55,
+          margin: '2rem auto'
+        }}
+      >
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800">
@@ -318,7 +332,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
             )}
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
