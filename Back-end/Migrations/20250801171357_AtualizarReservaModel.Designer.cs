@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Horizon.Migrations
 {
     [DbContext(typeof(HorizonDbContext))]
-    [Migration("20250801124933_AlteracaoNoModels")]
-    partial class AlteracaoNoModels
+    [Migration("20250801171357_AtualizarReservaModel")]
+    partial class AtualizarReservaModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

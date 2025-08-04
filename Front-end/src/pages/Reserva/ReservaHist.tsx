@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Rating from '../../components/Rating/Rating';
 import { reservasApi } from '../../api/reservas';
 import type { Reserva, CancelamentoReserva, AvaliacaoReserva } from '../../api/reservas';
 export default function ReservaHist() {
+  const navigate = useNavigate();
   const [filtroStatus, setFiltroStatus] = useState('todas');
   const [filtroData, setFiltroData] = useState('todas');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState<number | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,12 @@ export default function ReservaHist() {
     setSelectedReserva(reservaId);
     setShowConfirmModal(true);
   };
+
+  // Handler para navegar ao pagamento
+  const handlePagamentoClick = (reservaId: number) => {
+    navigate('/pagamento', { state: { reservaId } });
+  };
+
   const handleConfirmCancel = () => {
     setShowConfirmModal(false);
     setShowCancelModal(true);
@@ -138,6 +147,34 @@ export default function ReservaHist() {
       alert('Erro ao enviar a avaliação. Tente novamente.');
     }
   };
+  // Handler para confirmar status da reserva
+  const handleConfirmarStatus = async (reservaId: number) => {
+    setSelectedReserva(reservaId);
+    setShowStatusModal(true);
+  };
+
+  // Handler para confirmar status no modal
+  const handleConfirmarStatusModal = async () => {
+    if (!selectedReserva) return;
+    
+    try {
+      const reserva = reservas.find(r => r.id === selectedReserva);
+      if (!reserva) {
+        alert('Reserva não encontrada.');
+        return;
+      }
+
+      // Simular chamada da API para confirmar status
+      await reservasApi.confirmarStatus(selectedReserva);
+      alert(`Status "${getStatusText(reserva.status)}" confirmado com sucesso!\nConfirmação enviada por email.`);
+      setShowStatusModal(false);
+      setSelectedReserva(null);
+    } catch (err) {
+      console.error('Erro ao confirmar status:', err);
+      alert('Erro ao confirmar status. Tente novamente.');
+    }
+  };
+
   // Handler para reenviar confirmação
   const handleReenviarConfirmacao = async (reservaId: number) => {
     try {
@@ -148,25 +185,128 @@ export default function ReservaHist() {
       alert('Erro ao reenviar confirmação. Tente novamente.');
     }
   };
-  // Handler para baixar voucher
+  // Handler para visualizar voucher
   const handleBaixarVoucher = async (reservaId: number) => {
     try {
-      const voucherBlob = await reservasApi.baixarVoucher(reservaId);
+      const reserva = reservas.find(r => r.id === reservaId);
+      if (!reserva) {
+        alert('Reserva não encontrada.');
+        return;
+      }
+
+      // Gerar comprovante em formato HTML
+      const comprovanteHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Comprovante de Reserva - ${reserva.codigo}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+            .comprovante { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+            .header { text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo { font-size: 28px; font-weight: bold; color: #3b82f6; margin-bottom: 10px; }
+            .titulo { font-size: 24px; color: #1f2937; margin-bottom: 5px; }
+            .codigo { font-size: 14px; color: #6b7280; }
+            .secao { margin-bottom: 25px; }
+            .secao-titulo { font-size: 18px; font-weight: bold; color: #374151; margin-bottom: 15px; border-left: 4px solid #3b82f6; padding-left: 15px; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+            .info-item { background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #e5e7eb; }
+            .info-label { font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+            .info-valor { font-size: 16px; color: #1f2937; font-weight: 600; }
+            .status { padding: 8px 16px; border-radius: 20px; font-weight: bold; text-align: center; }
+            .status-confirmada { background: #dcfce7; color: #166534; }
+            .status-pendente { background: #fef3c7; color: #92400e; }
+            .status-concluida { background: #dbeafe; color: #1e40af; }
+            .status-cancelada { background: #fee2e2; color: #dc2626; }
+            .valor-total { font-size: 24px; color: #059669; font-weight: bold; text-align: center; padding: 20px; background: #f0fdf4; border-radius: 10px; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+            .qr-placeholder { width: 80px; height: 80px; background: #f3f4f6; border: 2px dashed #d1d5db; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 10px; }
+            .voltar-btn { position: fixed; top: 20px; left: 20px; background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+            .voltar-btn:hover { background: #2563eb; }
+          </style>
+        </head>
+        <body>
+          <button class="voltar-btn" onclick="window.location.href='/reservas'">← Voltar para Reservas</button>
+          <div class="comprovante">
+            <div class="header">
+              <div class="logo">🌅 HORIZON VIAGENS</div>
+              <div class="titulo">Comprovante de Reserva</div>
+              <div class="codigo">Código: ${reserva.codigo}</div>
+            </div>
+
+            <div class="secao">
+              <div class="secao-titulo">📍 Informações da Viagem</div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-label">Destino</div>
+                  <div class="info-valor">${reserva.destino}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Hotel</div>
+                  <div class="info-valor">${reserva.hotel}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Data da Viagem</div>
+                  <div class="info-valor">${reserva.dataViagem}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Pessoas</div>
+                  <div class="info-valor">${reserva.pessoas} ${reserva.pessoas === 1 ? 'pessoa' : 'pessoas'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="secao">
+              <div class="secao-titulo">✈️ Detalhes do Voo</div>
+              <div class="info-item">
+                <div class="info-label">Rota</div>
+                <div class="info-valor">${reserva.voo || 'Não incluído'}</div>
+              </div>
+            </div>
+
+            <div class="secao">
+              <div class="secao-titulo">📋 Status da Reserva</div>
+              <div class="status status-${reserva.status}">${getStatusText(reserva.status).toUpperCase()}</div>
+            </div>
+
+            <div class="valor-total">
+              Valor Total: R$ ${reserva.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+
+            <div class="secao">
+              <div class="secao-titulo">📅 Informações da Reserva</div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-label">Data da Reserva</div>
+                  <div class="info-valor">${reserva.dataReserva}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Avaliação do Hotel</div>
+                  <div class="info-valor">${reserva.avaliacao || 'N/A'} ⭐ (${reserva.estrelas || 0} estrelas)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="footer">
+              <div class="qr-placeholder">QR CODE</div>
+              <p>Este comprovante foi gerado automaticamente em ${new Date().toLocaleString('pt-BR')}</p>
+              <p><strong>Horizon Viagens</strong> - Expanda seus Horizontes</p>
+              <p>Em caso de dúvidas, entre em contato: (11) 9999-9999 | contato@horizon.com</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Abrir comprovante na mesma janela
+      document.open();
+      document.write(comprovanteHTML);
+      document.close();
       
-      // Criar um link temporário para download
-      const url = window.URL.createObjectURL(voucherBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `voucher-reserva-${reservaId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      alert('Comprovante baixado com sucesso!');
     } catch (err) {
-      console.error('Erro ao baixar comprovante:', err);
-      alert('Erro ao baixar comprovante. Tente novamente.');
+      console.error('Erro ao gerar comprovante:', err);
+      alert('Erro ao gerar comprovante. Tente novamente.');
     }
   };
   const handleRatingChange = (field: keyof typeof ratingData, value: number | string) => {
@@ -656,8 +796,14 @@ export default function ReservaHist() {
                         {/* Valor e Ações */}
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pt-4 border-t border-white/20">
                           <div className="flex flex-wrap gap-2">
-                            <button className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
-                              Status
+                            <button 
+                              onClick={() => handleConfirmarStatus(reserva.id)}
+                              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Confirmar Status
                             </button>
                             {reserva.status === 'confirmada' && (
                               <>
@@ -686,7 +832,10 @@ export default function ReservaHist() {
                             )}
                             {reserva.status === 'pendente' && (
                               <>
-                                <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2">
+                                <button 
+                                  onClick={() => handlePagamentoClick(reserva.id)}
+                                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
+                                >
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
                                   </svg>
@@ -758,6 +907,67 @@ export default function ReservaHist() {
         </div>
       </div>
       )} {/* Closing for main content conditional */}
+      {/* Modal de Confirmação de Status */}
+      {showStatusModal && selectedReserva && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl shadow-indigo-200/50 border-t-4 border-t-indigo-500">
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="flex justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-16 text-indigo-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 mb-2">Confirmar Status da Reserva</h2>
+                {(() => {
+                  const reserva = reservas.find(r => r.id === selectedReserva);
+                  return reserva && (
+                    <div className="text-slate-600 space-y-2">
+                      <p>
+                        <span className="font-semibold">{reserva.hotel}</span> - {reserva.destino}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Código:</span> {reserva.codigo}
+                      </p>
+                      <div className="flex items-center justify-center gap-2 mt-3">
+                        <span className="text-sm font-medium">Status atual:</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(reserva.status)}`}>
+                          {getStatusText(reserva.status)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-6">
+                <p className="text-sm text-indigo-800 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4 text-indigo-600 flex-shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                  </svg>
+                  <span><span className="font-semibold">Confirmação por email:</span> Uma nova confirmação será enviada para seu email com todos os detalhes da reserva.</span>
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowStatusModal(false);
+                    setSelectedReserva(null);
+                  }}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleConfirmarStatusModal}
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-indigo-200"
+                >
+                  Confirmar Status
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Modal de Confirmação de Cancelamento */}
       {showConfirmModal && selectedReserva && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">

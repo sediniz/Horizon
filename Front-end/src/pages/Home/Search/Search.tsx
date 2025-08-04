@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaSearch } from "react-icons/fa";
 
 // Tipos para os dados do formulário
@@ -281,6 +282,7 @@ const InlineCalendar: React.FC<{
 };
 
 const Search: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<SearchFormData>({
     destination: '',
     checkIn: '',
@@ -355,8 +357,33 @@ const Search: React.FC = () => {
 
   // Função para buscar
   const handleSearch = () => {
-    console.log('Dados da busca:', formData);
-    alert(`Buscando por: ${formData.destination} | Check-in: ${formData.checkIn} | Check-out: ${formData.checkOut} | ${formData.rooms} quarto(s) | ${formData.adults} adulto(s) | ${formData.children} criança(s)`);
+    console.log('🔍 Dados da busca:', formData);
+    
+    // Validações básicas
+    if (!formData.destination) {
+      alert('Por favor, selecione um destino');
+      return;
+    }
+    
+    if (!formData.checkIn || !formData.checkOut) {
+      alert('Por favor, selecione as datas de check-in e check-out');
+      return;
+    }
+    
+    // Criar parâmetros URL com os dados do formulário
+    const searchParams = new URLSearchParams({
+      destino: formData.destination,
+      checkin: formData.checkIn,
+      checkout: formData.checkOut,
+      quartos: formData.rooms.toString(),
+      adultos: formData.adults.toString(),
+      criancas: formData.children.toString()
+    });
+    
+    console.log('🧳 Navegando para PacotesGerais com parâmetros:', searchParams.toString());
+    
+    // Navegar para a página de pacotes com os parâmetros
+    navigate(`/pacotes?${searchParams.toString()}`);
   };
 
   // Fechar dropdowns quando clicar fora
