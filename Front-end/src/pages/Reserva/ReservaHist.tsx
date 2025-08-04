@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Rating from '../../components/Rating/Rating';
 import { reservasApi } from '../../api/reservas';
 import type { Reserva, CancelamentoReserva, AvaliacaoReserva } from '../../api/reservas';
 export default function ReservaHist() {
+  const navigate = useNavigate();
   const [filtroStatus, setFiltroStatus] = useState('todas');
   const [filtroData, setFiltroData] = useState('todas');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState<number | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,12 @@ export default function ReservaHist() {
     setSelectedReserva(reservaId);
     setShowConfirmModal(true);
   };
+
+  // Handler para navegar ao pagamento
+  const handlePagamentoClick = (reservaId: number) => {
+    navigate('/pagamento', { state: { reservaId } });
+  };
+
   const handleConfirmCancel = () => {
     setShowConfirmModal(false);
     setShowCancelModal(true);
@@ -140,27 +149,26 @@ export default function ReservaHist() {
   };
   // Handler para confirmar status da reserva
   const handleConfirmarStatus = async (reservaId: number) => {
+    setSelectedReserva(reservaId);
+    setShowStatusModal(true);
+  };
+
+  // Handler para confirmar status no modal
+  const handleConfirmarStatusModal = async () => {
+    if (!selectedReserva) return;
+    
     try {
-      const reserva = reservas.find(r => r.id === reservaId);
+      const reserva = reservas.find(r => r.id === selectedReserva);
       if (!reserva) {
         alert('Reserva não encontrada.');
         return;
       }
 
-      const statusAtual = getStatusText(reserva.status);
-      const confirmacao = window.confirm(
-        `Confirmar o status atual da reserva?\n\n` +
-        `Reserva: ${reserva.hotel} - ${reserva.destino}\n` +
-        `Código: ${reserva.codigo}\n` +
-        `Status atual: ${statusAtual}\n\n` +
-        `Esta ação irá reenviar a confirmação por email.`
-      );
-
-      if (confirmacao) {
-        // Simular chamada da API para confirmar status
-        await reservasApi.confirmarStatus(reservaId);
-        alert(`Status "${statusAtual}" confirmado com sucesso!\nConfirmação enviada por email.`);
-      }
+      // Simular chamada da API para confirmar status
+      await reservasApi.confirmarStatus(selectedReserva);
+      alert(`Status "${getStatusText(reserva.status)}" confirmado com sucesso!\nConfirmação enviada por email.`);
+      setShowStatusModal(false);
+      setSelectedReserva(null);
     } catch (err) {
       console.error('Erro ao confirmar status:', err);
       alert('Erro ao confirmar status. Tente novamente.');
@@ -824,7 +832,10 @@ export default function ReservaHist() {
                             )}
                             {reserva.status === 'pendente' && (
                               <>
-                                <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2">
+                                <button 
+                                  onClick={() => handlePagamentoClick(reserva.id)}
+                                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
+                                >
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
                                   </svg>
@@ -896,6 +907,67 @@ export default function ReservaHist() {
         </div>
       </div>
       )} {/* Closing for main content conditional */}
+      {/* Modal de Confirmação de Status */}
+      {showStatusModal && selectedReserva && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl shadow-indigo-200/50 border-t-4 border-t-indigo-500">
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="flex justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-16 text-indigo-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 mb-2">Confirmar Status da Reserva</h2>
+                {(() => {
+                  const reserva = reservas.find(r => r.id === selectedReserva);
+                  return reserva && (
+                    <div className="text-slate-600 space-y-2">
+                      <p>
+                        <span className="font-semibold">{reserva.hotel}</span> - {reserva.destino}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Código:</span> {reserva.codigo}
+                      </p>
+                      <div className="flex items-center justify-center gap-2 mt-3">
+                        <span className="text-sm font-medium">Status atual:</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(reserva.status)}`}>
+                          {getStatusText(reserva.status)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-6">
+                <p className="text-sm text-indigo-800 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4 text-indigo-600 flex-shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                  </svg>
+                  <span><span className="font-semibold">Confirmação por email:</span> Uma nova confirmação será enviada para seu email com todos os detalhes da reserva.</span>
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowStatusModal(false);
+                    setSelectedReserva(null);
+                  }}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleConfirmarStatusModal}
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-indigo-200"
+                >
+                  Confirmar Status
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Modal de Confirmação de Cancelamento */}
       {showConfirmModal && selectedReserva && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">

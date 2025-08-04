@@ -22,11 +22,13 @@ const useQuery = () => {
 // Componente principal que será envolvido pelo StripeProvider
 const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   const query = useQuery();
+  const location = useLocation();
   const navigate = useNavigate();
   const { usuario } = useAuth();
   
-  // Extrair parâmetros da URL
+  // Extrair parâmetros da URL e state
   const pacoteIdFromQuery = query.get('pacoteId');
+  const reservaIdFromState = location.state?.reservaId;
   const tituloFromQuery = query.get('titulo');
   const valorFromQuery = query.get('valor');
   const pessoasFromQuery = query.get('pessoas');
@@ -81,6 +83,13 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   
   // Usar o ID do usuário autenticado ou permitir compra como convidado
   const usuarioId = usuario?.usuarioId?.toString() || "1"; // Usar ID 1 como convidado
+
+  // Debug: mostrar reservaId recebida
+  useEffect(() => {
+    if (reservaIdFromState) {
+      console.log('ReservaId recebida para pagamento:', reservaIdFromState);
+    }
+  }, [reservaIdFromState]);
 
   useEffect(() => {
     if (pacoteId) {
