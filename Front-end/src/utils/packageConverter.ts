@@ -21,6 +21,17 @@ const getHotelAmenities = (hotel?: HotelAPI) => {
     return [];
   }
   
+  console.log(`🏨 Processando comodidades para hotel ${hotel.nome}:`, {
+    wifi: hotel.wifi,
+    estacionamento: hotel.estacionamento,
+    piscina: hotel.piscina,
+    petFriendly: hotel.petFriendly,
+    cafeDaManha: hotel.cafeDaManha,
+    almoco: hotel.almoco,
+    jantar: hotel.jantar,
+    allInclusive: hotel.allInclusive
+  });
+  
   // Converter booleanos do hotel para objetos com ícone
   if (hotel.wifi) {
     amenities.push({ name: "Wi-Fi Gratuito", icon: "wifi" });
@@ -38,9 +49,23 @@ const getHotelAmenities = (hotel?: HotelAPI) => {
     amenities.push({ name: "Pet Friendly", icon: "heart" });
   }
   
-  // Adicionar algumas comodidades padrão
-  amenities.push({ name: "Café da Manhã", icon: "coffee" });
-  amenities.push({ name: "Ar Condicionado", icon: "snowflake" });
+  if (hotel.cafeDaManha) {
+    amenities.push({ name: "Café da Manhã", icon: "coffee" });
+  }
+  
+  if (hotel.almoco) {
+    amenities.push({ name: "Almoço", icon: "utensils" });
+  }
+  
+  if (hotel.jantar) {
+    amenities.push({ name: "Jantar", icon: "utensils" });
+  }
+  
+  if (hotel.allInclusive) {
+    amenities.push({ name: "All Inclusive", icon: "star" });
+  }
+  
+  console.log(`✅ Comodidades convertidas para ${hotel.nome}:`, amenities);
   
   return amenities;
 };

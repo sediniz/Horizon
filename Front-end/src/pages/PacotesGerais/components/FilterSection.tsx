@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import IconRenderer from '../../../components/IconRenderer/IconRenderer';
-import { allAmenities, allLocations } from '../data/packagesData';
 
 interface FilterSectionProps {
   selectedLocation: string;
@@ -10,6 +9,8 @@ interface FilterSectionProps {
   onClearFilters: () => void;
   totalPackages: number;
   filteredCount: number;
+  availableAmenities?: {name: string, icon: string}[];
+  availableLocations?: string[];
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
@@ -19,7 +20,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   onAmenityToggle,
   onClearFilters,
   totalPackages,
-  filteredCount
+  filteredCount,
+  availableAmenities = [],
+  availableLocations = []
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -44,7 +47,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   }, []);
 
   // Filtrar localizações baseado no termo de busca
-  const filteredLocations = allLocations.filter(location =>
+  const filteredLocations = availableLocations.filter(location =>
     location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -171,7 +174,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 msOverflowStyle: 'none', /* IE e Edge */
               }}
             >
-              {allAmenities.map((amenity) => (
+              {availableAmenities.map((amenity) => (
                 <label 
                   key={amenity.name} 
                   className={`

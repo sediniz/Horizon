@@ -3,7 +3,7 @@ import PageHeader from './components/PageHeader';
 import FilterSection from './components/FilterSection';
 import PackageList from './components/PackageList';
 import { getAllPacotes } from '../../api/pacotes';
-import { getHoteisByIds } from '../../api/hoteis';
+import { getHoteisByIds, getAvailableAmenities } from '../../api/hoteis';
 import { convertAPIPackagesToPackages } from '../../utils/packageConverter';
 import type { FilterState } from './types';
 import type { PackageProps } from './types';
@@ -17,6 +17,8 @@ const PacotesGerais: React.FC = () => {
   const [packages, setPackages] = useState<PackageProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableAmenities, setAvailableAmenities] = useState<{name: string, icon: string}[]>([]);
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
 
   // Carregar pacotes da API
   useEffect(() => {
@@ -59,6 +61,17 @@ const PacotesGerais: React.FC = () => {
         console.log('✅ Pacotes convertidos:', convertedPackages);
         
         setPackages(convertedPackages);
+
+        // Carregar comodidades disponíveis baseadas nos hotéis reais
+        const amenities = await getAvailableAmenities();
+        setAvailableAmenities(amenities);
+        console.log('🏷️ Comodidades disponíveis:', amenities);
+
+        // Extrair localizações únicas dos hotéis
+        const locations = [...new Set(hoteis.map(h => h.localizacao))].filter(Boolean);
+        setAvailableLocations(locations);
+        console.log('📍 Localizações disponíveis:', locations);
+
       } catch (err) {
         console.error('❌ Erro ao carregar pacotes:', err);
         setError('Falha ao carregar pacotes. Tente novamente mais tarde.');
@@ -76,7 +89,10 @@ const PacotesGerais: React.FC = () => {
 
   // Filtrar pacotes baseado nos filtros selecionados
   const filteredPackages = useMemo(() => {
-    return packages.filter(pkg => {
+    console.log(' Aplicando filtros:', filters);
+    console.log(' Total de pacotes:', packages.length);
+    
+    const filtered = packages.filter(pkg => {
       // Filtro por localização
       const locationMatch = !filters.selectedLocation || pkg.location === filters.selectedLocation;
       
@@ -86,9 +102,14 @@ const PacotesGerais: React.FC = () => {
           pkg.amenities.some(pkgAmenity => pkgAmenity.name === amenity)
         );
       
+      console.log(`📍 Pacote ${pkg.title}:`, { locationMatch, amenityMatch });
+      
       return locationMatch && amenityMatch;
     });
-  }, [filters]);
+    
+    console.log('✅ Pacotes filtrados:', filtered.length);
+    return filtered;
+  }, [packages, filters]);
 
   // Funções para manipular filtros
   const handleLocationChange = (location: string) => {
@@ -155,6 +176,8 @@ const PacotesGerais: React.FC = () => {
             onClearFilters={handleClearFilters}
             totalPackages={packages.length}
             filteredCount={filteredPackages.length}
+            availableAmenities={availableAmenities}
+            availableLocations={availableLocations}
           />
           
           <PackageList
