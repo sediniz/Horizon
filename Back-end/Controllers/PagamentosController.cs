@@ -100,11 +100,20 @@ namespace Horizon.Controllers
             {
                 var intent = await _stripeService.CreatePaymentIntentAsync(request.ValorTotal);
                 
-                // Criar um registro de pagamento com status pendente
+                // Se não temos uma reserva, só retornamos o clientSecret sem salvar no banco
+                if (!request.ReservaId.HasValue)
+                {
+                    return Ok(new { 
+                        clientSecret = intent.ClientSecret,
+                        message = "Payment intent criado com sucesso"
+                    });
+                }
+                
+                // Se temos uma reserva, criar um registro de pagamento com status pendente
                 var pagamento = new Pagamento
                 {
-                    ReservaId = request.ReservaId,
-                    TipoPagamento = request.TipoPagamento ?? "Cart�o de Cr�dito",
+                    ReservaId = request.ReservaId.Value,
+                    TipoPagamento = request.TipoPagamento ?? "Cartão de Crédito",
                     StatusPagamento = "Pendente",
                     ValorPagamento = request.ValorTotal,
                     DataPagamento = DateTime.Now,
@@ -123,6 +132,89 @@ namespace Horizon.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { mensagem = "Erro ao criar intent de pagamento", erro = ex.Message });
+            }
+        }
+
+        [HttpPost("confirmar-pagamento-stripe")]
+        public async Task<IActionResult> ConfirmarPagamentoStripe([FromBody] ConfirmarPagamentoRequest request)
+        {
+            try
+            {
+                // Verificar o status do pagamento no Stripe
+                var intent = await _stripeService.GetPaymentIntentAsync(request.PaymentIntentId);
+                
+                if (intent.Status != "succeeded")
+                {
+                    return BadRequest(new { mensagem = "Pagamento não foi processado com sucesso" });
+                }
+
+                // Buscar dados do pacote se fornecido
+                Pacote? pacote = null;
+                if (request.PacoteId.HasValue)
+                {
+                    pacote = await _pacoteService.GetByIdAsync(request.PacoteId.Value);
+                    if (pacote == null)
+                    {
+                        return NotFound(new { mensagem = "Pacote não encontrado" });
+                    }
+                }
+
+                // Buscar usuário
+                var usuario = await _usuarioService.GetByIdAsync(request.UsuarioId);
+                if (usuario == null)
+                {
+                    return NotFound(new { mensagem = "Usuário não encontrado" });
+                }
+
+                // Criar uma nova reserva usando apenas as colunas que existem no banco
+                var dataViagem = request.DataViagem;
+                var duracaoPacote = pacote?.Duracao ?? 7; // Usar duração do pacote ou padrão de 7 dias
+                
+                Console.WriteLine($"💳 Processando pagamento para Pacote {request.PacoteId} - Hotel {pacote?.HotelId}");
+                Console.WriteLine($"📅 Datas: {dataViagem:yyyy-MM-dd} até {dataViagem.AddDays(duracaoPacote):yyyy-MM-dd}");
+                
+                var reserva = new Reserva
+                {
+                    UsuarioId = request.UsuarioId,
+                    DataInicio = dataViagem, // Data de início da viagem
+                    DataFim = dataViagem.AddDays(duracaoPacote), // Data de fim baseada na duração do pacote
+                    HotelId = pacote?.HotelId, // Incluir HotelId se tiver pacote
+                    DataReserva = DateTime.Now,
+                    DataViagem = request.DataViagem,
+                    QuantidadePessoas = request.QuantidadePessoas,
+                    ValorTotal = (decimal)intent.Amount / 100,
+                    PacoteId = request.PacoteId,
+                    Status = StatusReserva.Confirmada // Definir como confirmada quando pagamento é aprovado
+                };
+
+                await _reservaService.AddAsync(reserva);
+                await _reservaService.SaveChangesAsync();
+
+                // Criar registro de pagamento vinculado à reserva
+                var pagamento = new Pagamento
+                {
+                    ReservaId = reserva.ReservaId,
+                    TipoPagamento = "Cartão de Crédito",
+                    StatusPagamento = "Aprovado",
+                    ValorPagamento = (decimal)intent.Amount / 100,
+                    DataPagamento = DateTime.Now,
+                    StripePaymentIntentId = intent.Id,
+                    StripeClientSecret = intent.ClientSecret
+                };
+
+                await _pagamentoService.AddAsync(pagamento);
+                await _pagamentoService.SaveChangesAsync();
+
+                return Ok(new { 
+                    mensagem = "Pagamento confirmado e reserva criada com sucesso",
+                    reservaId = reserva.ReservaId,
+                    pagamentoId = pagamento.PagamentoId,
+                    valorPago = (decimal)intent.Amount / 100
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao confirmar pagamento", erro = ex.Message });
             }
         }
 

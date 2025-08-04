@@ -39,6 +39,15 @@ export interface PaymentIntentRequest {
   tipoPagamento?: string;
 }
 
+// Interface para confirmar pagamento
+export interface ConfirmarPagamentoRequest {
+  paymentIntentId: string;
+  usuarioId: number;
+  pacoteId?: number;
+  dataViagem: string;
+  quantidadePessoas: number;
+}
+
 // Criar intent de pagamento com Stripe
 export const criarIntentPagamento = async (valorTotal: number, pacoteId: number): Promise<{clientSecret: string}> => {
   try {
@@ -63,31 +72,35 @@ export const criarIntentPagamento = async (valorTotal: number, pacoteId: number)
   }
 };
 
-// Processar o pagamento com Stripe
-// Função para criar um mock de client secret para testes
-const gerarMockClientSecret = () => {
-  // Gerar um string aleatório que segue EXATAMENTE o formato exigido pelo Stripe
-  // O formato deve ser pi_XXXXXXXXXXXX_secret_XXXXXXXXXXXX onde X são caracteres alfanuméricos
-  // Limitando para exatamente 24 caracteres na primeira parte e 24 na segunda
-  const id = `pi_${"1".repeat(24)}`;
-  const secret = `secret_${"1".repeat(24)}`;
-  return `${id}_${secret}`;
-};
+// Confirmar pagamento e criar reserva
+export const confirmarPagamento = async (dados: ConfirmarPagamentoRequest): Promise<{
+  success: boolean, 
+  reservaId?: number,
+  mensagem?: string,
+  status?: string
+}> => {
+  try {
+    const response = await apiRequest('/pagamentos/confirmar-pagamento-stripe', {
+      method: 'POST',
+      data: dados,
+    });
 
-// Função mock para uso em desenvolvimento quando a API backend não está respondendo
-export const mockCriarIntentPagamento = async (valorTotal: number): Promise<{clientSecret: string}> => {
-  console.log('🔧 USANDO IMPLEMENTAÇÃO MOCK DO STRIPE - apenas para desenvolvimento', { valorTotal });
-  
-  // Simulamos uma chamada de API com um atraso
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  return { 
-    clientSecret: gerarMockClientSecret()
-  };
-};
+    console.log('🎯 Resposta do backend para confirmação:', response);
 
-// Importar a versão mock do processamento de pagamento
-import { mockProcessarPagamento } from './mockPagamentoApi';
+    return { 
+      success: true, 
+      reservaId: response.reservaId || response.data?.reservaId,
+      mensagem: response.mensagem || response.data?.mensagem || 'Pagamento confirmado com sucesso',
+      status: response.status || 'Confirmada'
+    };
+  } catch (error) {
+    console.error('Erro ao confirmar pagamento:', error);
+    return { 
+      success: false,
+      mensagem: 'Erro ao confirmar pagamento'
+    };
+  }
+};
 
 export const processarPagamento = async (dadosPagamento: DadosPagamento): Promise<RespostaPagamento> => {
   try {
@@ -132,12 +145,12 @@ export const processarPagamento = async (dadosPagamento: DadosPagamento): Promis
             message: 'Pagamento processado com sucesso'
           };
         } catch (defaultError) {
-          console.warn('❌ Falha no endpoint padrão, usando mock:', defaultError);
-          return await mockProcessarPagamento(dadosPagamento);
+          console.error('❌ Falha no endpoint padrão também:', defaultError);
+          throw new Error('Não foi possível processar o pagamento. Verifique sua conexão e tente novamente.');
         }
       } else {
-        console.warn('❌ Falha na API, usando mock:', apiError);
-        return await mockProcessarPagamento(dadosPagamento);
+        console.error('❌ Falha na API de pagamento:', apiError);
+        throw new Error('Serviço de pagamento indisponível. Tente novamente em alguns instantes.');
       }
     }
   } catch (error) {

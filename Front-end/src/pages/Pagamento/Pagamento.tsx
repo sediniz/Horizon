@@ -6,7 +6,6 @@ import {
 } from '../../api/pagamento';
 import { StripeProvider, useStripeContext } from '../../contexts/StripeContext';
 import StripeCardForm from '../../components/Pagamento/StripeCardForm';
-import MockStripeCardForm from '../../components/Pagamento/MockStripeCardForm';
 import type { DadosPagamento, DadosPacote } from '../../api/pagamento';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,6 +31,7 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   const valorFromQuery = query.get('valor');
   const pessoasFromQuery = query.get('pessoas');
   const dataIdaFromQuery = query.get('dataIda');
+  const dataVoltaFromQuery = query.get('dataVolta');
   const duracaoFromQuery = query.get('duracao');
   
   const [activeTab, setActiveTab] = useState('dados'); // 'dados', 'pagamento', 'confirmacao', 'sucesso'
@@ -496,22 +496,18 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
                       <h3 className="font-bold text-gray-800 mb-4">Dados do Cartão</h3>
                       
                       {stripeContext.clientSecret ? (
-                        // Verificar se estamos usando um client secret mockado (contém muitos "1" seguidos)
-                        stripeContext.clientSecret.includes('1'.repeat(10)) ? (
-                          <MockStripeCardForm 
-                            clientSecret={stripeContext.clientSecret}
-                            valorTotal={pacoteData?.valorTotal || 0}
-                            onPaymentSuccess={handlePaymentSuccess}
-                            onPaymentError={handlePaymentError}
-                          />
-                        ) : (
-                          <StripeCardForm 
-                            clientSecret={stripeContext.clientSecret}
-                            valorTotal={pacoteData?.valorTotal || 0}
-                            onPaymentSuccess={handlePaymentSuccess}
-                            onPaymentError={handlePaymentError}
-                          />
-                        )
+                        // Usar o formulário real do Stripe quando temos um client secret válido
+                        <StripeCardForm 
+                          clientSecret={stripeContext.clientSecret}
+                          valorTotal={pacoteData?.valorTotal || 0}
+                          pacoteId={pacoteId}
+                          dataViagem={formData.data}
+                          dataInicio={dataIdaFromQuery || formData.data}
+                          dataFim={dataVoltaFromQuery || formData.data}
+                          quantidadePessoas={parseInt(formData.quantidadePessoas) || 1}
+                          onPaymentSuccess={handlePaymentSuccess}
+                          onPaymentError={handlePaymentError}
+                        />
                       ) : (
                         <div className="text-center p-4">
                           {stripeContext.loading ? (

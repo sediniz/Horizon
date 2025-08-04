@@ -12,6 +12,7 @@ interface ReservaCardProps {
   dataVolta?: string;
   pessoas?: number; // Número de pessoas no pacote
   onReservar: (valorPacoteSelecionado: number) => void;
+  mostrarOpcoes?: boolean; // Nova prop para controlar se mostra as opções de noites
 }
 
 const ReservaCard: React.FC<ReservaCardProps> = ({ 
@@ -20,10 +21,15 @@ const ReservaCard: React.FC<ReservaCardProps> = ({
   dataIda = '',
   dataVolta = '',
   pessoas = 1,
-  onReservar 
+  onReservar,
+  valorTotal,
+  mostrarOpcoes = true
 }) => {
   // Valor base da diária por pessoa - usa o valor do backend ou o default
   const diaria = valorDiaria;
+  
+  // Se temos um valorTotal específico do DatePicker dinâmico, usar ele
+  const valorFinalCalculado = valorTotal || (diaria * duracaoPacote * pessoas);
   
   // Formatar as datas para exibição
   const formatarDataParaExibicao = (dataString: string) => {
@@ -84,10 +90,16 @@ const ReservaCard: React.FC<ReservaCardProps> = ({
 
   const handleConfirmarModal = () => {
     setShowModal(false);
-    // Pegar o valor do pacote selecionado atual
-    const valorPacoteSelecionado = precoSelecionado !== null ? precosGrid[precoSelecionado].valor : 0;
-    console.log("Valor do pacote selecionado a ser passado:", valorPacoteSelecionado);
-    onReservar(valorPacoteSelecionado);
+    // Se não estamos mostrando opções (usando DatePicker dinâmico), usar o valor calculado
+    if (!mostrarOpcoes && valorFinalCalculado) {
+      console.log("Valor final calculado a ser passado:", valorFinalCalculado);
+      onReservar(valorFinalCalculado);
+    } else {
+      // Pegar o valor do pacote selecionado atual
+      const valorPacoteSelecionado = precoSelecionado !== null ? precosGrid[precoSelecionado].valor : valorFinalCalculado;
+      console.log("Valor do pacote selecionado a ser passado:", valorPacoteSelecionado);
+      onReservar(valorPacoteSelecionado);
+    }
   };
 
   return (
@@ -119,33 +131,52 @@ const ReservaCard: React.FC<ReservaCardProps> = ({
         )}
       </div>
 
-      <div className="mb-6">
-        <h4 className="text-sm font-medium text-gray-700 mb-3 text-center">Escolha seu pacote:</h4>
-        <div className="grid grid-cols-2 gap-2">
-          {precosGrid.map((item, idx) => (
-            <button
-              key={idx}
-              className={`
-                p-4 rounded-lg border-2 text-center transition-all duration-300 hover:scale-105
-                ${precoSelecionado === idx 
-                  ? 'bg-gradient-to-r from-sky-500 to-cyan-500 text-white border-sky-500 shadow-lg' 
-                  : 'bg-white/70 border-gray-200 text-gray-700 hover:border-sky-300 hover:bg-white/90'
-                }
-              `}
-              onClick={() => {
-                setPrecoSelecionado(idx);
-                console.log(`Selecionado pacote ${idx} com valor ${item.valor}`);
-              }}
-            >
-              <div className="font-bold text-lg">R$ {item.valor.toFixed(2).replace('.', ',')}</div>
-              <div className="text-sm opacity-90">{item.noites} noites ({pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'})</div>
-              <div className="text-xs opacity-80">R$ {item.valorPorPessoa.toFixed(2).replace('.', ',')} por pessoa</div>
-            </button>
-          ))}
+      {/* Opções de noites/preços ou valor fixo */}
+      {mostrarOpcoes ? (
+        <div className="mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-3 text-center">Escolha seu pacote:</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {precosGrid.map((item, idx) => (
+              <button
+                key={idx}
+                className={`
+                p-3 rounded-lg border-2 transition-all hover:scale-105 ${
+                  precoSelecionado === idx 
+                    ? 'border-green-500 bg-green-50 text-green-800 font-bold shadow-lg' 
+                    : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
+                }`}
+                onClick={() => {
+                  setPrecoSelecionado(idx);
+                  console.log(`Selecionado pacote ${idx} com valor ${item.valor}`);
+                }}
+              >
+                <div className="font-bold text-lg">R$ {item.valor.toFixed(2).replace('.', ',')}</div>
+                <div className="text-sm opacity-90">{item.noites} noites ({pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'})</div>
+                <div className="text-xs opacity-80">R$ {item.valorPorPessoa.toFixed(2).replace('.', ',')} por pessoa</div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+          <div className="text-center">
+            <div className="text-sm text-blue-700 font-medium">Valor Total Calculado</div>
+            <div className="text-2xl font-bold text-blue-800">
+              R$ {valorFinalCalculado.toFixed(2).replace('.', ',')}
+            </div>
+            <div className="text-sm text-blue-700 mt-1">
+              Para {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}
+            </div>
+            {dataIda && dataVolta && (
+              <div className="text-sm text-blue-600 mt-2">
+                {Math.ceil((new Date(dataVolta).getTime() - new Date(dataIda).getTime()) / (1000 * 60 * 60 * 24))} noites selecionadas
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
-      {precoSelecionado !== null && (
+      {mostrarOpcoes && precoSelecionado !== null && (
         <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
           <div className="text-center">
             <div className="text-sm text-green-700 font-medium">Pacote Selecionado</div>
@@ -199,30 +230,42 @@ const ReservaCard: React.FC<ReservaCardProps> = ({
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Confirmar Reserva</h3>
               <p className="text-gray-600 mb-1">
-                Você está prestes a reservar o pacote de {precosGrid[precoSelecionado].noites} noites para {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}
+                {mostrarOpcoes ? (
+                  <>Você está prestes a reservar o pacote de {precosGrid[precoSelecionado].noites} noites para {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}</>
+                ) : (
+                  <>Você está prestes a reservar este pacote para {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}</>
+                )}
               </p>
               
-              {dataIda && (
+              {dataIda && (mostrarOpcoes ? dataVoltaCalculada : dataVolta) && (
                 <div className="flex items-center justify-center gap-2 text-gray-600 mb-3 text-sm">
                   <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span>
-                    De {formatarDataParaExibicao(dataIda)} até {formatarDataParaExibicao(dataVoltaCalculada)}
+                    De {formatarDataParaExibicao(dataIda)} até {formatarDataParaExibicao(mostrarOpcoes ? dataVoltaCalculada : dataVolta)}
                   </span>
                 </div>
               )}
               
               <div className="text-center mb-6">
                 <p className="text-2xl font-bold text-green-600">
-                  R$ {precosGrid[precoSelecionado].valor.toFixed(2).replace('.', ',')}
+                  {mostrarOpcoes ? (
+                    <>R$ {precosGrid[precoSelecionado].valor.toFixed(2).replace('.', ',')}</>
+                  ) : (
+                    <>R$ {valorFinalCalculado.toFixed(2).replace('.', ',')}</>
+                  )}
                 </p>
                 <div className="flex items-center justify-center gap-2 mt-1">
                   <span className="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
                     {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}
                   </span>
                   <span className="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                    R$ {precosGrid[precoSelecionado].valorPorPessoa.toFixed(2).replace('.', ',')} por pessoa
+                    {mostrarOpcoes ? (
+                      <>R$ {precosGrid[precoSelecionado].valorPorPessoa.toFixed(2).replace('.', ',')} por pessoa</>
+                    ) : (
+                      <>R$ {(valorFinalCalculado / pessoas).toFixed(2).replace('.', ',')} por pessoa</>
+                    )}
                   </span>
                 </div>
               </div>

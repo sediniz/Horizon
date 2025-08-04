@@ -18,11 +18,17 @@ namespace Horizon.Services.Implementations
             // Lógica de negócio: Validações antes de adicionar
             ValidarReserva(entity);
             
-            // Verificar disponibilidade do hotel nas datas
-            await VerificarDisponibilidadeAsync(entity.HotelId, entity.DataInicio, entity.DataFim);
+            // Verificar disponibilidade do hotel nas datas (apenas se houver HotelId)
+            if (entity.HotelId.HasValue)
+            {
+                await VerificarDisponibilidadeAsync(entity.HotelId.Value, entity.DataInicio, entity.DataFim);
+            }
             
-            // Definir status inicial
-            entity.Status = StatusReserva.Pendente;
+            // Definir status inicial apenas se não foi definido
+            if (entity.Status == default(StatusReserva))
+            {
+                entity.Status = StatusReserva.Pendente;
+            }
             
             return await _reservaRepository.AddAsync(entity);
         }
@@ -124,6 +130,14 @@ namespace Horizon.Services.Implementations
         {
             var reservasConflitantes = await _reservaRepository.GetReservasByHotelIdAsync(hotelId);
             
+            Console.WriteLine($"🏨 Verificando disponibilidade para Hotel {hotelId} de {dataInicio:yyyy-MM-dd} até {dataFim:yyyy-MM-dd}");
+            Console.WriteLine($"📋 Encontradas {reservasConflitantes.Count()} reservas existentes para este hotel");
+            
+            foreach (var reserva in reservasConflitantes.Where(r => r.Status != StatusReserva.Cancelada))
+            {
+                Console.WriteLine($"   - Reserva {reserva.ReservaId}: {reserva.DataInicio:yyyy-MM-dd} até {reserva.DataFim:yyyy-MM-dd} (Status: {reserva.Status})");
+            }
+            
             bool temConflito = reservasConflitantes.Any(r => 
                 r.Status != StatusReserva.Cancelada &&
                 ((dataInicio >= r.DataInicio && dataInicio < r.DataFim) ||
@@ -131,7 +145,14 @@ namespace Horizon.Services.Implementations
                  (dataInicio <= r.DataInicio && dataFim >= r.DataFim)));
 
             if (temConflito)
+            {
+                Console.WriteLine($"❌ CONFLITO DETECTADO para Hotel {hotelId} no período {dataInicio:yyyy-MM-dd} até {dataFim:yyyy-MM-dd}");
                 throw new InvalidOperationException("Hotel não disponível nas datas solicitadas");
+            }
+            else
+            {
+                Console.WriteLine($"✅ Hotel {hotelId} disponível no período {dataInicio:yyyy-MM-dd} até {dataFim:yyyy-MM-dd}");
+            }
         }
 
         private void ValidarTransicaoStatus(StatusReserva statusAtual, StatusReserva novoStatus)
