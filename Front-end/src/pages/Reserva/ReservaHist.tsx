@@ -219,7 +219,7 @@ export default function ReservaHist() {
             status: "confirmada" as const,
             valor: 1186,
             pessoas: 2,
-            imagem: "/src/assets/img1.jpeg",
+            imagem: "https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg",
             voo: "GRU → GIG",
             avaliacao: 8.3,
             estrelas: 3
@@ -234,7 +234,7 @@ export default function ReservaHist() {
             status: "pendente" as const,
             valor: 2120,
             pessoas: 2,
-            imagem: "/src/assets/img2.png",
+            imagem: "https://cdn.pixabay.com/photo/2012/11/10/14/12/copacabana-beach-65598_1280.jpg",
             voo: "GRU → GIG",
             avaliacao: 8.2,
             estrelas: 4
@@ -249,7 +249,7 @@ export default function ReservaHist() {
             status: "concluida" as const,
             valor: 3500,
             pessoas: 2,
-            imagem: "/src/assets/Praia01.png",
+            imagem: "https://segredosdeviagem.com.br/wp-content/uploads/2018/08/5B-Onde-ficar-Fernando-Noronha-pousada-maravilha-fernando-de-noronha_Divulgac%CC%A7a%CC%83o-1024x430.jpg",
             voo: "GRU → FEN",
             avaliacao: 9.1,
             estrelas: 5
@@ -264,7 +264,7 @@ export default function ReservaHist() {
             status: "cancelada" as const,
             valor: 4200,
             pessoas: 2,
-            imagem: "/src/assets/Paris2.png",
+            imagem: "https://www.thehotelguru.com/_images/02/8c/028cbe438fa3e6a67281b6da2a9d0911/s1654x900.jpg",
             voo: "GRU → CDG",
             avaliacao: 8.8,
             estrelas: 4
