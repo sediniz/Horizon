@@ -60,6 +60,15 @@ export const reservasApi = {
       return response;
     } catch (error) {
       console.error('Erro ao buscar reservas:', error);
+      
+      // Verificar se é erro de conectividade com SQL Server
+      if (axios.isAxiosError(error) && error.response?.status === 500) {
+        const errorMessage = error.response?.data?.message || '';
+        if (errorMessage.includes('SqlException') || errorMessage.includes('SQL Server')) {
+          throw new Error('Banco de dados temporariamente indisponível. Exibindo dados de exemplo.');
+        }
+      }
+      
       throw new Error('Não foi possível carregar as reservas');
     }
   },
@@ -94,8 +103,8 @@ export const reservasApi = {
   // Atualizar status da reserva
   async atualizarStatusReserva(id: number, status: Reserva['status']): Promise<Reserva> {
     try {
-      const response = await apiRequest(`/reservas/${id}/status`, {
-        method: 'PATCH',
+      const response = await apiRequest(`/reservas/atualizarStatus/${id}`, {
+        method: 'PUT',
         data: { status }
       });
       return response;
