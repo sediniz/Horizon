@@ -58,7 +58,7 @@ namespace Horizon.Controllers
 
         // PUT: api/pacotes/{id}
 
-        [Authorize]
+        //[Authorize]
         [HttpPut("{id}")]
 
         public async Task<IActionResult> Update(int id, [FromBody] Pacote pacote)
@@ -79,7 +79,7 @@ namespace Horizon.Controllers
 
         // DELETE: api/pacotes/{id}
 
-        [Authorize]
+        //[Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

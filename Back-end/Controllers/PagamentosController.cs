@@ -18,10 +18,18 @@ namespace Horizon.Controllers
         private readonly IPacoteService _pacoteService;
         private readonly IReservaService _reservaService;
 
-        public PagamentosController(IPagamentoService pagamentoService, IStripeService stripeService)
+        public PagamentosController(
+            IPagamentoService pagamentoService, 
+            IStripeService stripeService,
+            IUsuarioService usuarioService,
+            IPacoteService pacoteService,
+            IReservaService reservaService)
         {
             _pagamentoService = pagamentoService;
             _stripeService = stripeService;
+            _usuarioService = usuarioService;
+            _pacoteService = pacoteService;
+            _reservaService = reservaService;
         }
 
         [HttpGet]
@@ -55,7 +63,7 @@ namespace Horizon.Controllers
         {
             if (id != pagamento.PagamentoId)
             {
-                return BadRequest("ID n�o corresponde ao pagamento informado.");
+                return BadRequest("ID n�o corresponde ao pagamento informado.");
             }
             var existingPagamento = await _pagamentoService.GetByIdAsync(id);
             if (existingPagamento == null)
@@ -92,11 +100,20 @@ namespace Horizon.Controllers
             {
                 var intent = await _stripeService.CreatePaymentIntentAsync(request.ValorTotal);
                 
-                // Criar um registro de pagamento com status pendente
+                // Se não temos uma reserva, só retornamos o clientSecret sem salvar no banco
+                if (!request.ReservaId.HasValue)
+                {
+                    return Ok(new { 
+                        clientSecret = intent.ClientSecret,
+                        message = "Payment intent criado com sucesso"
+                    });
+                }
+                
+                // Se temos uma reserva, criar um registro de pagamento com status pendente
                 var pagamento = new Pagamento
                 {
-                    ReservaId = request.ReservaId,
-                    TipoPagamento = request.TipoPagamento ?? "Cart�o de Cr�dito",
+                    ReservaId = request.ReservaId.Value,
+                    TipoPagamento = request.TipoPagamento ?? "Cartão de Crédito",
                     StatusPagamento = "Pendente",
                     ValorPagamento = request.ValorTotal,
                     DataPagamento = DateTime.Now,
@@ -118,18 +135,101 @@ namespace Horizon.Controllers
             }
         }
 
+        [HttpPost("confirmar-pagamento-stripe")]
+        public async Task<IActionResult> ConfirmarPagamentoStripe([FromBody] ConfirmarPagamentoRequest request)
+        {
+            try
+            {
+                // Verificar o status do pagamento no Stripe
+                var intent = await _stripeService.GetPaymentIntentAsync(request.PaymentIntentId);
+                
+                if (intent.Status != "succeeded")
+                {
+                    return BadRequest(new { mensagem = "Pagamento não foi processado com sucesso" });
+                }
+
+                // Buscar dados do pacote se fornecido
+                Pacote? pacote = null;
+                if (request.PacoteId.HasValue)
+                {
+                    pacote = await _pacoteService.GetByIdAsync(request.PacoteId.Value);
+                    if (pacote == null)
+                    {
+                        return NotFound(new { mensagem = "Pacote não encontrado" });
+                    }
+                }
+
+                // Buscar usuário
+                var usuario = await _usuarioService.GetByIdAsync(request.UsuarioId);
+                if (usuario == null)
+                {
+                    return NotFound(new { mensagem = "Usuário não encontrado" });
+                }
+
+                // Criar uma nova reserva usando apenas as colunas que existem no banco
+                var dataViagem = request.DataViagem;
+                var duracaoPacote = pacote?.Duracao ?? 7; // Usar duração do pacote ou padrão de 7 dias
+                
+                Console.WriteLine($"💳 Processando pagamento para Pacote {request.PacoteId} - Hotel {pacote?.HotelId}");
+                Console.WriteLine($"📅 Datas: {dataViagem:yyyy-MM-dd} até {dataViagem.AddDays(duracaoPacote):yyyy-MM-dd}");
+                
+                var reserva = new Reserva
+                {
+                    UsuarioId = request.UsuarioId,
+                    DataInicio = dataViagem, // Data de início da viagem
+                    DataFim = dataViagem.AddDays(duracaoPacote), // Data de fim baseada na duração do pacote
+                    HotelId = pacote?.HotelId, // Incluir HotelId se tiver pacote
+                    DataReserva = DateTime.Now,
+                    DataViagem = request.DataViagem,
+                    QuantidadePessoas = request.QuantidadePessoas,
+                    ValorTotal = (decimal)intent.Amount / 100,
+                    PacoteId = request.PacoteId,
+                    Status = StatusReserva.Confirmada // Definir como confirmada quando pagamento é aprovado
+                };
+
+                await _reservaService.AddAsync(reserva);
+                await _reservaService.SaveChangesAsync();
+
+                // Criar registro de pagamento vinculado à reserva
+                var pagamento = new Pagamento
+                {
+                    ReservaId = reserva.ReservaId,
+                    TipoPagamento = "Cartão de Crédito",
+                    StatusPagamento = "Aprovado",
+                    ValorPagamento = (decimal)intent.Amount / 100,
+                    DataPagamento = DateTime.Now,
+                    StripePaymentIntentId = intent.Id,
+                    StripeClientSecret = intent.ClientSecret
+                };
+
+                await _pagamentoService.AddAsync(pagamento);
+                await _pagamentoService.SaveChangesAsync();
+
+                return Ok(new { 
+                    mensagem = "Pagamento confirmado e reserva criada com sucesso",
+                    reservaId = reserva.ReservaId,
+                    pagamentoId = pagamento.PagamentoId,
+                    valorPago = (decimal)intent.Amount / 100
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao confirmar pagamento", erro = ex.Message });
+            }
+        }
+
         [HttpPost("confirmar-pagamento/{id}")]
         public async Task<IActionResult> ConfirmarPagamento(int id)
         {
             var pagamento = await _pagamentoService.GetByIdAsync(id);
             if (pagamento == null)
             {
-                return NotFound(new { mensagem = "Pagamento n�o encontrado" });
+                return NotFound(new { mensagem = "Pagamento n�o encontrado" });
             }
 
             if (string.IsNullOrEmpty(pagamento.StripePaymentIntentId))
             {
-                return BadRequest(new { mensagem = "Este pagamento n�o possui um ID de intent do Stripe" });
+                return BadRequest(new { mensagem = "Este pagamento n�o possui um ID de intent do Stripe" });
             }
 
             try
@@ -146,7 +246,7 @@ namespace Horizon.Controllers
                 }
                 else
                 {
-                    return Ok(new { mensagem = "Pagamento ainda n�o foi processado ou foi recusado", status = intent.Status });
+                    return Ok(new { mensagem = "Pagamento ainda n�o foi processado ou foi recusado", status = intent.Status });
                 }
             }
             catch (Exception ex)
@@ -198,23 +298,33 @@ namespace Horizon.Controllers
         {
             if (request == null)
             {
-                return BadRequest(new { mensagem = "Dados de pagamento inv�lidos" });
+                return BadRequest(new { mensagem = "Dados de pagamento inválidos" });
             }
 
             try
             {
-                // Verificar se o usu�rio existe
-                var usuario = await _usuarioService.GetByIdAsync(int.Parse(request.UsuarioId));
-                if (usuario == null)
+                // Validar se o UsuarioId é um número válido
+                if (string.IsNullOrEmpty(request.UsuarioId) || !int.TryParse(request.UsuarioId, out int usuarioIdInt))
                 {
-                    return BadRequest(new { mensagem = "Usu�rio n�o encontrado" });
+                    return BadRequest(new { mensagem = $"ID do usuário inválido. Recebido: '{request.UsuarioId}'. Esperado: um número inteiro válido." });
                 }
 
-                // Obter informa��es do pacote
+                // Para usuário convidado (ID 1), permitir sem verificação
+                // Para outros usuários, verificar se existe no sistema
+                if (usuarioIdInt != 1)
+                {
+                    var usuario = await _usuarioService.GetByIdAsync(usuarioIdInt);
+                    if (usuario == null)
+                    {
+                        return BadRequest(new { mensagem = $"Usuário com ID {usuarioIdInt} não encontrado no sistema." });
+                    }
+                }
+
+                // Obter informações do pacote
                 var pacote = await _pacoteService.GetByIdAsync(request.PacoteId);
                 if (pacote == null)
                 {
-                    return BadRequest(new { mensagem = "Pacote n�o encontrado" });
+                    return BadRequest(new { mensagem = "Pacote não encontrado" });
                 }
 
                 // Converter data da string para DateTime
@@ -224,8 +334,7 @@ namespace Horizon.Controllers
                     dataInicio = DateTime.Now.AddDays(30); // Fallback: 30 dias a partir de hoje
                 }
 
-                // Calcular data de fim com base na dura��o do pacote
-                // Ou usar a dura��o personalizada se dispon�vel
+                // Calcular data de fim com base na duração do pacote
                 int duracao = request.Duracao > 0 ? request.Duracao : pacote.Duracao;
                 var dataFim = dataInicio.AddDays(duracao);
 
@@ -235,15 +344,15 @@ namespace Horizon.Controllers
                     Status = StatusReserva.Confirmada,
                     DataInicio = dataInicio,
                     DataFim = dataFim,
-                    UsuarioId = int.Parse(request.UsuarioId),
-                    HotelId = pacote.HotelId // Assumindo que o pacote tem um HotelId
+                    UsuarioId = usuarioIdInt,
+                    HotelId = pacote.HotelId
                 };
 
                 // Adicionar a reserva
                 await _reservaService.AddAsync(reserva);
                 await _reservaService.SaveChangesAsync();
 
-                // Criar um pagamento associado � reserva
+                // Criar um pagamento associado à reserva
                 var pagamento = new Pagamento
                 {
                     ReservaId = reserva.ReservaId,
@@ -266,6 +375,7 @@ namespace Horizon.Controllers
                     valor = pagamento.ValorPagamento,
                     codigoPagamento = $"PAG{pagamento.PagamentoId}",
                     numeroPedido = $"RES{reserva.ReservaId}",
+                    reservaId = reserva.ReservaId,
                     message = "Pagamento processado com sucesso"
                 });
             }

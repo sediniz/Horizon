@@ -34,7 +34,7 @@ namespace Horizon.Controllers
         }
 
         // POST: api/hotel
-        [Authorize]
+        //[Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateHotel([FromBody] Hotel hotel)
         {
@@ -43,17 +43,43 @@ namespace Horizon.Controllers
         }
 
         // PUT: api/hotel/{id}
-        [Authorize]
+        //[Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateHotel(int id, [FromBody] Hotel hotel)
         {
-            if (id != hotel.HotelId) return BadRequest();
-            var updated = await _hotelService.UpdateAsync(hotel);
-            return Ok(updated);
+            Console.WriteLine($"🔄 Atualizando hotel ID: {id}");
+            Console.WriteLine($"📨 Hotel recebido - ID: {hotel.HotelId}, Nome: {hotel.Nome}");
+            Console.WriteLine($"🏷️ Comodidades recebidas:");
+            Console.WriteLine($"   - Wi-Fi: {hotel.Wifi}");
+            Console.WriteLine($"   - Estacionamento: {hotel.Estacionamento}");
+            Console.WriteLine($"   - Piscina: {hotel.Piscina}");
+            Console.WriteLine($"   - Pet Friendly: {hotel.PetFriendly}");
+            Console.WriteLine($"   - Café da Manhã: {hotel.CafeDaManha}");
+            Console.WriteLine($"   - Almoço: {hotel.Almoco}");
+            Console.WriteLine($"   - Jantar: {hotel.Jantar}");
+            Console.WriteLine($"   - All Inclusive: {hotel.AllInclusive}");
+            
+            if (id != hotel.HotelId) 
+            {
+                Console.WriteLine($"❌ IDs não coincidem. URL: {id}, Body: {hotel.HotelId}");
+                return BadRequest("ID do hotel não confere com o parâmetro da URL");
+            }
+            
+            try
+            {
+                var updated = await _hotelService.UpdateAsync(hotel);
+                Console.WriteLine($"✅ Hotel atualizado: {updated.HotelId} - {updated.Nome}");
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erro ao atualizar hotel: {ex.Message}");
+                return StatusCode(500, $"Erro interno: {ex.Message}");
+            }
         }
 
         // DELETE: api/hotel/{id}
-        [Authorize]
+        //[Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHotel(int id)
         {

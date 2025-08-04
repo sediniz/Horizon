@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import LogoTexto from '../../assets/LogoTexto.png';
 
 const hospedagemButtons = [
   {
@@ -149,6 +150,9 @@ const Footer: React.FC = () => {
       `}</style>
       <div className="max-w-7xl mx-auto px-4">
         <div className="glass-effect rounded-2xl p-8 shadow-xl border border-white/20 backdrop-blur-sm">
+          <div className="flex justify-center inset-0 pointer-events-none z-50 opacity-75">
+            <img src={LogoTexto} alt="Horizon - Expanda seus Horizontes" className="h-20 object-contain cursor-pointer" />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Seção Hospedagem */}
             <div>

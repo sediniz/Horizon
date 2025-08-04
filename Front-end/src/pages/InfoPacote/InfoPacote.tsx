@@ -8,6 +8,8 @@ import PacoteInfoCard from "./PacoteInfoCard";
 import ReservaCard from "./ReservaCard";
 import DescricaoPacote from "./DescricaoPacote";
 import AvaliacaoPacote from "./AvaliacaoPacote";
+import { DateSelector } from "../../components/DateSelector";
+import DatePickerDinamico from "../../components/DatePicker/DatePickerDynamico";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPacoteById } from "../../api/pacotes";
 import { getHotelById } from "../../api/hoteis";
@@ -52,6 +54,8 @@ const InfoPacote: React.FC = () => {
   const [avaliacoes, setAvaliacoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usarDatePickerDinamico, setUsarDatePickerDinamico] = useState(true);
+  const [valorTotalCalculado, setValorTotalCalculado] = useState(0);
   
   useEffect(() => {
     const carregarPacote = async () => {
@@ -141,6 +145,17 @@ const InfoPacote: React.FC = () => {
   }, [id, navigate]);
 
   const handleReservar = (valorPacoteSelecionado: number) => {
+    // Validar se as datas foram selecionadas
+    if (!dataIda || !dataVolta) {
+      alert('Por favor, selecione as datas da viagem antes de continuar');
+      return;
+    }
+
+    if (new Date(dataIda) >= new Date(dataVolta)) {
+      alert('A data de início deve ser anterior à data de fim');
+      return;
+    }
+
     // Usar o valor do pacote selecionado que foi passado do ReservaCard
     // Se não for fornecido, usar o valorTotal do estado como fallback
     const valorTotalExato = valorPacoteSelecionado > 0 
@@ -153,16 +168,18 @@ const InfoPacote: React.FC = () => {
       valorPacoteSelecionado,
       pessoas: pessoas,
       dataIda: dataIda,
+      dataVolta: dataVolta, // Incluir data de volta
       duracao: duracao
     });
     
-    // Construir URL com os parâmetros de query
+    // Construir URL com os parâmetros de query incluindo as datas
     const queryParams = new URLSearchParams({
       pacoteId: id || '',
       titulo: titulo,
-      valor: valorTotalExato.toString(), // Usar o valor selecionado pelo usuário
+      valor: valorTotalExato.toString(),
       pessoas: pessoas.toString(),
       dataIda: dataIda,
+      dataVolta: dataVolta, // Adicionar data de volta
       duracao: duracao.toString()
     }).toString();
     
@@ -178,8 +195,17 @@ const InfoPacote: React.FC = () => {
     setPessoas(novo.pessoas);
   };
 
-  const [editandoNome, setEditandoNome] = useState(false);
-  const [novoNome, setNovoNome] = useState(local);
+  // Função para lidar com mudanças de data do DatePicker dinâmico
+  const handleDataDinamicaChange = (dataInicio: string, dataFim: string, valorCalculado: number) => {
+    setDataIda(dataInicio);
+    setDataVolta(dataFim);
+    setValorTotalCalculado(valorCalculado);
+    setValorTotal(valorCalculado);
+    
+    // Atualizar também o preço exibido
+    const noites = Math.ceil((new Date(dataFim).getTime() - new Date(dataInicio).getTime()) / (1000 * 60 * 60 * 24));
+    setPreco(`R$ ${valorCalculado.toFixed(2).replace('.', ',')} por ${noites} noites`);
+  };
 
   if (loading) {
     return (
@@ -231,54 +257,14 @@ const InfoPacote: React.FC = () => {
         {/* Header com nome do lugar */}
         <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm mb-6">
           <div className="flex items-center justify-between">
-            {editandoNome ? (
-              <div className="flex items-center gap-4 w-full">
-                <input
-                  className="glass-effect rounded-lg px-4 py-2 flex-1 text-lg font-semibold border border-white/30 focus:outline-none focus:ring-2 focus:ring-sky-500/50 text-gray-800"
-                  value={novoNome}
-                  onChange={e => setNovoNome(e.target.value)}
-                  autoFocus
-                />
-                <button
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
-                  onClick={() => {
-                    setLocal(novoNome);
-                    setEditandoNome(false);
-                  }}
-                >
-                  Salvar
-                </button>
-                <button
-                  className="bg-gradient-to-r from-gray-400 to-gray-500 text-white px-6 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
-                  onClick={() => {
-                    setNovoNome(local);
-                    setEditandoNome(false);
-                  }}
-                >
-                  Cancelar
-                </button>
-              </div>
-            ) : (
-              <>
-                <h1 className="text-3xl font-bold text-shadow bg-gradient-to-r from-sky-600 to-cyan-600 bg-clip-text text-transparent">
-                  {titulo}
-                </h1>
-                <div>
-                  <span className="px-4 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mr-3">
-                    {local}
-                  </span>
-                  <button
-                    className="bg-gradient-to-r from-sky-500 to-cyan-500 text-white px-6 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
-                    onClick={() => setEditandoNome(true)}
-                  >
-                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Editar
-                  </button>
-                </div>
-              </>
-            )}
+            <h1 className="text-3xl font-bold text-shadow bg-gradient-to-r from-sky-600 to-cyan-600 bg-clip-text text-transparent">
+              {titulo}
+            </h1>
+            <div>
+              <span className="px-4 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                {local}
+              </span>
+            </div>
           </div>
         </div>
         {/* Carrossel com imagem estilizada */}
@@ -320,6 +306,37 @@ const InfoPacote: React.FC = () => {
           </div>
         </div>
 
+        {/* Seletor de Datas */}
+        <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-800">Escolha as datas da sua viagem</h3>
+            <button
+              onClick={() => setUsarDatePickerDinamico(!usarDatePickerDinamico)}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+            >
+              {usarDatePickerDinamico ? 'Datas personalizadas' : 'Opções sugeridas'}
+            </button>
+          </div>
+          
+          {usarDatePickerDinamico ? (
+            <DatePickerDinamico
+              valorDiaria={valorDiaria}
+              quantidadePessoas={pessoas}
+              duracaoPacote={duracao}
+              onDataChange={handleDataDinamicaChange}
+              dataInicialSugerida={dataIda}
+            />
+          ) : (
+            <DateSelector
+              dataInicio={dataIda}
+              dataFim={dataVolta}
+              onDataInicioChange={setDataIda}
+              onDataFimChange={setDataVolta}
+              label=""
+            />
+          )}
+        </div>
+
         {/* Seção principal com cards modernizados */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
@@ -336,12 +353,13 @@ const InfoPacote: React.FC = () => {
             <ReservaCard
               preco={preco}
               valorDiaria={valorDiaria}
-              valorTotal={valorTotal}
+              valorTotal={valorTotalCalculado || valorTotal}
               duracaoPacote={duracao}
               dataIda={dataIda}
               dataVolta={dataVolta}
               pessoas={pessoas}
               onReservar={handleReservar}
+              mostrarOpcoes={!usarDatePickerDinamico}
             />
           </div>
         </div>

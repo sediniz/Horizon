@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 // Ícones SVG inline para cada comodidade
 const icones = {
@@ -32,29 +32,15 @@ interface DescricaoPacoteProps {
 }
 
 const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto }) => {
-  const [descricao, setDescricao] = useState(descricaoTexto || "Descrição do que tem no pacote");
-  const [editando, setEditando] = useState(false);
-  const [tempDescricao, setTempDescricao] = useState(descricao);
+  const descricao = descricaoTexto || "Descrição do que tem no pacote";
   
-  // Update descricao when props change
-  useEffect(() => {
-    if (descricaoTexto) {
-      setDescricao(descricaoTexto);
-      setTempDescricao(descricaoTexto);
-    }
-  }, [descricaoTexto]);
   // Estados dos booleanos (poderiam vir de props ou API)
-  const [comodidades, setComodidades] = useState({
+  const comodidades = {
     AmbienteClimatizado: true,
     Tv: true,
     Varanda: false,
     Frigobar: true,
     Disponibilidade: true,
-  });
-
-  const handleSalvar = () => {
-    setDescricao(tempDescricao);
-    setEditando(false);
   };
 
   return (
@@ -68,45 +54,11 @@ const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto }) => 
         Descrição do Pacote
       </h2>
 
-      {editando ? (
-        <div className="space-y-4">
-          <textarea
-            className="w-full bg-white/70 border border-gray-200 rounded-lg px-4 py-3 min-h-[120px] focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-colors resize-none"
-            value={tempDescricao}
-            onChange={e => setTempDescricao(e.target.value)}
-            placeholder="Descreva os detalhes do pacote..."
-          />
-          <div className="flex gap-3">
-            <button 
-              className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
-              onClick={handleSalvar}
-            >
-              Salvar
-            </button>
-            <button 
-              className="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
-              onClick={() => setEditando(false)}
-            >
-              Cancelar
-            </button>
-          </div>
+      <div className="space-y-4">
+        <div className="bg-white/40 rounded-lg p-4 border border-white/20 text-gray-700 leading-relaxed">
+          {descricao}
         </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="bg-white/40 rounded-lg p-4 border border-white/20 text-gray-700 leading-relaxed">
-            {descricao}
-          </div>
-          <button 
-            className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
-            onClick={() => setEditando(true)}
-          >
-            <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Editar Descrição
-          </button>
-        </div>
-      )}
+      </div>
 
       {/* Comodidades do quarto */}
       <div className="mt-8">
@@ -118,17 +70,15 @@ const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto }) => 
         </h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
           {Object.entries(comodidades).map(([key, value]) => (
-            <button
+            <div
               key={key}
-              type="button"
-              className="group focus:outline-none"
-              onClick={() => setComodidades(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+              className="group"
             >
               <div className={`
-                bg-white/60 border-2 rounded-lg p-3 text-center transition-all duration-300 hover:scale-105 hover:shadow-md
+                bg-white/60 border-2 rounded-lg p-3 text-center transition-all duration-300
                 ${value 
                   ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50' 
-                  : 'border-gray-200 bg-white/40 hover:border-gray-300'
+                  : 'border-gray-200 bg-white/40'
                 }
               `}>
                 <div className={`
@@ -150,7 +100,7 @@ const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto }) => 
                   {value ? 'Incluído' : 'Não incluído'}
                 </span>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>

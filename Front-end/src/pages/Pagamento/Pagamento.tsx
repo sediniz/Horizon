@@ -6,7 +6,6 @@ import {
 } from '../../api/pagamento';
 import { StripeProvider, useStripeContext } from '../../contexts/StripeContext';
 import StripeCardForm from '../../components/Pagamento/StripeCardForm';
-import MockStripeCardForm from '../../components/Pagamento/MockStripeCardForm';
 import type { DadosPagamento, DadosPacote } from '../../api/pagamento';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,6 +31,7 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   const valorFromQuery = query.get('valor');
   const pessoasFromQuery = query.get('pessoas');
   const dataIdaFromQuery = query.get('dataIda');
+  const dataVoltaFromQuery = query.get('dataVolta');
   const duracaoFromQuery = query.get('duracao');
   
   const [activeTab, setActiveTab] = useState('dados'); // 'dados', 'pagamento', 'confirmacao', 'sucesso'
@@ -40,11 +40,33 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     quantidadePessoas: pessoasFromQuery || '',
     desconto: '',
     formaPagamento: 'PIX' as 'PIX' | 'Cartão de Crédito' | 'Cartão de Débito' | 'Boleto',
-    nome: usuario?.nome || '',
-    email: usuario?.email || '',
+    nome: '',
+    email: '',
     telefone: '',
     cpf: ''
   });
+
+  // Atualizar formData quando o usuário mudar (login/logout)
+  useEffect(() => {
+    if (usuario) {
+      setFormData(prev => ({
+        ...prev,
+        nome: usuario.nome || '',
+        email: usuario.email || '',
+        telefone: usuario.telefone || '',
+        cpf: usuario.cpfPassaporte || ''
+      }));
+    } else {
+      // Limpar dados se usuário fizer logout
+      setFormData(prev => ({
+        ...prev,
+        nome: '',
+        email: '',
+        telefone: '',
+        cpf: ''
+      }));
+    }
+  }, [usuario]);
 
   const [pacoteData, setPacoteData] = useState<DadosPacote | null>(null);
   const [loading, setLoading] = useState(false);
@@ -57,8 +79,8 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   // Usar o ID do pacote da URL ou dos props, com fallback para 3
   const pacoteId = Number(pacoteIdFromQuery) || propPacoteId || 3;
   
-  // Usar o ID do usuário autenticado ou um valor padrão
-  const usuarioId = usuario?.usuarioId?.toString() || "usuario-exemplo-456";
+  // Usar o ID do usuário autenticado ou permitir compra como convidado
+  const usuarioId = usuario?.usuarioId?.toString() || "1"; // Usar ID 1 como convidado
 
   useEffect(() => {
     if (pacoteId) {
@@ -210,9 +232,14 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
       return;
     }
 
-    // Verificar se está autenticado para prosseguir
-    if (!usuario) {
-      setError('É necessário fazer login para finalizar a compra');
+    // Verificar se os campos obrigatórios estão preenchidos
+    if (!formData.data || !formData.quantidadePessoas || !formData.nome || !formData.email) {
+      setError('Por favor, preencha todos os campos obrigatórios');
+      return;
+    }
+
+    if (formData.formaPagamento === 'Cartão de Crédito' && !paymentMethodId) {
+      setError('Processamento do cartão de crédito incompleto');
       return;
     }
 
@@ -226,7 +253,7 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
         desconto: formData.desconto || undefined,
         formaPagamento: formData.formaPagamento,
         pacoteId,
-        usuarioId,
+        usuarioId: usuarioId, // Sempre terá um valor (usuário logado ou convidado)
         paymentMethodId: paymentMethodId || undefined
       };
 
@@ -260,6 +287,14 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
+        {/* Mostrar informação do usuário se logado */}
+        {usuario && (
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-6">
+            <strong className="font-bold">👋 Olá, {usuario.nome}!</strong>
+            <span className="block sm:inline"> Seus dados foram preenchidos automaticamente. </span>
+          </div>
+        )}
+
         {/* Header com abas */}
         <div className="bg-white rounded-lg shadow-lg mb-6">
           <div className="flex border-b">
@@ -461,22 +496,18 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
                       <h3 className="font-bold text-gray-800 mb-4">Dados do Cartão</h3>
                       
                       {stripeContext.clientSecret ? (
-                        // Verificar se estamos usando um client secret mockado (contém muitos "1" seguidos)
-                        stripeContext.clientSecret.includes('1'.repeat(10)) ? (
-                          <MockStripeCardForm 
-                            clientSecret={stripeContext.clientSecret}
-                            valorTotal={pacoteData?.valorTotal || 0}
-                            onPaymentSuccess={handlePaymentSuccess}
-                            onPaymentError={handlePaymentError}
-                          />
-                        ) : (
-                          <StripeCardForm 
-                            clientSecret={stripeContext.clientSecret}
-                            valorTotal={pacoteData?.valorTotal || 0}
-                            onPaymentSuccess={handlePaymentSuccess}
-                            onPaymentError={handlePaymentError}
-                          />
-                        )
+                        // Usar o formulário real do Stripe quando temos um client secret válido
+                        <StripeCardForm 
+                          clientSecret={stripeContext.clientSecret}
+                          valorTotal={pacoteData?.valorTotal || 0}
+                          pacoteId={pacoteId}
+                          dataViagem={formData.data}
+                          dataInicio={dataIdaFromQuery || formData.data}
+                          dataFim={dataVoltaFromQuery || formData.data}
+                          quantidadePessoas={parseInt(formData.quantidadePessoas) || 1}
+                          onPaymentSuccess={handlePaymentSuccess}
+                          onPaymentError={handlePaymentError}
+                        />
                       ) : (
                         <div className="text-center p-4">
                           {stripeContext.loading ? (

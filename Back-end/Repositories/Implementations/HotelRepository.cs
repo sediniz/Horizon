@@ -37,9 +37,34 @@ namespace Horizon.Repositories.Implementations
 
         public async Task<Hotel> UpdateAsync(Hotel entity)
         {
-            _context.Hoteis.Update(entity);
+            // Buscar a entidade existente no contexto
+            var existingHotel = await _context.Hoteis.FindAsync(entity.HotelId);
+            
+            if (existingHotel == null)
+            {
+                throw new InvalidOperationException($"Hotel com ID {entity.HotelId} não encontrado");
+            }
+
+            // Atualizar apenas as propriedades necessárias
+            existingHotel.Nome = entity.Nome;
+            existingHotel.Localizacao = entity.Localizacao;
+            existingHotel.Descricao = entity.Descricao;
+            existingHotel.QuantidadeDeQuartos = entity.QuantidadeDeQuartos;
+            existingHotel.Estacionamento = entity.Estacionamento;
+            existingHotel.PetFriendly = entity.PetFriendly;
+            existingHotel.Piscina = entity.Piscina;
+            existingHotel.Wifi = entity.Wifi;
+            existingHotel.CafeDaManha = entity.CafeDaManha;
+            existingHotel.Almoco = entity.Almoco;
+            existingHotel.Jantar = entity.Jantar;
+            existingHotel.AllInclusive = entity.AllInclusive;
+            existingHotel.ValorDiaria = entity.ValorDiaria;
+            existingHotel.Imagens = entity.Imagens;
+            existingHotel.DatasDisponiveis = entity.DatasDisponiveis;
+            existingHotel.QuartoId = entity.QuartoId;
+
             await _context.SaveChangesAsync();
-            return entity;
+            return existingHotel;
         }
 
         public async Task<bool> DeleteAsync(int id)

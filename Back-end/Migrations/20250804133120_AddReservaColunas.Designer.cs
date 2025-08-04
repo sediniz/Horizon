@@ -4,6 +4,7 @@ using Horizon.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Horizon.Migrations
 {
     [DbContext(typeof(HorizonDbContext))]
-    partial class HorizonDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250804133120_AddReservaColunas")]
+    partial class AddReservaColunas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -250,18 +253,39 @@ namespace Horizon.Migrations
                     b.Property<DateTime>("DataInicio")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("HotelId")
+                    b.Property<DateTime>("DataReserva")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DataViagem")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PacoteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantidadePessoas")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("StatusReserva")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("ValorTotal")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("ReservaId");
 
                     b.HasIndex("HotelId");
+
+                    b.HasIndex("PacoteId");
 
                     b.HasIndex("UsuarioId");
 
@@ -350,9 +374,11 @@ namespace Horizon.Migrations
                 {
                     b.HasOne("Horizon.Models.Hotel", "Hotel")
                         .WithMany()
-                        .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("HotelId");
+
+                    b.HasOne("Horizon.Models.Pacote", "Pacote")
+                        .WithMany()
+                        .HasForeignKey("PacoteId");
 
                     b.HasOne("Horizon.Models.Usuario", "Usuario")
                         .WithMany()
@@ -361,6 +387,8 @@ namespace Horizon.Migrations
                         .IsRequired();
 
                     b.Navigation("Hotel");
+
+                    b.Navigation("Pacote");
 
                     b.Navigation("Usuario");
                 });

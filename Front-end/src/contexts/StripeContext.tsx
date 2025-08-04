@@ -2,13 +2,23 @@ import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from '../api/stripeConfig';
-import { criarIntentPagamento, mockCriarIntentPagamento } from '../api/pagamento';
+import { criarIntentPagamento, confirmarPagamento } from '../api/pagamento';
+import { useAuth } from './AuthContext';
 
 interface StripeContextType {
   clientSecret: string | null;
   loading: boolean;
   error: string | null;
   iniciarPagamento: (valorTotal: number, pacoteId: number) => Promise<void>;
+  confirmarPagamentoCompleto: (paymentIntentId: string, dadosReserva: DadosReserva) => Promise<boolean>;
+}
+
+interface DadosReserva {
+  pacoteId: number;
+  dataViagem: string; // Data de início da viagem
+  dataInicio: string; // Data de início (mesmo que dataViagem para compatibilidade)
+  dataFim: string;    // Data de fim da viagem
+  quantidadePessoas: number;
 }
 
 const StripeContext = createContext<StripeContextType | undefined>(undefined);
@@ -29,6 +39,7 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { usuario } = useAuth();
 
   const iniciarPagamento = async (valorTotal: number, pacoteId: number) => {
     try {
@@ -45,14 +56,16 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
         // Chamar a API para criar um payment intent
         const { clientSecret } = await criarIntentPagamento(valorTotal, pacoteId);
         console.log('✅ Client Secret recebido do backend:', clientSecret ? 'Sucesso' : 'Vazio');
-        setClientSecret(clientSecret);
-      } catch (apiError) {
-        console.warn('⚠️ Falha ao usar API real, usando mock para desenvolvimento:', apiError);
         
-        // Se a API falhar, usamos o mock para continuar com o desenvolvimento/teste
-        const { clientSecret } = await mockCriarIntentPagamento(valorTotal);
-        console.log('🔧 Client Secret mockado gerado:', clientSecret ? 'Sucesso' : 'Vazio');
-        setClientSecret(clientSecret);
+        // Verificar se o client secret é válido (formato real do Stripe)
+        if (clientSecret && clientSecret.startsWith('pi_') && clientSecret.includes('_secret_')) {
+          setClientSecret(clientSecret);
+        } else {
+          throw new Error('Client secret inválido recebido do backend');
+        }
+      } catch (apiError) {
+        console.error('❌ Falha ao conectar com API de pagamento:', apiError);
+        throw new Error('Não foi possível conectar ao serviço de pagamento. Verifique sua conexão e tente novamente.');
       }
     } catch (err) {
       console.error('Erro ao iniciar pagamento:', err);
@@ -62,34 +75,63 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
     }
   };
 
-  // Verificar se é um client secret mock
-  const isMockClientSecret = clientSecret && clientSecret.includes('1'.repeat(10));
-  
-  // Só renderiza o componente Elements quando tivermos o client secret
-  if (clientSecret) {
-    // Para client secrets mockados, não passamos para o Elements para evitar erros do Stripe
-    if (isMockClientSecret) {
-      console.log('🔧 Usando modo mockado para Stripe Elements');
-      return (
-        <StripeContext.Provider value={{ clientSecret, loading, error, iniciarPagamento }}>
-          {children}
-        </StripeContext.Provider>
-      );
-    } else {
-      // Para client secrets reais, utilizamos o Stripe Elements normalmente
-      return (
-        <StripeContext.Provider value={{ clientSecret, loading, error, iniciarPagamento }}>
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
-            {children}
-          </Elements>
-        </StripeContext.Provider>
-      );
+  const confirmarPagamentoCompleto = async (paymentIntentId: string, dadosReserva: DadosReserva): Promise<boolean> => {
+    try {
+      if (!usuario?.usuarioId) {
+        console.error('Usuário não está logado');
+        return false;
+      }
+
+      // Garantir que a data está no formato correto (ISO string)
+      const dataViagem = dadosReserva.dataInicio || dadosReserva.dataViagem;
+      
+      console.log('📅 Dados da reserva para confirmação:', {
+        paymentIntentId,
+        usuarioId: usuario.usuarioId,
+        pacoteId: dadosReserva.pacoteId,
+        dataViagem,
+        quantidadePessoas: dadosReserva.quantidadePessoas
+      });
+
+      const resultado = await confirmarPagamento({
+        paymentIntentId,
+        usuarioId: usuario.usuarioId,
+        pacoteId: dadosReserva.pacoteId,
+        dataViagem,
+        quantidadePessoas: dadosReserva.quantidadePessoas
+      });
+
+      console.log('📄 Resultado da confirmação de pagamento:', resultado);
+
+      if (resultado.success) {
+        console.log('✅ Pagamento confirmado e reserva criada:', resultado.reservaId);
+        console.log('📋 Status da reserva no backend:', resultado.status || 'Confirmada');
+        return true;
+      } else {
+        console.error('❌ Falha ao confirmar pagamento:', resultado.mensagem || 'Erro desconhecido');
+        return false;
+      }
+    } catch (error) {
+      console.error('Erro ao confirmar pagamento completo:', error);
+      return false;
     }
+  };
+
+  // Sempre renderiza o componente Elements quando tivermos o client secret
+  if (clientSecret) {
+    // Usar o Stripe Elements normalmente para client secrets válidos
+    return (
+      <StripeContext.Provider value={{ clientSecret, loading, error, iniciarPagamento, confirmarPagamentoCompleto }}>
+        <Elements stripe={stripePromise} options={{ clientSecret }}>
+          {children}
+        </Elements>
+      </StripeContext.Provider>
+    );
   }
 
   // Caso ainda não tenha o client secret, renderiza sem o Elements
   return (
-    <StripeContext.Provider value={{ clientSecret, loading, error, iniciarPagamento }}>
+    <StripeContext.Provider value={{ clientSecret, loading, error, iniciarPagamento, confirmarPagamentoCompleto }}>
       {children}
     </StripeContext.Provider>
   );

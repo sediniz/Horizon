@@ -23,7 +23,9 @@ namespace Horizon.Repositories.Implementations
         }
         public async Task<IEnumerable<Pacote>> GetAllAsync()
         {
-            return await _context.Pacotes.ToListAsync();
+            return await _context.Pacotes
+                .Include(p => p.Hotel)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Pacote>> GetByDestinoAsync(string destino)

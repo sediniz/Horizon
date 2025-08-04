@@ -21,6 +21,17 @@ const getHotelAmenities = (hotel?: HotelAPI) => {
     return [];
   }
   
+  console.log(`🏨 Processando comodidades para hotel ${hotel.nome}:`, {
+    wifi: hotel.wifi,
+    estacionamento: hotel.estacionamento,
+    piscina: hotel.piscina,
+    petFriendly: hotel.petFriendly,
+    cafeDaManha: hotel.cafeDaManha,
+    almoco: hotel.almoco,
+    jantar: hotel.jantar,
+    allInclusive: hotel.allInclusive
+  });
+  
   // Converter booleanos do hotel para objetos com ícone
   if (hotel.wifi) {
     amenities.push({ name: "Wi-Fi Gratuito", icon: "wifi" });
@@ -38,9 +49,23 @@ const getHotelAmenities = (hotel?: HotelAPI) => {
     amenities.push({ name: "Pet Friendly", icon: "heart" });
   }
   
-  // Adicionar algumas comodidades padrão
-  amenities.push({ name: "Café da Manhã", icon: "coffee" });
-  amenities.push({ name: "Ar Condicionado", icon: "snowflake" });
+  if (hotel.cafeDaManha) {
+    amenities.push({ name: "Café da Manhã", icon: "coffee" });
+  }
+  
+  if (hotel.almoco) {
+    amenities.push({ name: "Almoço", icon: "utensils" });
+  }
+  
+  if (hotel.jantar) {
+    amenities.push({ name: "Jantar", icon: "utensils" });
+  }
+  
+  if (hotel.allInclusive) {
+    amenities.push({ name: "All Inclusive", icon: "star" });
+  }
+  
+  console.log(`✅ Comodidades convertidas para ${hotel.nome}:`, amenities);
   
   return amenities;
 };
@@ -102,7 +127,8 @@ const getDefaultHighlights = (duracao: number, destino: string) => {
 
 // Função para calcular rating baseado nas avaliações reais do hotel
 const calculateRating = (hotel?: HotelAPI): number => {
-  console.log('⭐ Calculando rating para hotel:', hotel?.nome || 'Hotel não informado');
+  console.log('⭐ === CALCULANDO RATING ===');
+  console.log('📊 Hotel completo:', hotel);
   
   // Se não tem hotel ou não tem avaliações, usar rating padrão
   if (!hotel) {
@@ -110,27 +136,37 @@ const calculateRating = (hotel?: HotelAPI): number => {
     return 4.0;
   }
   
+  console.log(`🏨 Hotel: ${hotel.nome}`);
+  console.log(`📝 Campo avaliacoes:`, hotel.avaliacoes);
+  console.log(`📊 Tipo do campo avaliacoes:`, typeof hotel.avaliacoes);
+  console.log(`📈 É array?`, Array.isArray(hotel.avaliacoes));
+  
   if (!hotel.avaliacoes) {
     console.log('❌ Hotel sem campo avaliacoes - usando rating padrão 4.0');
     return 4.0;
   }
   
   if (hotel.avaliacoes.length === 0) {
-    console.log('❌ Hotel sem avaliações - usando rating padrão 4.0');
+    console.log('❌ Hotel sem avaliações (array vazio) - usando rating padrão 4.0');
     return 4.0;
   }
   
-  console.log(`✅ Hotel com ${hotel.avaliacoes.length} avaliações:`, hotel.avaliacoes.map(a => `Nota: ${a.nota}`));
+  console.log(`✅ Hotel com ${hotel.avaliacoes.length} avaliações:`);
+  hotel.avaliacoes.forEach((avaliacao, index) => {
+    console.log(`   ${index + 1}. Nota: ${avaliacao.nota}, Comentário: "${avaliacao.comentario}"`);
+  });
   
   // Calcular média das avaliações
   const somaNotas = hotel.avaliacoes.reduce((soma, avaliacao) => soma + avaliacao.nota, 0);
   const mediaNotas = somaNotas / hotel.avaliacoes.length;
   
-  console.log(`📊 Média calculada: ${mediaNotas.toFixed(2)}`);
+  console.log(`� Soma das notas: ${somaNotas}`);
+  console.log(`�📊 Média calculada: ${mediaNotas.toFixed(2)}`);
   
   // Garantir que a nota está entre 0 e 5
   const finalRating = Math.max(0, Math.min(5, mediaNotas));
   console.log(`⭐ Rating final: ${finalRating}`);
+  console.log('=== FIM CÁLCULO RATING ===\n');
   
   return finalRating;
 };

@@ -53,6 +53,10 @@ const Admin: React.FC = () => {
     petFriendly: data.petFriendly,
     piscina: data.piscina,
     wifi: data.wifi,
+    cafeDaManha: data.cafeDaManha,
+    almoco: data.almoco,
+    jantar: data.jantar,
+    allInclusive: data.allInclusive,
     valorDiaria: Number(data.valorDiaria) || 0,
     imagens: data.imagens,
     datasDisponiveis: data.datasDisponiveis,
@@ -95,7 +99,11 @@ const Admin: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const convertedData = convertHotelFormData(data);
+      const convertedData = {
+        ...convertHotelFormData(data),
+        hotelId: editingHotel.hotelId  // Incluir o ID do hotel
+      };
+      console.log('🔄 Dados sendo enviados para atualização:', convertedData);
       await updateHotel(editingHotel.hotelId, convertedData);
       
       setEditingHotel(null);

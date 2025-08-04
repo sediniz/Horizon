@@ -8,6 +8,10 @@ export interface HotelFormData {
   petFriendly: boolean;
   piscina: boolean;
   wifi: boolean;
+  cafeDaManha: boolean;
+  almoco: boolean;
+  jantar: boolean;
+  allInclusive: boolean;
   valorDiaria: number | string; // Permite string vazia durante edição
   imagens: string;
   datasDisponiveis: string;

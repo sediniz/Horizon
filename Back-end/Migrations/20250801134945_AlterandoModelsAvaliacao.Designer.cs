@@ -4,6 +4,7 @@ using Horizon.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Horizon.Migrations
 {
     [DbContext(typeof(HorizonDbContext))]
-    partial class HorizonDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250801134945_AlterandoModelsAvaliacao")]
+    partial class AlterandoModelsAvaliacao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,10 +46,15 @@ namespace Horizon.Migrations
                     b.Property<decimal>("Nota")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.Property<int>("hotelId")
                         .HasColumnType("int");
 
                     b.HasKey("IdAvaliacao");
+
+                    b.HasIndex("UsuarioId");
 
                     b.HasIndex("hotelId");
 
@@ -308,11 +316,19 @@ namespace Horizon.Migrations
 
             modelBuilder.Entity("Horizon.Models.Avaliacao", b =>
                 {
-                    b.HasOne("Horizon.Models.Hotel", null)
+                    b.HasOne("Horizon.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId");
+
+                    b.HasOne("Horizon.Models.Hotel", "Hotel")
                         .WithMany("Avaliacoes")
                         .HasForeignKey("hotelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Horizon.Models.Hotel", b =>
