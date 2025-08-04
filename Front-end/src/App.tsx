@@ -1,5 +1,6 @@
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
+import ScrollToTop from './components/ScrollToTop/ScrollToTop';
 import InfoPacote from './pages/InfoPacote/InfoPacote';
 import Home from './pages/Home/Home';
 import PacotesGerais from './pages/PacotesGerais/PacotesGerais';
@@ -16,6 +17,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <div className="App">
           <Header />
           <Routes>
