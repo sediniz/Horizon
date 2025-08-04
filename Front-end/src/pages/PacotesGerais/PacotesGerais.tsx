@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PageHeader from './components/PageHeader';
 import FilterSection from './components/FilterSection';
 import PackageList from './components/PackageList';
@@ -9,8 +10,22 @@ import type { FilterState } from './types';
 import type { PackageProps } from './types';
 
 const PacotesGerais: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  
+  // Extrair parâmetros da URL vindos da busca
+  const searchData = {
+    destino: searchParams.get('destino') || '',
+    checkin: searchParams.get('checkin') || '',
+    checkout: searchParams.get('checkout') || '',
+    quartos: parseInt(searchParams.get('quartos') || '1'),
+    adultos: parseInt(searchParams.get('adultos') || '2'),
+    criancas: parseInt(searchParams.get('criancas') || '0')
+  };
+  
+  console.log('🔍 Parâmetros recebidos da busca:', searchData);
+  
   const [filters, setFilters] = useState<FilterState>({
-    selectedLocation: '',
+    selectedLocation: searchData.destino, // Aplicar destino automaticamente
     selectedAmenities: []
   });
   
@@ -135,6 +150,41 @@ const PacotesGerais: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <PageHeader />
+      
+      {/* Informação da Busca - quando vem da página Home */}
+      {searchData.destino && (
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-center mb-3">
+              <div className="bg-blue-100 rounded-full p-2 mr-3">
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-blue-800">Resultados da sua busca</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-center">
+                <span className="text-blue-600 font-medium mr-2">📍 Destino:</span>
+                <span className="text-blue-800 capitalize">{searchData.destino}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-blue-600 font-medium mr-2">📅 Período:</span>
+                <span className="text-blue-800">
+                  {searchData.checkin ? new Date(searchData.checkin).toLocaleDateString('pt-BR') : 'N/A'} até {searchData.checkout ? new Date(searchData.checkout).toLocaleDateString('pt-BR') : 'N/A'}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-blue-600 font-medium mr-2">👥 Hóspedes:</span>
+                <span className="text-blue-800">
+                  {searchData.quartos} quarto(s), {searchData.adultos} adulto(s)
+                  {searchData.criancas > 0 && `, ${searchData.criancas} criança(s)`}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Loading State */}
       {loading && (

@@ -61,12 +61,22 @@ export const getAllHoteis = async (): Promise<HotelAPI[]> => {
 export const getHotelById = async (id: number): Promise<HotelAPI> => {
   try {
     const response = await apiRequest(`/hoteis/${id}`);
-    console.log(` Hotel ${id} recebido:`, response);
-    console.log(` Avaliações do hotel ${response.nome}:`, {
-      temAvaliacoes: !!response.avaliacoes,
+    console.log(`🏨 Hotel ${id} recebido completo:`, response);
+    console.log(`⭐ Avaliações detalhadas do hotel ${response.nome}:`, {
+      temCampoAvaliacoes: 'avaliacoes' in response,
+      tipoAvaliacoes: typeof response.avaliacoes,
+      isArray: Array.isArray(response.avaliacoes),
       quantidadeAvaliacoes: response.avaliacoes?.length || 0,
-      avaliacoes: response.avaliacoes || 'Nenhuma avaliação'
+      avaliacoesCompletas: response.avaliacoes || 'Campo não existe'
     });
+    
+    if (response.avaliacoes && response.avaliacoes.length > 0) {
+      console.log(`📝 Detalhes de cada avaliação:`);
+      response.avaliacoes.forEach((av: any, i: number) => {
+        console.log(`   ${i + 1}. ID: ${av.idAvaliacao || 'N/A'}, Nota: ${av.nota}, Comentário: "${av.comentario}"`);
+      });
+    }
+    
     return response;
   } catch (error) {
     console.error(`Erro ao buscar hotel ${id}:`, error);
