@@ -1,4 +1,3 @@
-// src/components/TravelPackages.tsx
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +15,6 @@ type Amenity = {
   icon: string;
 };
 
-// Definindo o tipo do pacote para exibição (mapeado da API)
 type DisplayPackage = {
   id: number;
   title: string;
@@ -44,12 +42,9 @@ const getImageByDestino = (destino: string): string => {
   return PraiaImg; // Fallback padrão
 };
 
-// Função para mapear pacote da API para formato de exibição
 const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
-  // Gerar amenidades baseadas nas comodidades REAIS do hotel
   const amenities: Amenity[] = [];
   
-  // Usar as comodidades reais do hotel se disponível
   if (pacote.hotel) {
     if (pacote.hotel.wifi) amenities.push({ name: 'WiFi Grátis', icon: 'wifi' });
     if (pacote.hotel.piscina) amenities.push({ name: 'Piscina', icon: 'pool' });
@@ -61,7 +56,6 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     if (pacote.hotel.allInclusive) amenities.push({ name: 'All Inclusive', icon: 'star' });
   }
   
-  // Se não tem amenidades do hotel, usar fallback genérico
   if (amenities.length === 0) {
     amenities.push(
       { name: 'WiFi Grátis', icon: 'wifi' },
@@ -71,12 +65,10 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     );
   }
 
-  // Usar a imagem do hotel se disponível, senão usar fallback baseado no destino
   const hotelImage = pacote.hotel?.imagens;
   const fallbackImage = getImageByDestino(pacote.destino);
   
-  // Calcular rating real baseado nas avaliações do hotel
-  let realRating = 4.0; // Rating padrão
+  let realRating = 4.0; 
   let reviewCount = 0;
   
   if (pacote.hotel?.avaliacoes && pacote.hotel.avaliacoes.length > 0) {
@@ -86,12 +78,10 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
   }
   
   // CALCULAR PREÇO POR PESSOA (diária × dias)
-  // Usar valorDiaria do hotel se disponível, senão calcular baseado no valorTotal
   const valorDiaria = pacote.hotel?.valorDiaria || 
                      (pacote.hotel?.quarto?.valorDoQuarto || 0) + 200 || 
                      (pacote.valorTotal / pacote.duracao / pacote.quantidadeDePessoas);
   
-  // Calcular preço por pessoa: diária × número de dias
   const precoPorPessoa = valorDiaria * pacote.duracao;
   
   return {
@@ -100,16 +90,15 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     hotelName: pacote.hotel?.nome || 'Hotel Incluído',
     price: `R$ ${precoPorPessoa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
     duration: `${pacote.duracao} dias / ${pacote.duracao - 1} noites`,
-    image: hotelImage || fallbackImage, // Usar imagem do hotel ou fallback
-    rating: realRating, // Rating real das avaliações
-    reviewCount: reviewCount, // Número real de avaliações
+    image: hotelImage || fallbackImage, 
+    rating: realRating, 
+    reviewCount: reviewCount, 
     location: pacote.destino,
     amenities
     
   };
 };
 
-// Componente para renderizar as estrelas
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   const stars = [];
   const fullStars = Math.floor(rating);
@@ -173,28 +162,22 @@ const TravelPackages: React.FC = () => {
       try {
         setLoading(true);
         
-        // Buscar pacotes
         const pacotesAPI = await getAllPacotes();
         
         // Pegar apenas os primeiros 3 pacotes para a home
         const primeiros3Pacotes = pacotesAPI.slice(0, 3);
         
-        // Extrair IDs únicos dos hotéis
         const hotelIds = [...new Set(primeiros3Pacotes.map(p => p.hotelId))];
         
-        // Carregar dados dos hotéis com avaliações
         const hoteis = await getHoteisByIds(hotelIds);
         
-        // Criar um mapa hotelId -> hotel para lookup rápido
         const hotelMap = new Map(hoteis.map(hotel => [hotel.hotelId, hotel]));
         
-        // Associar hotéis aos pacotes
         const pacotesComHoteis = primeiros3Pacotes.map(pacote => ({
           ...pacote,
           hotel: hotelMap.get(pacote.hotelId)
         }));
         
-        // Mapear para o formato de exibição
         const displayPackages = pacotesComHoteis.map(mapPacoteToDisplay);
         
         setPackages(displayPackages);
@@ -203,7 +186,6 @@ const TravelPackages: React.FC = () => {
         console.error('Erro ao carregar pacotes:', err);
         setError('Erro ao carregar pacotes. Usando dados de exemplo.');
         
-        // Fallback para dados mockados em caso de erro
         const fallbackPackages: DisplayPackage[] = [
           {
             id: 1,
@@ -299,7 +281,7 @@ const TravelPackages: React.FC = () => {
               </div>
 
               {/* Conteúdo do card */}
-              <div className="p-4">{/* Reduzido padding de p-6 para p-4 */}
+              <div className="p-4">{/**/}
                 {/* Título e Hotel */}
                 <div className="mb-3">
                   <h3 className="text-xl font-bold text-gray-900 mb-1">{pkg.title}</h3>
@@ -325,7 +307,7 @@ const TravelPackages: React.FC = () => {
                 </div>
 
                 {/* Comodidades */}
-                <div className="mb-4">{/* Reduzido de mb-6 para mb-4 */}
+                <div className="mb-4">{/**/}
                   <p className="text-sm font-semibold text-gray-800 mb-2">Comodidades:</p>
                   <div className="grid grid-cols-3 gap-2">
                     {pkg.amenities.slice(0, 6).map((amenity: Amenity, index: number) => (

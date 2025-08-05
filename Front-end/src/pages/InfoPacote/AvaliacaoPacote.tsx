@@ -29,12 +29,10 @@ const AvaliacaoPacote: React.FC<AvaliacaoPacoteProps> = ({ avaliacoes = [] }) =>
     return <Rating rating={nota} size={size as any} />;
   };
   
-  // Função para obter um avatar aleatório
   const getRandomAvatar = (index: number) => {
     return avatarFallbacks[index % avatarFallbacks.length];
   };
   
-  // Função para obter um nome aleatório
   const getRandomNome = (index: number) => {
     return nomesFallback[index % nomesFallback.length];
   };

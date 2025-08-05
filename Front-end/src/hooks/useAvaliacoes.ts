@@ -9,7 +9,7 @@ export const useAvaliacoes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Função para formatar avaliações para o componente (baseado nos modelos reais)
+  // Função para formatar avaliações para o componente 
   const formatarAvaliacoes = (avaliacoes: Avaliacao[]): AvaliacaoFormatada[] => {
     const cores = [
       "from-blue-400 to-blue-600",
@@ -87,7 +87,7 @@ export const useAvaliacoes = () => {
     });
   };
 
-  // Carregar avaliações da API - apenas dados reais do banco
+  // Carregar avaliações da API 
   const loadAvaliacoes = async () => {
     try {
       setLoading(true);

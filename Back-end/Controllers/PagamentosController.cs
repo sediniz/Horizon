@@ -63,7 +63,7 @@ namespace Horizon.Controllers
         {
             if (id != pagamento.PagamentoId)
             {
-                return BadRequest("ID n�o corresponde ao pagamento informado.");
+                return BadRequest("ID nao corresponde ao pagamento informado.");
             }
             var existingPagamento = await _pagamentoService.GetByIdAsync(id);
             if (existingPagamento == null)
@@ -168,7 +168,7 @@ namespace Horizon.Controllers
 
                 // Verificar se é uma reserva existente ou nova
                 var dataViagem = request.DataViagem;
-                var duracaoPacote = pacote?.Duracao ?? 7; // Usar duração do pacote ou padrão de 7 dias
+                var duracaoPacote = pacote?.Duracao ?? 7; 
                 
                 Console.WriteLine($"💳 Processando pagamento para Pacote {request.PacoteId} - Hotel {pacote?.HotelId}");
                 Console.WriteLine($"📅 Datas: {dataViagem:yyyy-MM-dd} até {dataViagem.AddDays(duracaoPacote):yyyy-MM-dd}");
@@ -178,7 +178,7 @@ namespace Horizon.Controllers
                 if (request.ReservaId.HasValue && request.ReservaId.Value > 0)
                 {
                     // Se temos uma reserva existente, atualizá-la
-                    Console.WriteLine($"♻️ Atualizando reserva existente: {request.ReservaId}");
+                    Console.WriteLine($" Atualizando reserva existente: {request.ReservaId}");
                     
                     reserva = await _reservaService.GetByIdAsync(request.ReservaId.Value);
                     if (reserva == null)
@@ -213,7 +213,7 @@ namespace Horizon.Controllers
                         QuantidadePessoas = request.QuantidadePessoas,
                         ValorTotal = (decimal)intent.Amount / 100,
                         PacoteId = request.PacoteId,
-                        Status = StatusReserva.Confirmada // Definir como confirmada quando pagamento é aprovado
+                        Status = StatusReserva.Confirmada 
                     };
                     
                     // Adicionar nova reserva
@@ -255,12 +255,12 @@ namespace Horizon.Controllers
             var pagamento = await _pagamentoService.GetByIdAsync(id);
             if (pagamento == null)
             {
-                return NotFound(new { mensagem = "Pagamento n�o encontrado" });
+                return NotFound(new { mensagem = "Pagamento nao encontrado" });
             }
 
             if (string.IsNullOrEmpty(pagamento.StripePaymentIntentId))
             {
-                return BadRequest(new { mensagem = "Este pagamento n�o possui um ID de intent do Stripe" });
+                return BadRequest(new { mensagem = "Este pagamento nao possui um ID de intent do Stripe" });
             }
 
             try
@@ -277,7 +277,7 @@ namespace Horizon.Controllers
                 }
                 else
                 {
-                    return Ok(new { mensagem = "Pagamento ainda n�o foi processado ou foi recusado", status = intent.Status });
+                    return Ok(new { mensagem = "Pagamento ainda nao foi processado ou foi recusado", status = intent.Status });
                 }
             }
             catch (Exception ex)
@@ -296,11 +296,10 @@ namespace Horizon.Controllers
                 var stripeEvent = Stripe.EventUtility.ConstructEvent(
                     json,
                     Request.Headers["Stripe-Signature"],
-                    "whsec_sua_chave_webhook_aqui" // Substitua pela sua chave de webhook
+                    "whsec_sua_chave_webhook_aqui" 
                 );
 
-                // Processar eventos relevantes do Stripe
-                if (stripeEvent.Type == "payment_intent.succeeded") // Corrigido para usar a string literal correta
+                if (stripeEvent.Type == "payment_intent.succeeded") 
                 {
                     var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
 
@@ -340,8 +339,7 @@ namespace Horizon.Controllers
                     return BadRequest(new { mensagem = $"ID do usuário inválido. Recebido: '{request.UsuarioId}'. Esperado: um número inteiro válido." });
                 }
 
-                // Para usuário convidado (ID 1), permitir sem verificação
-                // Para outros usuários, verificar se existe no sistema
+                
                 if (usuarioIdInt != 1)
                 {
                     var usuario = await _usuarioService.GetByIdAsync(usuarioIdInt);

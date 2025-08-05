@@ -41,9 +41,7 @@ const Admin: React.FC = () => {
     testConnection();
   }, []);
 
-  // ================================
-  // FUNÇÕES HELPER
-  // ================================
+ 
   const convertHotelFormData = (data: HotelFormData) => ({
     nome: data.nome,
     localizacao: data.localizacao,
@@ -64,7 +62,7 @@ const Admin: React.FC = () => {
   });
 
   const convertPacoteFormData = (data: PacoteFormData, pacoteId?: number) => ({
-    pacoteId: pacoteId || 0, // Incluir o ID do pacote para o PUT
+    pacoteId: pacoteId || 0, 
     titulo: data.titulo,
     descricao: data.descricao || 'Pacote de viagem', // Valor padrão se vazio
     destino: data.destino,
@@ -74,9 +72,7 @@ const Admin: React.FC = () => {
     hotelId: Number(data.hotelId) || 0,
   });
 
-  // ================================
-  // FUNÇÕES PARA HOTÉIS
-  // ================================
+
   const handleCreateHotel = async (data: HotelFormData) => {
     try {
       setIsLoading(true);
@@ -101,7 +97,7 @@ const Admin: React.FC = () => {
       setIsLoading(true);
       const convertedData = {
         ...convertHotelFormData(data),
-        hotelId: editingHotel.hotelId  // Incluir o ID do hotel
+        hotelId: editingHotel.hotelId  
       };
       console.log('🔄 Dados sendo enviados para atualização:', convertedData);
       await updateHotel(editingHotel.hotelId, convertedData);
@@ -133,9 +129,8 @@ const Admin: React.FC = () => {
     setViewMode('form');
   };
 
-  // ================================
-  // FUNÇÕES PARA PACOTES
-  // ================================
+
+
   const handleCreatePacote = async (data: PacoteFormData) => {
     try {
       setIsLoading(true);
@@ -152,7 +147,6 @@ const Admin: React.FC = () => {
     } catch (error) {
       console.error(' Erro completo ao criar pacote:', error);
       
-      // Mostrar erro mais detalhado para o usuário
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       alert(`Erro ao criar pacote: ${errorMessage}`);
     } finally {
@@ -200,9 +194,7 @@ const Admin: React.FC = () => {
     setViewMode('form');
   };
 
-  // ================================
-  // FUNÇÕES DE NAVEGAÇÃO
-  // ================================
+
   const handleTabChange = (tab: ActiveTab) => {
     setActiveTab(tab);
     setViewMode('list');

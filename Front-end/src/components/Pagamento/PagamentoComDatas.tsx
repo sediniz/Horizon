@@ -7,7 +7,7 @@ interface PagamentoComDatasProps {
   pacoteId: number;
   valorTotal: number;
   quantidadePessoas: number;
-  duracaoSugerida?: number; // Duração em dias do pacote
+  duracaoSugerida?: number; 
   onPaymentSuccess: (paymentMethodId: string, reservaId?: number) => void;
   onPaymentError: (error: string) => void;
 }
@@ -25,11 +25,9 @@ const PagamentoComDatas: React.FC<PagamentoComDatasProps> = ({
   const [etapaAtual, setEtapaAtual] = useState<'datas' | 'pagamento'>('datas');
   const { clientSecret, iniciarPagamento, loading } = useStripeContext();
 
-  // Função para calcular data fim baseada na duração sugerida
   const handleDataInicioChange = (novaDataInicio: string) => {
     setDataInicio(novaDataInicio);
     
-    // Se não há data fim definida, calcular baseado na duração sugerida
     if (!dataFim && novaDataInicio && duracaoSugerida) {
       const dataInicioDate = new Date(novaDataInicio);
       const dataFimDate = new Date(dataInicioDate);
@@ -140,7 +138,7 @@ const PagamentoComDatas: React.FC<PagamentoComDatasProps> = ({
         clientSecret={clientSecret}
         valorTotal={valorTotal}
         pacoteId={pacoteId}
-        dataViagem={dataInicio} // Compatibilidade com API atual
+        dataViagem={dataInicio} 
         dataInicio={dataInicio}
         dataFim={dataFim}
         quantidadePessoas={quantidadePessoas}

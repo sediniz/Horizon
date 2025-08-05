@@ -15,9 +15,9 @@ interface StripeContextType {
 
 interface DadosReserva {
   pacoteId: number;
-  dataViagem: string; // Data de início da viagem
-  dataInicio: string; // Data de início (mesmo que dataViagem para compatibilidade)
-  dataFim: string;    // Data de fim da viagem
+  dataViagem: string;
+  dataInicio: string; 
+  dataFim: string;    
   quantidadePessoas: number;
 }
 
@@ -51,13 +51,11 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
         pacoteId
       });
       
-      // Tentar usar a API real primeiro
       try {
         // Chamar a API para criar um payment intent
         const { clientSecret } = await criarIntentPagamento(valorTotal, pacoteId);
         console.log('✅ Client Secret recebido do backend:', clientSecret ? 'Sucesso' : 'Vazio');
         
-        // Verificar se o client secret é válido (formato real do Stripe)
         if (clientSecret && clientSecret.startsWith('pi_') && clientSecret.includes('_secret_')) {
           setClientSecret(clientSecret);
         } else {
@@ -82,7 +80,6 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
         return false;
       }
 
-      // Garantir que a data está no formato correto (ISO string)
       const dataViagem = dadosReserva.dataInicio || dadosReserva.dataViagem;
       
       console.log('📅 Dados da reserva para confirmação:', {
@@ -117,9 +114,7 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
     }
   };
 
-  // Sempre renderiza o componente Elements quando tivermos o client secret
   if (clientSecret) {
-    // Usar o Stripe Elements normalmente para client secrets válidos
     return (
       <StripeContext.Provider value={{ clientSecret, loading, error, iniciarPagamento, confirmarPagamentoCompleto }}>
         <Elements stripe={stripePromise} options={{ clientSecret }}>
@@ -129,7 +124,6 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
     );
   }
 
-  // Caso ainda não tenha o client secret, renderiza sem o Elements
   return (
     <StripeContext.Provider value={{ clientSecret, loading, error, iniciarPagamento, confirmarPagamentoCompleto }}>
       {children}

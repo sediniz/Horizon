@@ -46,7 +46,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     };
   }, []);
 
-  // Filtrar localizações baseado no termo de busca
   const filteredLocations = availableLocations.filter(location =>
     location.toLowerCase().includes(searchTerm.toLowerCase())
   );

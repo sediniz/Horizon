@@ -6,20 +6,18 @@ interface PacoteInfoCardProps {
   dataIda: string;
   dataVolta: string;
   pessoas: number;
-  duracao: number; // Nova prop para duração
+  duracao: number; 
   pacoteId?: number;
   onModificar: (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => void;
 }
 
 const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', dataIda, dataVolta, pessoas, duracao }) => {
-  // Debug: verificar que duracao está chegando
-  console.log('📋 PacoteInfoCard recebeu duracao:', duracao);
+  console.log(' PacoteInfoCard recebeu duracao:', duracao);
   
-  // Função para adicionar 1 dia às datas (gambiarra para o InfoPacote)
   const formatarDataComMaisUmDia = (dataString: string) => {
     try {
       const data = new Date(dataString);
-      data.setDate(data.getDate() + 1); // Adiciona 1 dia
+      data.setDate(data.getDate() + 1); 
       return data.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',

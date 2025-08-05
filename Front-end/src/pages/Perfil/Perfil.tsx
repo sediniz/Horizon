@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Simulando dados do usuário baseado no modelo Usuario.cs
 interface UsuarioData {
   usuarioId: number;
   nome: string;
@@ -13,7 +12,6 @@ interface UsuarioData {
   profileImage?: string;
 }
 
-// Dados mockados do usuário (em um projeto real, viria de uma API)
 const mockUserData: UsuarioData = {
   usuarioId: 1,
   nome: "Usuário Anônimo",
@@ -27,7 +25,6 @@ function Perfil() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Usar dados reais do usuário logado ou fallback para dados vazios
   const realUserData: UsuarioData = usuario ? {
     usuarioId: usuario.usuarioId || 0,
     nome: usuario.nome || "Nome não informado",
@@ -42,7 +39,6 @@ function Perfil() {
   const [editForm, setEditForm] = useState<UsuarioData>(realUserData);
   const [isAccountSettingsExpanded, setIsAccountSettingsExpanded] = useState(false);
 
-  // Atualizar dados quando o usuário mudar (login/logout)
   useEffect(() => {
     if (usuario) {
       const updatedUserData: UsuarioData = {
@@ -61,7 +57,6 @@ function Perfil() {
     }
   }, [usuario, navigate]);
 
-  // Função para lidar com mudanças no formulário
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setEditForm(prev => ({
@@ -70,28 +65,24 @@ function Perfil() {
     }));
   };
 
-  // Função para salvar alterações
   const handleSave = async () => {
     try {
-      // Aqui você faria a chamada para a API para salvar os dados
+      // 
       // const response = await fetch('/api/usuarios/atualizar', {
       //   method: 'PUT',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(editForm)
       // });
       
-      // Por enquanto, apenas atualizar localmente
       setUserData(editForm);
       setIsEditing(false);
       
-      // TODO: Após implementar a API, também atualizar o contexto de autenticação
       console.log('Dados atualizados:', editForm);
     } catch (error) {
       console.error('Erro ao salvar dados:', error);
     }
   };
 
-  // Função para cancelar edição
   const handleCancel = () => {
     setEditForm(userData);
     setIsEditing(false);
@@ -125,17 +116,17 @@ function Perfil() {
               Meu Perfil
             </h1>
             
-            {/* Profile Card - Rectangular div with user info */}
+            {/* Profile Card */}
             <div className="bg-white rounded-lg shadow-lg p-6 mb-8 max-w-2xl mx-auto">
               <div className="space-y-6">
-                {/* User Name - Centered */}
+                {/* User Name */}
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">
                     {userData.nome}
                   </h2>
                 </div>
 
-                {/* Information Grid - Centered */}
+                {/* Information Grid*/}
                 <div className="space-y-4 max-w-md mx-auto">
                   {/* Email */}
                   <div className="space-y-1">
@@ -186,7 +177,7 @@ function Perfil() {
                   </div>
                 </div>
 
-                {/* Edit Button - Centered */}
+                {/* Edit Button*/}
                 <div className="flex justify-center mb-6">
                   {!isEditing && (
                     <button

@@ -81,9 +81,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const data = await response.json();
         const token = data.token;
 
-        // Decodificar o token JWT para extrair informações do usuário
         const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('Payload do JWT:', payload); // Debug
+        console.log('Payload do JWT:', payload); 
         
         const userData: UsuarioAuth = {
           usuarioId: parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]) || 0,
@@ -94,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           tipoUsuario: payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || 'Cliente',
         };
 
-        console.log('Dados do usuário extraídos:', userData); // Debug
+        console.log('Dados do usuário extraídos:', userData); 
 
         // Salvar no localStorage
         localStorage.setItem('horizon_token', token);

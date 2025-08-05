@@ -12,7 +12,6 @@ import type { PackageProps } from './types';
 const PacotesGerais: React.FC = () => {
   const [searchParams] = useSearchParams();
   
-  // Extrair parâmetros da URL vindos da busca
   const searchData = {
     destino: searchParams.get('destino') || '',
     checkin: searchParams.get('checkin') || '',
@@ -23,7 +22,7 @@ const PacotesGerais: React.FC = () => {
   };
   
   const [filters, setFilters] = useState<FilterState>({
-    selectedLocation: searchData.destino, // Aplicar destino automaticamente
+    selectedLocation: searchData.destino, 
     selectedAmenities: []
   });
   
@@ -33,7 +32,6 @@ const PacotesGerais: React.FC = () => {
   const [availableAmenities, setAvailableAmenities] = useState<{name: string, icon: string}[]>([]);
   const [availableLocations, setAvailableLocations] = useState<string[]>([]);
 
-  // Carregar pacotes da API
   useEffect(() => {
     const loadPackages = async () => {
       try {
@@ -42,32 +40,26 @@ const PacotesGerais: React.FC = () => {
         
         const pacotesAPI = await getAllPacotes();
         
-        // Extrair IDs únicos dos hotéis
         const hotelIds = [...new Set(pacotesAPI.map(p => p.hotelId))];
-        console.log('🏨 IDs dos hotéis para carregar:', hotelIds);
+        console.log(' IDs dos hotéis para carregar:', hotelIds);
         
-        // Carregar dados dos hotéis
         const hoteis = await getHoteisByIds(hotelIds);
         
-        // Criar um mapa hotelId -> hotel para lookup rápido
         const hotelMap = new Map(hoteis.map(hotel => [hotel.hotelId, hotel]));
         
-        // Combinar pacotes com dados dos hotéis
         const pacotesComHotel = pacotesAPI.map(pacote => ({
           ...pacote,
           hotel: hotelMap.get(pacote.hotelId)
         }));
         
         const convertedPackages = convertAPIPackagesToPackages(pacotesComHotel);
-        console.log('✅ Pacotes convertidos:', convertedPackages);
+        console.log('Pacotes convertidos:', convertedPackages);
         
         setPackages(convertedPackages);
 
-        // Carregar comodidades disponíveis baseadas nos hotéis reais
         const amenities = await getAvailableAmenities();
         setAvailableAmenities(amenities);
 
-        // Extrair localizações únicas dos hotéis
         const locations = [...new Set(hoteis.map(h => h.localizacao))].filter(Boolean);
         setAvailableLocations(locations);
 
@@ -107,7 +99,6 @@ const PacotesGerais: React.FC = () => {
     return filtered;
   }, [packages, filters]);
 
-  // Funções para manipular filtros
   const handleLocationChange = (location: string) => {
     setFilters(prev => ({ ...prev, selectedLocation: location }));
   };
@@ -132,7 +123,7 @@ const PacotesGerais: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <PageHeader />
       
-      {/* Informação da Busca - quando vem da página Home */}
+      {/* Informação da Buscaquando vem da página Home */}
       {searchData.destino && (
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">

@@ -34,8 +34,8 @@ export interface DadosPacote {
 // Interface para o payload do PaymentIntent
 export interface PaymentIntentRequest {
   valorTotal: number;
-  pacoteId?: number;  // Opcional porque pode não existir ainda
-  reservaId?: number; // Opcional porque podemos criar uma reserva depois
+  pacoteId?: number;  
+  reservaId?: number; 
   tipoPagamento?: string;
 }
 
@@ -51,15 +51,13 @@ export interface ConfirmarPagamentoRequest {
 // Criar intent de pagamento com Stripe
 export const criarIntentPagamento = async (valorTotal: number, pacoteId: number): Promise<{clientSecret: string}> => {
   try {
-    // Criamos um payload completo conforme o backend espera
     const payload: PaymentIntentRequest = {
       valorTotal,
       pacoteId,
       tipoPagamento: "Cartão de Crédito",
-      // Não enviamos reservaId porque provavelmente a reserva ainda não foi criada
     };
     
-    console.log('📊 Enviando payload para criar intent:', payload);
+    console.log('Enviando payload para criar intent:', payload);
     
     const response = await apiRequest('/pagamentos/criar-intent', {
       method: 'POST',
@@ -118,14 +116,13 @@ export const processarPagamento = async (dadosPagamento: DadosPagamento): Promis
         console.log('Endpoint /processar não disponível, tentando endpoint padrão...');
         
         try {
-          // Tenta usar o endpoint padrão para criar um pagamento
           const response = await apiRequest('/pagamentos', {
             method: 'POST',
             data: {
-              ReservaId: dadosPagamento.pacoteId, // Não temos uma reserva ainda, então usamos o pacoteId
+              ReservaId: dadosPagamento.pacoteId, 
               UsuarioId: dadosPagamento.usuarioId,
               TipoPagamento: dadosPagamento.formaPagamento,
-              StatusPagamento: "Aprovado", // Simulando que foi aprovado
+              StatusPagamento: "Aprovado", 
               ValorPagamento: dadosPagamento.paymentMethodId ? 
                 parseFloat((dadosPagamento.quantidadePessoas * 1000).toFixed(2)) : 
                 0,

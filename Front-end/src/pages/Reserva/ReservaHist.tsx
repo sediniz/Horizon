@@ -92,11 +92,9 @@ export default function ReservaHist() {
     if (!selectedReserva) return;
     
     try {
-      // Encontrar a reserva sendo cancelada
       const reserva = reservas.find(r => r.id === selectedReserva);
       const reservaInfo = reserva ? `${reserva.hotel} - ${reserva.destino}` : 'Reserva';
       
-      // Chamar API para cancelar
       const dadosCancelamento: CancelamentoReserva = {
         reservaId: selectedReserva,
         nome: cancelData.nome,
@@ -107,7 +105,6 @@ export default function ReservaHist() {
       
       await reservasApi.cancelarReserva(dadosCancelamento);
       
-      // Atualizar estado local
       setReservas(prev => prev.map(r => 
         r.id === selectedReserva ? { ...r, status: 'cancelada' as const } : r
       ));
@@ -154,7 +151,6 @@ export default function ReservaHist() {
       alert('Erro ao enviar a avaliação. Tente novamente.');
     }
   };
-  // Handler para enviar comprovante por e-mail
   const handleEnviarPorEmail = async (reservaId: number) => {
     try {
       const reserva = reservas.find(r => r.id === reservaId);
@@ -163,7 +159,6 @@ export default function ReservaHist() {
         return;
       }
 
-      // Simular envio do comprovante por e-mail
       await reservasApi.confirmarStatus(reservaId);
       alert(`Comprovante da reserva ${reserva.codigo} enviado por e-mail com sucesso!\n\nO comprovante foi enviado para: ${usuario?.email || 'seu e-mail cadastrado'}`);
     } catch (err) {
@@ -172,7 +167,6 @@ export default function ReservaHist() {
     }
   };
 
-  // Handler para reenviar confirmação
   const handleReenviarConfirmacao = async (reservaId: number) => {
     try {
       await reservasApi.reenviarConfirmacao(reservaId);
@@ -191,7 +185,6 @@ export default function ReservaHist() {
         return;
       }
 
-      // Adicionar função global para enviar por e-mail
       (window as any).enviarComprovanteEmail = (reservaId: number) => {
         handleEnviarPorEmail(reservaId);
       };
@@ -589,13 +582,11 @@ export default function ReservaHist() {
       try {
         setLoading(true);
         setError(null);
-        // Usa o ID do usuário do contexto de autenticação
         const reservasCarregadas = await reservasApi.buscarReservas(usuario?.usuarioId);
         setReservas(reservasCarregadas);
       } catch (err) {
         console.error('Erro ao carregar reservas:', err);
         setError(err instanceof Error ? err.message : 'Erro ao carregar reservas');
-        // Fallback para dados mock em caso de erro
         setReservas([
           {
             id: 1,
