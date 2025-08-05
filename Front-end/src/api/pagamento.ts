@@ -85,8 +85,6 @@ export const confirmarPagamento = async (dados: ConfirmarPagamentoRequest): Prom
       data: dados,
     });
 
-    console.log('🎯 Resposta do backend para confirmação:', response);
-
     return { 
       success: true, 
       reservaId: response.reservaId || response.data?.reservaId,
@@ -105,19 +103,19 @@ export const confirmarPagamento = async (dados: ConfirmarPagamentoRequest): Prom
 export const processarPagamento = async (dadosPagamento: DadosPagamento): Promise<RespostaPagamento> => {
   try {
     // Tenta usar a API real
-    console.log('🔄 Tentando processar pagamento via API:', dadosPagamento);
+    console.log(' Tentando processar pagamento via API:', dadosPagamento);
     
     try {
       const response = await apiRequest('/pagamentos/processar', {
         method: 'POST',
         data: dadosPagamento,
       });
-      console.log('✅ Resposta de processamento recebida:', response);
+      console.log(' Resposta de processamento recebida:', response);
       return response;
     } catch (apiError: any) {
       // Se não existir o endpoint /processar, usar o endpoint padrão
       if (apiError?.response?.status === 405) {
-        console.log('⚠️ Endpoint /processar não disponível, tentando endpoint padrão...');
+        console.log('Endpoint /processar não disponível, tentando endpoint padrão...');
         
         try {
           // Tenta usar o endpoint padrão para criar um pagamento
@@ -135,7 +133,7 @@ export const processarPagamento = async (dadosPagamento: DadosPagamento): Promis
               StripePaymentIntentId: dadosPagamento.paymentMethodId || "",
             },
           });
-          console.log('✅ Resposta de pagamento padrão recebida:', response);
+          console.log(' Resposta de pagamento padrão recebida:', response);
           
           // Converter para o formato esperado
           return {
@@ -145,16 +143,16 @@ export const processarPagamento = async (dadosPagamento: DadosPagamento): Promis
             message: 'Pagamento processado com sucesso'
           };
         } catch (defaultError) {
-          console.error('❌ Falha no endpoint padrão também:', defaultError);
+          console.error(' Falha no endpoint padrão também:', defaultError);
           throw new Error('Não foi possível processar o pagamento. Verifique sua conexão e tente novamente.');
         }
       } else {
-        console.error('❌ Falha na API de pagamento:', apiError);
+        console.error(' Falha na API de pagamento:', apiError);
         throw new Error('Serviço de pagamento indisponível. Tente novamente em alguns instantes.');
       }
     }
   } catch (error) {
-    console.error('🔴 Erro ao processar pagamento:', error);
+    console.error(' Erro ao processar pagamento:', error);
     throw new Error('Falha ao processar pagamento. Tente novamente.');
   }
 };

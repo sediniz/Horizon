@@ -61,21 +61,6 @@ export const getAllHoteis = async (): Promise<HotelAPI[]> => {
 export const getHotelById = async (id: number): Promise<HotelAPI> => {
   try {
     const response = await apiRequest(`/hoteis/${id}`);
-    console.log(`🏨 Hotel ${id} recebido completo:`, response);
-    console.log(`⭐ Avaliações detalhadas do hotel ${response.nome}:`, {
-      temCampoAvaliacoes: 'avaliacoes' in response,
-      tipoAvaliacoes: typeof response.avaliacoes,
-      isArray: Array.isArray(response.avaliacoes),
-      quantidadeAvaliacoes: response.avaliacoes?.length || 0,
-      avaliacoesCompletas: response.avaliacoes || 'Campo não existe'
-    });
-    
-    if (response.avaliacoes && response.avaliacoes.length > 0) {
-      console.log(`📝 Detalhes de cada avaliação:`);
-      response.avaliacoes.forEach((av: any, i: number) => {
-        console.log(`   ${i + 1}. ID: ${av.idAvaliacao || 'N/A'}, Nota: ${av.nota}, Comentário: "${av.comentario}"`);
-      });
-    }
     
     return response;
   } catch (error) {
@@ -91,7 +76,6 @@ export const getHoteisByIds = async (hotelIds: number[]): Promise<HotelAPI[]> =>
     const hotelPromises = hotelIds.map(id => getHotelById(id));
     const hoteis = await Promise.all(hotelPromises);
     
-    console.log('🏨 Múltiplos hotéis carregados:', hoteis.length);
     return hoteis;
   } catch (error) {
     console.error('Erro ao buscar múltiplos hotéis:', error);
@@ -106,7 +90,6 @@ export const createHotel = async (hotel: Omit<HotelAPI, 'hotelId'>): Promise<Hot
       method: 'POST',
       data: hotel,
     });
-    console.log('🏨 Hotel criado:', response);
     return response;
   } catch (error) {
     console.error('Erro ao criar hotel:', error);
@@ -117,16 +100,13 @@ export const createHotel = async (hotel: Omit<HotelAPI, 'hotelId'>): Promise<Hot
 // Função para atualizar um hotel (admin)
 export const updateHotel = async (id: number, hotel: Partial<HotelAPI>): Promise<HotelAPI> => {
   try {
-    console.log(`🔄 Atualizando hotel ${id} com dados:`, hotel);
     const response = await apiRequest(`/hoteis/${id}`, {
       method: 'PUT',
       data: hotel,
     });
-    console.log(`🏨 Hotel ${id} atualizado:`, response);
     return response;
   } catch (error) {
     console.error(`Erro ao atualizar hotel ${id}:`, error);
-    console.error('Dados enviados:', hotel);
     throw new Error('Falha ao atualizar hotel');
   }
 };
@@ -137,7 +117,6 @@ export const deleteHotel = async (id: number): Promise<void> => {
     await apiRequest(`/hoteis/${id}`, {
       method: 'DELETE',
     });
-    console.log(`🏨 Hotel ${id} deletado`);
   } catch (error) {
     console.error(`Erro ao deletar hotel ${id}:`, error);
     throw new Error('Falha ao deletar hotel');
@@ -166,7 +145,6 @@ export const getAvailableAmenities = async () => {
       hoteis.some(hotel => hotel[amenity.key as keyof HotelAPI] === true)
     );
     
-    console.log('🏨 Comodidades disponíveis nos hotéis:', availableAmenities);
     return availableAmenities;
   } catch (error) {
     console.error('Erro ao obter comodidades:', error);

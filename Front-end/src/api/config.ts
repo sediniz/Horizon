@@ -25,29 +25,29 @@ export const apiRequest = async (
   };
 
   try {
-    console.log(`🌐 Fazendo requisição: ${config.method?.toUpperCase()} ${url}`);
+    console.log(` Fazendo requisição: ${config.method?.toUpperCase()} ${url}`);
     if (config.data) {
-      console.log('📤 Dados enviados:', config.data);
+      console.log(' Dados enviados:', config.data);
     }
     
     const response = await axios(config);
-    console.log(`✅ Resposta recebida: ${response.status}`, response.data);
+    console.log(` Resposta recebida: ${response.status}`, response.data);
     return response.data;
   } catch (error: any) {
-    console.error('❌ API Request Error:', error);
-    console.error('🔗 URL da requisição:', url);
-    console.error('⚙️ Configuração:', config);
+    console.error(' API Request Error:', error);
+    console.error(' URL da requisição:', url);
+    console.error(' Configuração:', config);
     
     if (error.response) {
-      console.error('📝 Resposta do servidor:', error.response.data);
-      console.error('🔢 Status:', error.response.status);
-      console.error('🏷️ Headers:', error.response.headers);
+      console.error('Resposta do servidor:', error.response.data);
+      console.error('Status:', error.response.status);
+      console.error('Headers:', error.response.headers);
       
       // Log detalhado dos erros de validação
       if (error.response.data?.errors) {
-        console.error('🚨 Erros de validação detalhados:', error.response.data.errors);
+        console.error('Erros de validação detalhados:', error.response.data.errors);
         Object.entries(error.response.data.errors).forEach(([field, messages]) => {
-          console.error(`❌ Campo "${field}":`, messages);
+          console.error(`Campo "${field}":`, messages);
         });
       }
       
@@ -71,10 +71,10 @@ export const apiRequest = async (
       
       throw new Error(errorMessage);
     } else if (error.request) {
-      console.error('📡 Nenhuma resposta recebida:', error.request);
+      console.error('Nenhuma resposta recebida:', error.request);
       throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
     } else {
-      console.error('⚠️ Erro na configuração:', error.message);
+      console.error('Erro na configuração:', error.message);
       throw new Error(`Erro na requisição: ${error.message}`);
     }
   }
