@@ -14,34 +14,41 @@ export interface AtualizarAvaliacaoDto {
   comentario: string;
 }
 
-// Interface da avaliação com dados completos (como vem da API)
+// Interface da avaliação com dados completos (como vem da API - camelCase)
 export interface Avaliacao {
-  IdAvaliacao: number;
-  Nota: number;
-  Comentario: string;
-  DataAvaliacao: string;
-  IdUsuario: number;
+  idAvaliacao: number;
+  nota: number;
+  comentario: string;
+  dataAvaliacao: string;
+  idUsuario: number;
   hotelId: number;
   // Dados do usuário e hotel (vem com Include)
-  Usuario?: {
-    UsuarioId: number;
-    Nome: string;
-    Email: string;
-    Telefone: string;
-    CpfPassaporte: string;
-    TipoUsuario: string;
+  usuario?: {
+    usuarioId: number;
+    nome: string;
+    email: string;
+    telefone: string;
+    cpfPassaporte: string;
+    tipoUsuario: string;
   };
-  Hotel?: {
-    HotelId: number;
-    QuantidadeDeQuartos: number;
-    Nome: string;
-    Localizacao: string;
-    Descricao: string;
-    Estacionamento: boolean;
-    PetFriendly: boolean;
-    Piscina: boolean;
-    Wifi: boolean;
-    CafeDaManha: boolean;
+  hotel?: {
+    hotelId: number;
+    quantidadeDeQuartos: number;
+    nome: string;
+    localizacao: string;
+    descricao: string;
+    estacionamento: boolean;
+    petFriendly: boolean;
+    piscina: boolean;
+    wifi: boolean;
+    cafeDaManha: boolean;
+    almoco: boolean;
+    jantar: boolean;
+    allInclusive: boolean;
+    datasDisponiveis: string;
+    valorDiaria: number;
+    imagens: string;
+    imagem: string;
   };
 }
 
@@ -64,6 +71,9 @@ export interface AvaliacaoFormatada {
     stars: number;
     amenities: string[];
     category: string;
+    description: string;
+    dailyRate: number;
+    rooms: number;
   };
 }
 

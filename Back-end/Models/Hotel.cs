@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Horizon.Models
 {
@@ -42,6 +43,7 @@ namespace Horizon.Models
         [NotMapped]
         public string? Imagem => Imagens;
 
+        [JsonIgnore] // Ignora esta propriedade na serialização para evitar referência circular
         public ICollection<Avaliacao>? Avaliacoes { get; set; }
 
         [ForeignKey("Quarto")]
