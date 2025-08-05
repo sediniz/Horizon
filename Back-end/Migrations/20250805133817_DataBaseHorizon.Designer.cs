@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Horizon.Migrations
 {
     [DbContext(typeof(HorizonDbContext))]
-    [Migration("20250804133120_AddReservaColunas")]
-    partial class AddReservaColunas
+    [Migration("20250805133817_DataBaseHorizon")]
+    partial class DataBaseHorizon
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -270,10 +270,6 @@ namespace Horizon.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<string>("StatusReserva")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
