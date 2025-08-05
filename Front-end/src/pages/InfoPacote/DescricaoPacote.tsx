@@ -1,46 +1,81 @@
 import React from "react";
 
-// Ícones SVG inline para cada comodidade
+// Ícones SVG inline para cada comodidade do hotel
 const icones = {
-  AmbienteClimatizado: (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v2m0 16v2m8-10h2M2 12H4m15.07-7.07l1.42 1.42M4.93 19.07l1.42-1.42M19.07 19.07l-1.42-1.42M4.93 4.93L6.35 6.35" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  wifi: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5a2.5 2.5 0 002.5 2.5M1 8.5C1 4 5 1 12 1s11 3 11 7.5M3 12.5C3 8.5 7 5.5 12 5.5s9 3 9 7M5 16.5C5 14 8 12 12 12s7 2 7 4.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
   ),
-  Tv: (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M8 2l4 4 4-4"/></svg>
+  estacionamento: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 2h8l4 9H4l4-9zM1 11h22M5 11v10h14V11" strokeLinecap="round" strokeLinejoin="round"/></svg>
   ),
-  Varanda: (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="8" rx="2"/><path d="M7 10V6a5 5 0 0 1 10 0v4"/></svg>
+  piscina: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M2 20h20M6 8h12l-1 12H7L6 8zM12 4v4" strokeLinecap="round" strokeLinejoin="round"/></svg>
   ),
-  Frigobar: (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M6 9h12"/></svg>
+  petFriendly: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" strokeLinecap="round" strokeLinejoin="round"/></svg>
   ),
-  Disponibilidade: (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+  cafeDaManha: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  ),
+  almoco: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  ),
+  jantar: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  ),
+  allInclusive: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
   ),
 };
 
 const nomes = {
-  AmbienteClimatizado: 'Ambiente Climatizado',
-  Tv: 'TV',
-  Varanda: 'Varanda',
-  Frigobar: 'Frigobar',
-  Disponibilidade: 'Disponível',
+  wifi: 'Wi-Fi Gratuito',
+  estacionamento: 'Estacionamento',
+  piscina: 'Piscina',
+  petFriendly: 'Pet Friendly',
+  cafeDaManha: 'Café da Manhã',
+  almoco: 'Almoço',
+  jantar: 'Jantar',
+  allInclusive: 'All Inclusive',
 };
 
 interface DescricaoPacoteProps {
   descricaoTexto?: string;
+  hotelInfo?: {
+    wifi?: boolean;
+    estacionamento?: boolean;
+    piscina?: boolean;
+    petFriendly?: boolean;
+    cafeDaManha?: boolean;
+    almoco?: boolean;
+    jantar?: boolean;
+    allInclusive?: boolean;
+  };
 }
 
-const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto }) => {
+const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto, hotelInfo }) => {
   const descricao = descricaoTexto || "Descrição do que tem no pacote";
   
-  // Estados dos booleanos (poderiam vir de props ou API)
-  const comodidades = {
-    AmbienteClimatizado: true,
-    Tv: true,
-    Varanda: false,
-    Frigobar: true,
-    Disponibilidade: true,
+  // Gerar comodidades baseadas nas informações reais do hotel
+  const comodidadesDoHotel = hotelInfo ? {
+    wifi: hotelInfo.wifi || false,
+    estacionamento: hotelInfo.estacionamento || false,
+    piscina: hotelInfo.piscina || false,
+    petFriendly: hotelInfo.petFriendly || false,
+    cafeDaManha: hotelInfo.cafeDaManha || false,
+    almoco: hotelInfo.almoco || false,
+    jantar: hotelInfo.jantar || false,
+    allInclusive: hotelInfo.allInclusive || false,
+  } : {
+    // Fallback caso não tenha informações do hotel
+    wifi: true,
+    estacionamento: false,
+    piscina: true,
+    petFriendly: false,
+    cafeDaManha: true,
+    almoco: false,
+    jantar: false,
+    allInclusive: false,
   };
 
   return (
@@ -69,7 +104,7 @@ const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto }) => 
           Comodidades
         </h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-          {Object.entries(comodidades).map(([key, value]) => (
+          {Object.entries(comodidadesDoHotel).map(([key, value]) => (
             <div
               key={key}
               className="group"

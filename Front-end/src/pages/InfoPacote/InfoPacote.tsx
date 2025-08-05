@@ -8,6 +8,8 @@ import PacoteInfoCard from "./PacoteInfoCard";
 import ReservaCard from "./ReservaCard";
 import DescricaoPacote from "./DescricaoPacote";
 import AvaliacaoPacote from "./AvaliacaoPacote";
+import PackageCustomizer from "../../components/PackageCustomizer/PackageCustomizer";
+import PreDefinedPackages from "../../components/PreDefinedPackages/PreDefinedPackages";
 import { DateSelector } from "../../components/DateSelector";
 import DatePickerDinamico from "../../components/DatePicker/DatePickerDynamico";
 import { useParams, useNavigate } from "react-router-dom";
@@ -56,6 +58,19 @@ const InfoPacote: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [usarDatePickerDinamico, setUsarDatePickerDinamico] = useState(true);
   const [valorTotalCalculado, setValorTotalCalculado] = useState(0);
+  const [hotelInfo, setHotelInfo] = useState<any>(null); // Para armazenar informações completas do hotel
+  
+  // Estados para os valores originais (ainda necessários para outros componentes)
+  const [duracaoOriginal, setDuracaoOriginal] = useState(0);
+  const [pessoasOriginal, setPessoasOriginal] = useState(2);
+  
+  // Estados do customizador removidos (agora é independente)
+  // const [duracaoCustomizada, setDuracaoCustomizada] = useState(0);
+  // const [pessoasCustomizada, setPessoasCustomizada] = useState(2);
+  // const [valorTotalCustomizado, setValorTotalCustomizado] = useState(0);
+  
+  // Estado para duração atual exibida nas informações do pacote
+  const [duracaoAtual, setDuracaoAtual] = useState(0);
   
   useEffect(() => {
     const carregarPacote = async () => {
@@ -79,17 +94,20 @@ const InfoPacote: React.FC = () => {
         }
         
         // Buscar informações do hotel relacionado
-        let hotelInfo;
+        let hotelInfoTemp;
         try {
-          hotelInfo = await getHotelById(pacote.hotelId);
-          if (hotelInfo) {
-            if (hotelInfo.avaliacoes) {
-              setAvaliacoes(hotelInfo.avaliacoes);
+          hotelInfoTemp = await getHotelById(pacote.hotelId);
+          if (hotelInfoTemp) {
+            // Armazenar informações completas do hotel para usar nas comodidades
+            setHotelInfo(hotelInfoTemp);
+            
+            if (hotelInfoTemp.avaliacoes) {
+              setAvaliacoes(hotelInfoTemp.avaliacoes);
             }
             // Verificar e salvar a imagem do hotel
-            if (hotelInfo.imagens && hotelInfo.imagens.trim() !== '') {
+            if (hotelInfoTemp.imagens && hotelInfoTemp.imagens.trim() !== '') {
               // Se houver uma URL de imagem, usá-la
-              setImagem(hotelInfo.imagens);
+              setImagem(hotelInfoTemp.imagens);
             } else {
               // Usar a imagem baseada no destino como fallback
               setImagem(getImagemPorDestino(pacote.destino));
@@ -112,15 +130,15 @@ const InfoPacote: React.FC = () => {
         // Atualizar o estado
         setTitulo(pacote.titulo);
         setLocal(pacote.destino);
-        setHotel(hotelInfo?.nome || pacote.titulo);
+        setHotel(hotelInfoTemp?.nome || pacote.titulo);
         setDataIda(formatarData(dataIdaObj));
         setDataVolta(formatarData(dataVoltaObj));
         setPessoas(pacote.quantidadeDePessoas);
         
         // Determinar o valor da diária
         // Prioridade: 1. Usar a diária do hotel, 2. Usar o valor do quarto se disponível, 3. Calcular pela duração
-        const valorDiariaPacote = hotelInfo?.valorDiaria || 
-                                (hotelInfo?.quarto?.valorDoQuarto || 0) + 200 || // Adiciona margem ao valor do quarto
+        const valorDiariaPacote = hotelInfoTemp?.valorDiaria || 
+                                (hotelInfoTemp?.quarto?.valorDoQuarto || 0) + 200 || // Adiciona margem ao valor do quarto
                                 (pacote.duracao > 0 ? pacote.valorTotal / pacote.duracao : pacote.valorTotal || 500);
         
         // Calcular o valor total do pacote baseado na diária e duração
@@ -131,6 +149,14 @@ const InfoPacote: React.FC = () => {
         setValorDiaria(valorDiariaPacote);
         setValorTotal(valorTotalPacote);
         setDuracao(pacote.duracao);
+        
+        // Configurar valores originais para os outros componentes
+        setDuracaoOriginal(pacote.duracao);
+        setPessoasOriginal(pacote.quantidadeDePessoas);
+        
+        // Inicializar duração atual
+        setDuracaoAtual(pacote.duracao);
+        console.log('🔧 Inicializando duracaoAtual com:', pacote.duracao);
         
         setDescricao(pacote.descricao);
       } catch (err) {
@@ -144,48 +170,7 @@ const InfoPacote: React.FC = () => {
     carregarPacote();
   }, [id, navigate]);
 
-  const handleReservar = (valorPacoteSelecionado: number) => {
-    // Validar se as datas foram selecionadas
-    if (!dataIda || !dataVolta) {
-      alert('Por favor, selecione as datas da viagem antes de continuar');
-      return;
-    }
-
-    if (new Date(dataIda) >= new Date(dataVolta)) {
-      alert('A data de início deve ser anterior à data de fim');
-      return;
-    }
-
-    // Usar o valor do pacote selecionado que foi passado do ReservaCard
-    // Se não for fornecido, usar o valorTotal do estado como fallback
-    const valorTotalExato = valorPacoteSelecionado > 0 
-      ? valorPacoteSelecionado 
-      : parseFloat(valorTotal.toFixed(2));
-    
-    console.log("Reservar pacote", {
-      pacoteId: Number(id),
-      valorTotal: valorTotalExato,
-      valorPacoteSelecionado,
-      pessoas: pessoas,
-      dataIda: dataIda,
-      dataVolta: dataVolta, // Incluir data de volta
-      duracao: duracao
-    });
-    
-    // Construir URL com os parâmetros de query incluindo as datas
-    const queryParams = new URLSearchParams({
-      pacoteId: id || '',
-      titulo: titulo,
-      valor: valorTotalExato.toString(),
-      pessoas: pessoas.toString(),
-      dataIda: dataIda,
-      dataVolta: dataVolta, // Adicionar data de volta
-      duracao: duracao.toString()
-    }).toString();
-    
-    // Navegar para a página de pagamento com os parâmetros
-    navigate(`/pagamento?${queryParams}`);
-  };
+  // Função handleReservar removida - não é mais usada
 
   const handleModificar = (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => {
     setLocal(novo.local);
@@ -195,16 +180,87 @@ const InfoPacote: React.FC = () => {
     setPessoas(novo.pessoas);
   };
 
-  // Função para lidar com mudanças de data do DatePicker dinâmico
-  const handleDataDinamicaChange = (dataInicio: string, dataFim: string, valorCalculado: number) => {
+  // Função para lidar com mudanças de data do DatePicker dinâmico (lado direito - pacotes pré-definidos)
+  const handleDataDinamicaChange = (dataInicio: string, dataFim: string, valorCalculado: number, duracao: number) => {
+    console.log('🚀 InfoPacote handleDataDinamicaChange recebeu:', {
+      dataInicio,
+      dataFim,
+      valorCalculado,
+      duracaoRecebida: duracao,
+      duracaoAtualAntes: duracaoAtual
+    });
+    
     setDataIda(dataInicio);
     setDataVolta(dataFim);
     setValorTotalCalculado(valorCalculado);
-    setValorTotal(valorCalculado);
     
-    // Atualizar também o preço exibido
-    const noites = Math.ceil((new Date(dataFim).getTime() - new Date(dataInicio).getTime()) / (1000 * 60 * 60 * 24));
-    setPreco(`R$ ${valorCalculado.toFixed(2).replace('.', ',')} por ${noites} noites`);
+    // Usar a duração recebida diretamente (mais precisa que calcular das datas)
+    setDuracaoAtual(duracao);
+    
+    console.log('✅ InfoPacote setDuracaoAtual chamado com:', duracao);
+    
+    // Para pacotes pré-definidos, manter a duração original e recalcular o valor
+    const valorPacotePreDefinido = valorDiaria * duracaoOriginal * pessoasOriginal;
+    setValorTotal(valorPacotePreDefinido);
+    setPreco(`R$ ${valorPacotePreDefinido.toFixed(2).replace('.', ',')} por ${duracaoOriginal} ${duracaoOriginal === 1 ? 'dia' : 'dias'}`);
+  };
+
+  // Função para lidar com mudanças do customizador - REMOVIDA para manter independência
+  // const handleCustomizationChange = ... (removido)
+
+  // Função para reservar com customização
+  const handleReservarCustomizado = (dias: number, pessoasCount: number, valorTotal: number, dataInicio: string, dataFim: string) => {
+    console.log('🛒 Reservando pacote customizado:', {
+      pacoteId: id,
+      titulo: titulo,
+      valor: valorTotal,
+      pessoas: pessoasCount,
+      dias: dias,
+      dataIda: dataInicio,
+      dataVolta: dataFim
+    });
+
+    const queryParams = new URLSearchParams({
+      pacoteId: id || '',
+      titulo: `${titulo} (Personalizado)`,
+      valor: valorTotal.toString(),
+      pessoas: pessoasCount.toString(),
+      dataIda: dataInicio,
+      dataVolta: dataFim,
+      duracao: dias.toString()
+    }).toString();
+
+    navigate(`/pagamento?${queryParams}`);
+  };
+
+  // Função para reservar pacote original
+  const handleReservarPacote = (valorTotal: number) => {
+    if (!dataIda || !dataVolta) {
+      alert('Por favor, selecione as datas da viagem antes de continuar');
+      return;
+    }
+
+    console.log('🛒 Reservando pacote original:', {
+      pacoteId: id,
+      titulo: titulo,
+      valor: valorTotal,
+      pessoas: pessoasOriginal,
+      dataIda: dataIda,
+      dataVolta: dataVolta,
+      duracao: duracaoOriginal
+    });
+
+    const queryParams = new URLSearchParams({
+      pacoteId: id || '',
+      titulo: titulo,
+      valor: valorTotal.toString(),
+      pessoas: pessoasOriginal.toString(),
+      dataIda: dataIda,
+      dataVolta: dataVolta,
+      duracao: duracaoOriginal.toString()
+    }).toString();
+
+    navigate(`/pagamento?${queryParams}`);
   };
 
   if (loading) {
@@ -306,60 +362,43 @@ const InfoPacote: React.FC = () => {
           </div>
         </div>
 
-        {/* Seletor de Datas */}
-        <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-gray-800">Escolha as datas da sua viagem</h3>
-            <button
-              onClick={() => setUsarDatePickerDinamico(!usarDatePickerDinamico)}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
-            >
-              {usarDatePickerDinamico ? 'Datas personalizadas' : 'Opções sugeridas'}
-            </button>
+        {/* Seção principal com lógicas separadas */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="space-y-6">
+            {/* Informações do Pacote */}
+            <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
+              <PacoteInfoCard
+                local={local}
+                hotel={hotel}
+                dataIda={dataIda}
+                dataVolta={dataVolta}
+                pessoas={pessoas}
+                duracao={duracaoAtual}
+                onModificar={handleModificar}
+              />
+            </div>
+            
+            {/* Customizador de Pacote - LADO ESQUERDO */}
+            <PackageCustomizer
+              valorDiaria={valorDiaria}
+              duracaoOriginal={duracaoOriginal}
+              pessoasOriginal={pessoasOriginal}
+              onReservarCustomizado={handleReservarCustomizado}
+              className="glass-effect shadow-xl border border-white/20 backdrop-blur-sm"
+            />
           </div>
           
-          {usarDatePickerDinamico ? (
-            <DatePickerDinamico
+          <div className="space-y-6">
+            {/* Pacotes Pré-Definidos - LADO DIREITO */}
+            <PreDefinedPackages
               valorDiaria={valorDiaria}
-              quantidadePessoas={pessoas}
-              duracaoPacote={duracao}
+              duracao={duracaoOriginal}
+              pessoas={pessoasOriginal}
+              dataIda={dataIda}
+              dataVolta={dataVolta}
               onDataChange={handleDataDinamicaChange}
-              dataInicialSugerida={dataIda}
-            />
-          ) : (
-            <DateSelector
-              dataInicio={dataIda}
-              dataFim={dataVolta}
-              onDataInicioChange={setDataIda}
-              onDataFimChange={setDataVolta}
-              label=""
-            />
-          )}
-        </div>
-
-        {/* Seção principal com cards modernizados */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
-            <PacoteInfoCard
-              local={local}
-              hotel={hotel}
-              dataIda={dataIda}
-              dataVolta={dataVolta}
-              pessoas={pessoas}
-              onModificar={handleModificar}
-            />
-          </div>
-          <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
-            <ReservaCard
-              preco={preco}
-              valorDiaria={valorDiaria}
-              valorTotal={valorTotalCalculado || valorTotal}
-              duracaoPacote={duracao}
-              dataIda={dataIda}
-              dataVolta={dataVolta}
-              pessoas={pessoas}
-              onReservar={handleReservar}
-              mostrarOpcoes={!usarDatePickerDinamico}
+              onReservarPacote={handleReservarPacote}
+              className="glass-effect shadow-xl border border-white/20 backdrop-blur-sm"
             />
           </div>
         </div>
@@ -367,7 +406,10 @@ const InfoPacote: React.FC = () => {
         {/* Seção inferior com descrição e avaliações */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
-            <DescricaoPacote descricaoTexto={descricao} />
+            <DescricaoPacote 
+              descricaoTexto={descricao} 
+              hotelInfo={hotelInfo}
+            />
           </div>
           <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
             <AvaliacaoPacote avaliacoes={avaliacoes} />

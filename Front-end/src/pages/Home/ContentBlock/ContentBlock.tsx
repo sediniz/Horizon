@@ -85,11 +85,20 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     reviewCount = pacote.hotel.avaliacoes.length;
   }
   
+  // CALCULAR PREÇO POR PESSOA (diária × dias)
+  // Usar valorDiaria do hotel se disponível, senão calcular baseado no valorTotal
+  const valorDiaria = pacote.hotel?.valorDiaria || 
+                     (pacote.hotel?.quarto?.valorDoQuarto || 0) + 200 || 
+                     (pacote.valorTotal / pacote.duracao / pacote.quantidadeDePessoas);
+  
+  // Calcular preço por pessoa: diária × número de dias
+  const precoPorPessoa = valorDiaria * pacote.duracao;
+  
   return {
     id: pacote.pacoteId,
     title: pacote.titulo,
     hotelName: pacote.hotel?.nome || 'Hotel Incluído',
-    price: `R$ ${pacote.valorTotal.toFixed(2).replace('.', ',')}`,
+    price: `R$ ${precoPorPessoa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
     duration: `${pacote.duracao} dias / ${pacote.duracao - 1} noites`,
     image: hotelImage || fallbackImage, // Usar imagem do hotel ou fallback
     rating: realRating, // Rating real das avaliações
@@ -312,6 +321,7 @@ const TravelPackages: React.FC = () => {
                     <span className="text-2xl font-bold text-blue-600">{pkg.price}</span>
                   </div>
                   <p className="text-sm text-gray-600">{pkg.duration}</p>
+                  <p className="text-xs text-gray-500">por pessoa</p>
                 </div>
 
                 {/* Comodidades */}
