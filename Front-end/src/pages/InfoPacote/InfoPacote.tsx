@@ -5,13 +5,10 @@ import cancunImg from '../../assets/cancun.png';
 import parisImg from '../../assets/Paris2.png';
 import praiaImg from '../../assets/Praia01.png';
 import PacoteInfoCard from "./PacoteInfoCard";
-import ReservaCard from "./ReservaCard";
 import DescricaoPacote from "./DescricaoPacote";
 import AvaliacaoPacote from "./AvaliacaoPacote";
 import PackageCustomizer from "../../components/PackageCustomizer/PackageCustomizer";
 import PreDefinedPackages from "../../components/PreDefinedPackages/PreDefinedPackages";
-import { DateSelector } from "../../components/DateSelector";
-import DatePickerDinamico from "../../components/DatePicker/DatePickerDynamico";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPacoteById } from "../../api/pacotes";
 import { getHotelById } from "../../api/hoteis";
@@ -362,22 +359,23 @@ const InfoPacote: React.FC = () => {
           </div>
         </div>
 
-        {/* Seção principal com lógicas separadas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="space-y-6">
-            {/* Informações do Pacote */}
-            <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
-              <PacoteInfoCard
-                local={local}
-                hotel={hotel}
-                dataIda={dataIda}
-                dataVolta={dataVolta}
-                pessoas={pessoas}
-                duracao={duracaoAtual}
-                onModificar={handleModificar}
-              />
-            </div>
-            
+        {/* Seção principal reorganizada */}
+        <div className="space-y-6 mb-8">
+          {/* Informações do Pacote - OCUPANDO TODA A LARGURA */}
+          <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
+            <PacoteInfoCard
+              local={local}
+              hotel={hotel}
+              dataIda={dataIda}
+              dataVolta={dataVolta}
+              pessoas={pessoas}
+              duracao={duracaoAtual}
+              onModificar={handleModificar}
+            />
+          </div>
+          
+          {/* Seção inferior com Customizador e Pacotes Pré-Definidos lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Customizador de Pacote - LADO ESQUERDO */}
             <PackageCustomizer
               valorDiaria={valorDiaria}
@@ -386,9 +384,7 @@ const InfoPacote: React.FC = () => {
               onReservarCustomizado={handleReservarCustomizado}
               className="glass-effect shadow-xl border border-white/20 backdrop-blur-sm"
             />
-          </div>
-          
-          <div className="space-y-6">
+            
             {/* Pacotes Pré-Definidos - LADO DIREITO */}
             <PreDefinedPackages
               valorDiaria={valorDiaria}

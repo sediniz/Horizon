@@ -27,6 +27,17 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
     setDataInicio(dataInicioDefault.toISOString().split('T')[0]);
   }, []);
 
+  // Função para adicionar 1 dia às datas (gambiarra para PackageCustomizer)
+  const adicionarUmDia = (dataString: string) => {
+    try {
+      const data = new Date(dataString);
+      data.setDate(data.getDate() + 1);
+      return data.toLocaleDateString('pt-BR');
+    } catch (e) {
+      return dataString;
+    }
+  };
+
   // Função para calcular desconto baseado na duração extra
   const calcularDesconto = (diasSelecionados: number): number => {
     const diasExtras = diasSelecionados - duracaoOriginal;
@@ -89,10 +100,10 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
             <div className="mt-3 p-3 bg-purple-50 rounded-lg">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-purple-700">
-                  <strong>Check-in:</strong> {new Date(dataInicio).toLocaleDateString('pt-BR')}
+                  <strong>Check-in:</strong> {adicionarUmDia(dataInicio)}
                 </span>
                 <span className="text-purple-700">
-                  <strong>Check-out:</strong> {new Date(new Date(dataInicio).setDate(new Date(dataInicio).getDate() + dias)).toLocaleDateString('pt-BR')}
+                  <strong>Check-out:</strong> {adicionarUmDia(new Date(new Date(dataInicio).setDate(new Date(dataInicio).getDate() + dias)).toISOString().split('T')[0])}
                 </span>
               </div>
               <div className="text-center mt-2">
@@ -221,7 +232,7 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
           onReservarCustomizado(dias, pessoas, valorTotal, dataInicio, dataFim.toISOString().split('T')[0]);
         }}
         disabled={!dataInicio}
-        className="w-full mt-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed shadow-lg hover:shadow-xl disabled:shadow-none"
+        className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed shadow-lg hover:shadow-xl disabled:shadow-none"
       >
         <span className="flex items-center justify-center gap-2">
           {!dataInicio ? (
@@ -234,7 +245,7 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
           ) : (
             <>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               Reservar Viagem Personalizada
             </>
