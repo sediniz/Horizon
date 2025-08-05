@@ -106,7 +106,7 @@ const AuthTest: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
-            🧪 Teste de Autenticação JWT
+             Teste de Autenticação JWT
           </h1>
 
           {/* Status Atual */}

@@ -14,7 +14,6 @@ const Review: React.FC = () => {
     setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="Review max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-lg">
@@ -26,7 +25,6 @@ const Review: React.FC = () => {
     );
   }
 
-  // Error state
   if (error && reviews.length === 0) {
     return (
       <div className="Review max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-lg">
@@ -50,7 +48,6 @@ const Review: React.FC = () => {
     );
   }
 
-  // Se não há reviews, não renderiza o componente
   if (!loading && reviews.length === 0) {
     return null;
   }
@@ -79,7 +76,7 @@ const Review: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row gap-4 items-center">
         {/* Lado esquerdo: Conteúdo da review */}
-        <div className="flex-1 space-y-3">{/* Reduzi de space-y-4 para space-y-3 */}
+        <div className="flex-1 space-y-3">{/*  */}
           {/* Perfil */}
           <div className="flex items-center gap-4">
             <div className={`w-16 h-16 bg-gradient-to-br ${review.bgColor} rounded-full flex items-center justify-center`}>
@@ -234,7 +231,7 @@ const Review: React.FC = () => {
         ))}
       </div>
 
-      {/* Status da fonte dos dados (apenas para desenvolvimento) */}
+      {/*  */}
       {error && (
         <div className="text-center mt-2">
           <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">

@@ -19,7 +19,6 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
   const [pessoas, setPessoas] = useState(pessoasOriginal);
   const [dataInicio, setDataInicio] = useState("");
 
-  // Inicializar data padrão (7 dias a partir de hoje)
   useEffect(() => {
     const hoje = new Date();
     const dataInicioDefault = new Date(hoje);
@@ -27,7 +26,6 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
     setDataInicio(dataInicioDefault.toISOString().split('T')[0]);
   }, []);
 
-  // Função para adicionar 1 dia às datas (gambiarra para PackageCustomizer)
   const adicionarUmDia = (dataString: string) => {
     try {
       const data = new Date(dataString);
@@ -38,7 +36,6 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
     }
   };
 
-  // Função para calcular desconto baseado na duração extra
   const calcularDesconto = (diasSelecionados: number): number => {
     const diasExtras = diasSelecionados - duracaoOriginal;
     
@@ -57,8 +54,6 @@ const PackageCustomizer: React.FC<PackageCustomizerProps> = ({
     return valorComDesconto;
   };
 
-  // Remover o useEffect que atualiza automaticamente para manter independência
-  // useEffect removido para que não afete outros componentes
 
   const formatarMoeda = (valor: number) => {
     return valor.toLocaleString('pt-BR', {

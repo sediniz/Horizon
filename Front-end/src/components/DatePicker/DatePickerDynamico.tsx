@@ -15,7 +15,7 @@ interface DatePickerDinamicoProps {
   quantidadePessoas: number;
   duracaoPacote: number;
   dataInicialSugerida?: string;
-  duracaoFixa?: boolean; // Nova prop para modo fixo
+  duracaoFixa?: boolean; 
   onDataChange: (dataInicio: string, dataFim: string, valorTotal: number, duracao: number) => void;
 }
 
@@ -24,7 +24,7 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
   quantidadePessoas,
   duracaoPacote,
   dataInicialSugerida,
-  duracaoFixa = false, // Por padrão é dinâmico
+  duracaoFixa = false, 
   onDataChange
 }) => {
   const [opcoesDatas, setOpcoesDatas] = useState<OpcaoData[]>([]);
@@ -34,20 +34,17 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
     inicio: '',
     fim: ''
   });
-  const [duracaoSelecionada, setDuracaoSelecionada] = useState(duracaoPacote); // Nova state para controlar duração selecionada
+  const [duracaoSelecionada, setDuracaoSelecionada] = useState(duracaoPacote); 
 
-  // Gerar opções baseadas na lógica de duração
   useEffect(() => {
     const opcoes: OpcaoData[] = [];
     const hoje = new Date();
     
-    // Usar data sugerida ou próximos dias
     const dataBase = dataInicialSugerida ? 
       new Date(dataInicialSugerida + 'T00:00:00') : 
       new Date(hoje.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 dias a partir de hoje
 
     if (duracaoFixa) {
-      // Modo fixo: usar apenas a duração do pacote
       const dataFim = new Date(dataBase);
       dataFim.setDate(dataFim.getDate() + duracaoPacote);
       
@@ -68,7 +65,6 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
         });
       }
     } else {
-      // Modo dinâmico: gerar opções de duração (original, +2, +4, +6)
       
       // Opção 1: Duração original do pacote (mais popular)
       const dataFimOriginal = new Date(dataBase);
@@ -120,10 +116,9 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
 
     setOpcoesDatas(opcoes);
     
-    // Selecionar a primeira opção por padrão e notificar
     if (opcoes.length > 0) {
       const primeira = opcoes[0];
-      setDuracaoSelecionada(primeira.noites); // Atualizar duração selecionada
+      setDuracaoSelecionada(primeira.noites); 
       onDataChange(primeira.dataInicio, primeira.dataFim, primeira.valorTotal, primeira.noites);
     }
   }, [valorDiaria, quantidadePessoas, duracaoPacote, dataInicialSugerida, duracaoFixa]);
@@ -154,7 +149,7 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
   const handleSelecaoOpcao = (index: number) => {
     setOpcaoSelecionada(index);
     const opcao = opcoesDatas[index];
-    console.log('🎯 Selecionando opção:', { index, noites: opcao.noites, duracaoAnterior: duracaoSelecionada });
+    console.log('Selecionando opção:', { index, noites: opcao.noites, duracaoAnterior: duracaoSelecionada });
     setDuracaoSelecionada(opcao.noites); // Atualizar duração selecionada
     onDataChange(opcao.dataInicio, opcao.dataFim, opcao.valorTotal, opcao.noites);
   };
@@ -280,7 +275,7 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
                   value={dataPersonalizada.inicio}
                   onChange={(e) => {
                     const novaDataIda = e.target.value;
-                    console.log('📅 Selecionando data personalizada:', { 
+                    console.log('Selecionando data personalizada:', { 
                       data: novaDataIda, 
                       duracaoAtual: duracaoSelecionada,
                       duracaoPacote: duracaoPacote 
@@ -296,11 +291,9 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
                       fim: dataFimFormatada
                     });
 
-                    // Calcular valor com desconto e aplicar automaticamente
                     const valorBase = valorDiaria * duracaoSelecionada * quantidadePessoas;
                     let valorComDesconto = valorBase;
                     
-                    // Aplicar desconto conforme a duração extra
                     if (duracaoSelecionada === duracaoPacote + 2) {
                       valorComDesconto = valorBase * 0.95; // 5% desconto
                     } else if (duracaoSelecionada === duracaoPacote + 4) {
@@ -309,13 +302,12 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
                       valorComDesconto = valorBase * 0.85; // 15% desconto
                     }
 
-                    console.log('💰 Cálculo automático:', { 
+                    console.log('Cálculo auomático:', { 
                       valorBase, 
                       valorComDesconto, 
                       duracaoUsada: duracaoSelecionada 
                     });
 
-                    // Aplicar automaticamente quando a data for selecionada
                     onDataChange(novaDataIda, dataFimFormatada, valorComDesconto, duracaoSelecionada);
                   }}
                   min={new Date().toISOString().split('T')[0]}
@@ -340,7 +332,6 @@ const DatePickerDinamico: React.FC<DatePickerDinamicoProps> = ({
                         let valorComDesconto = valorBase;
                         let percentualDesconto = 0;
                         
-                        // Aplicar desconto conforme a duração extra
                         if (duracaoSelecionada === duracaoPacote + 2) {
                           valorComDesconto = valorBase * 0.95; // 5% desconto
                           percentualDesconto = 5;

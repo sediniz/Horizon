@@ -14,7 +14,6 @@ interface SearchFormData {
 
 // Lista de destinos disponíveis
 const destinations = [
-  // Brasil - Principais cidades e estados
   { value: 'sao-paulo', label: 'São Paulo, SP', flag: '🇧🇷' },
   { value: 'rio-de-janeiro', label: 'Rio de Janeiro, RJ', flag: '🇧🇷' },
   { value: 'salvador', label: 'Salvador, BA', flag: '🇧🇷' },
@@ -262,11 +261,9 @@ const InlineCalendar: React.FC<{
     const dateStr = formatDate(date);
     
     if (!tempCheckIn || (tempCheckIn && tempCheckOut)) {
-      // Primeira seleção ou reiniciar
       setTempCheckIn(dateStr);
       setTempCheckOut('');
     } else if (tempCheckIn && !tempCheckOut) {
-      // Segunda seleção
       if (dateStr > tempCheckIn) {
         setTempCheckOut(dateStr);
       } else {
@@ -459,12 +456,10 @@ const Search: React.FC = () => {
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [destinationQuery, setDestinationQuery] = useState('');
 
-  // Função para abrir/fechar calendário
   const toggleCalendar = () => {
     setIsCalendarOpen(!isCalendarOpen);
   };
 
-  // Função para selecionar datas do calendário
   const handleDateSelection = (checkIn: string, checkOut: string) => {
     setFormData(prev => ({
       ...prev,
@@ -473,7 +468,6 @@ const Search: React.FC = () => {
     }));
   };
 
-  // Função para selecionar destino
   const handleDestinationSelect = (destination: string) => {
     setFormData(prev => ({
       ...prev,
@@ -483,12 +477,10 @@ const Search: React.FC = () => {
     setIsDestinationOpen(false);
   };
 
-  // Filtrar destinos baseado na busca
   const filteredDestinations = destinations.filter(dest =>
     dest.label.toLowerCase().includes(destinationQuery.toLowerCase())
   );
 
-  // Função para formatar data para exibição
   const formatDateDisplay = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString + 'T00:00:00');
@@ -498,7 +490,6 @@ const Search: React.FC = () => {
     });
   };
 
-  // Função para incrementar/decrementar valores
   const updateCounter = (field: 'rooms' | 'adults' | 'children', operation: 'increment' | 'decrement') => {
     setFormData(prev => {
       const currentValue = prev[field];
@@ -517,9 +508,7 @@ const Search: React.FC = () => {
     });
   };
 
-  // Função para buscar
   const handleSearch = () => {
-    // Validações básicas
     if (!formData.destination) {
       alert('Por favor, selecione um destino');
       return;
@@ -530,7 +519,6 @@ const Search: React.FC = () => {
       return;
     }
     
-    // Criar parâmetros URL com os dados do formulário
     const searchParams = new URLSearchParams({
       destino: formData.destination,
       checkin: formData.checkIn,
@@ -540,13 +528,11 @@ const Search: React.FC = () => {
       criancas: formData.children.toString()
     });
     
-    console.log('🧳 Navegando para PacotesGerais com parâmetros:', searchParams.toString());
+    console.log('Navegando para PacotesGerais com parâmetros:', searchParams.toString());
     
-    // Navegar para a página de pacotes com os parâmetros
     navigate(`/pacotes?${searchParams.toString()}`);
   };
 
-  // Fechar dropdowns quando clicar fora
   const handleClickOutside = () => {
     setIsDestinationOpen(false);
     setIsGuestsOpen(false);

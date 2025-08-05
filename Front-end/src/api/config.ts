@@ -25,14 +25,14 @@ apiClient.interceptors.request.use(
     const token = getAuthToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log(`🔐 Token adicionado à requisição: ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(`Token adicionado à requisição: ${config.method?.toUpperCase()} ${config.url}`);
     } else {
-      console.log(`⚠️ Nenhum token encontrado para: ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(` Nenhum token encontrado para: ${config.method?.toUpperCase()} ${config.url}`);
     }
     return config;
   },
   (error) => {
-    console.error('❌ Erro no interceptor de requisição:', error);
+    console.error(' Erro no interceptor de requisição:', error);
     return Promise.reject(error);
   }
 );
@@ -40,12 +40,12 @@ apiClient.interceptors.request.use(
 // Interceptor para tratar respostas de erro (ex: token expirado)
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`✅ Resposta recebida: ${response.status} para ${response.config.method?.toUpperCase()} ${response.config.url}`);
+    console.log(`Resposta recebida: ${response.status} para ${response.config.method?.toUpperCase()} ${response.config.url}`);
     return response;
   },
   (error) => {
     if (error.response?.status === 401) {
-      console.log('🔒 Token inválido ou expirado. Redirecionando para login...');
+      console.log('Token inválido ou expirado. Redirecionando para login...');
       // Limpar token inválido
       localStorage.removeItem('horizon_token');
       localStorage.removeItem('horizon_user');
@@ -61,10 +61,10 @@ export const apiRequest = async (
   options: AxiosRequestConfig = {}
 ): Promise<any> => {
   try {
-    console.log(`🚀 Fazendo requisição: ${options.method?.toUpperCase() || 'GET'} ${endpoint}`);
+    console.log(`Fazendo requisição: ${options.method?.toUpperCase() || 'GET'} ${endpoint}`);
     
     if (options.data) {
-      console.log('📋 Dados enviados:', options.data);
+      console.log('Dados enviados:', options.data);
     }
     
     const response = await apiClient({
@@ -73,17 +73,17 @@ export const apiRequest = async (
       ...options,
     });
     
-    console.log(`✅ Resposta recebida: ${response.status}`, response.data);
+    console.log(`Resposta recebida: ${response.status}`, response.data);
     return response.data;
   } catch (error: any) {
-    console.error('❌ API Request Error:', error);
-    console.error('🌐 Endpoint da requisição:', endpoint);
-    console.error('⚙️ Opções:', options);
+    console.error('API Request Error:', error);
+    console.error('Endpoint da requisição:', endpoint);
+    console.error('Opções:', options);
     
     if (error.response) {
-      console.error('📨 Resposta do servidor:', error.response.data);
-      console.error('📊 Status:', error.response.status);
-      console.error('📋 Headers:', error.response.headers);
+      console.error('Resposta do servidor:', error.response.data);
+      console.error('Status:', error.response.status);
+      console.error('Headers:', error.response.headers);
       
       // Log detalhado dos erros de validação
       if (error.response.data?.errors) {

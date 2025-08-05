@@ -56,7 +56,6 @@ interface DescricaoPacoteProps {
 const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto, hotelInfo }) => {
   const descricao = descricaoTexto || "Descrição do que tem no pacote";
   
-  // Gerar comodidades baseadas nas informações reais do hotel
   const comodidadesDoHotel = hotelInfo ? {
     wifi: hotelInfo.wifi || false,
     estacionamento: hotelInfo.estacionamento || false,

@@ -21,7 +21,6 @@ const imagensFallback = {
   default: cancunImg
 };
 
-// Função para obter imagem com base no destino
 const getImagemPorDestino = (destino: string) => {
   const destinoLower = destino.toLowerCase();
   if (destinoLower.includes('praia') || destinoLower.includes('beach') || 
@@ -55,18 +54,13 @@ const InfoPacote: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [usarDatePickerDinamico, setUsarDatePickerDinamico] = useState(true);
   const [valorTotalCalculado, setValorTotalCalculado] = useState(0);
-  const [hotelInfo, setHotelInfo] = useState<any>(null); // Para armazenar informações completas do hotel
+  const [hotelInfo, setHotelInfo] = useState<any>(null); 
   
-  // Estados para os valores originais (ainda necessários para outros componentes)
   const [duracaoOriginal, setDuracaoOriginal] = useState(0);
   const [pessoasOriginal, setPessoasOriginal] = useState(2);
   
-  // Estados do customizador removidos (agora é independente)
-  // const [duracaoCustomizada, setDuracaoCustomizada] = useState(0);
-  // const [pessoasCustomizada, setPessoasCustomizada] = useState(2);
-  // const [valorTotalCustomizado, setValorTotalCustomizado] = useState(0);
+
   
-  // Estado para duração atual exibida nas informações do pacote
   const [duracaoAtual, setDuracaoAtual] = useState(0);
   
   useEffect(() => {
@@ -80,7 +74,6 @@ const InfoPacote: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Obter o pacote da API
         const pacoteId = Number(id);
         const pacote = await getPacoteById(pacoteId);
         
@@ -90,23 +83,18 @@ const InfoPacote: React.FC = () => {
           return;
         }
         
-        // Buscar informações do hotel relacionado
         let hotelInfoTemp;
         try {
           hotelInfoTemp = await getHotelById(pacote.hotelId);
           if (hotelInfoTemp) {
-            // Armazenar informações completas do hotel para usar nas comodidades
             setHotelInfo(hotelInfoTemp);
             
             if (hotelInfoTemp.avaliacoes) {
               setAvaliacoes(hotelInfoTemp.avaliacoes);
             }
-            // Verificar e salvar a imagem do hotel
             if (hotelInfoTemp.imagens && hotelInfoTemp.imagens.trim() !== '') {
-              // Se houver uma URL de imagem, usá-la
               setImagem(hotelInfoTemp.imagens);
             } else {
-              // Usar a imagem baseada no destino como fallback
               setImagem(getImagemPorDestino(pacote.destino));
             }
           }
@@ -114,17 +102,14 @@ const InfoPacote: React.FC = () => {
           console.error("Erro ao buscar hotel:", err);
         }
         
-        // Calcular datas (exemplo simples para simulação)
         const hoje = new Date();
         const dataIdaObj = new Date(hoje);
         dataIdaObj.setDate(dataIdaObj.getDate() + 30); // 30 dias a partir de hoje
         const dataVoltaObj = new Date(dataIdaObj);
         dataVoltaObj.setDate(dataVoltaObj.getDate() + pacote.duracao);
         
-        // Formatar as datas
         const formatarData = (data: Date) => data.toISOString().split('T')[0];
         
-        // Atualizar o estado
         setTitulo(pacote.titulo);
         setLocal(pacote.destino);
         setHotel(hotelInfoTemp?.nome || pacote.titulo);
@@ -133,27 +118,22 @@ const InfoPacote: React.FC = () => {
         setPessoas(pacote.quantidadeDePessoas);
         
         // Determinar o valor da diária
-        // Prioridade: 1. Usar a diária do hotel, 2. Usar o valor do quarto se disponível, 3. Calcular pela duração
         const valorDiariaPacote = hotelInfoTemp?.valorDiaria || 
-                                (hotelInfoTemp?.quarto?.valorDoQuarto || 0) + 200 || // Adiciona margem ao valor do quarto
+                                (hotelInfoTemp?.quarto?.valorDoQuarto || 0) + 200 || 
                                 (pacote.duracao > 0 ? pacote.valorTotal / pacote.duracao : pacote.valorTotal || 500);
         
-        // Calcular o valor total do pacote baseado na diária e duração
         const valorTotalPacote = pacote.valorTotal > 0 ? pacote.valorTotal : valorDiariaPacote * pacote.duracao;
         
-        // Atualizar os estados relacionados a preço
         setPreco(`R$ ${valorTotalPacote.toFixed(2).replace('.', ',')} por ${pacote.duracao} noites`);
         setValorDiaria(valorDiariaPacote);
         setValorTotal(valorTotalPacote);
         setDuracao(pacote.duracao);
         
-        // Configurar valores originais para os outros componentes
         setDuracaoOriginal(pacote.duracao);
         setPessoasOriginal(pacote.quantidadeDePessoas);
         
-        // Inicializar duração atual
         setDuracaoAtual(pacote.duracao);
-        console.log('🔧 Inicializando duracaoAtual com:', pacote.duracao);
+        console.log('Inicializando duracaoAtual com:', pacote.duracao);
         
         setDescricao(pacote.descricao);
       } catch (err) {
@@ -167,7 +147,6 @@ const InfoPacote: React.FC = () => {
     carregarPacote();
   }, [id, navigate]);
 
-  // Função handleReservar removida - não é mais usada
 
   const handleModificar = (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => {
     setLocal(novo.local);
@@ -177,9 +156,8 @@ const InfoPacote: React.FC = () => {
     setPessoas(novo.pessoas);
   };
 
-  // Função para lidar com mudanças de data do DatePicker dinâmico (lado direito - pacotes pré-definidos)
   const handleDataDinamicaChange = (dataInicio: string, dataFim: string, valorCalculado: number, duracao: number) => {
-    console.log('🚀 InfoPacote handleDataDinamicaChange recebeu:', {
+    console.log('InfoPacote handleDataDinamicaChange recebeu:', {
       dataInicio,
       dataFim,
       valorCalculado,
@@ -191,23 +169,18 @@ const InfoPacote: React.FC = () => {
     setDataVolta(dataFim);
     setValorTotalCalculado(valorCalculado);
     
-    // Usar a duração recebida diretamente (mais precisa que calcular das datas)
     setDuracaoAtual(duracao);
     
-    console.log('✅ InfoPacote setDuracaoAtual chamado com:', duracao);
+    console.log(' InfoPacote setDuracaoAtual chamado com:', duracao);
     
-    // Para pacotes pré-definidos, manter a duração original e recalcular o valor
     const valorPacotePreDefinido = valorDiaria * duracaoOriginal * pessoasOriginal;
     setValorTotal(valorPacotePreDefinido);
     setPreco(`R$ ${valorPacotePreDefinido.toFixed(2).replace('.', ',')} por ${duracaoOriginal} ${duracaoOriginal === 1 ? 'dia' : 'dias'}`);
   };
 
-  // Função para lidar com mudanças do customizador - REMOVIDA para manter independência
-  // const handleCustomizationChange = ... (removido)
-
-  // Função para reservar com customização
+  
   const handleReservarCustomizado = (dias: number, pessoasCount: number, valorTotal: number, dataInicio: string, dataFim: string) => {
-    console.log('🛒 Reservando pacote customizado:', {
+    console.log('Reservando pacote customizado:', {
       pacoteId: id,
       titulo: titulo,
       valor: valorTotal,
@@ -328,7 +301,6 @@ const InfoPacote: React.FC = () => {
               alt={titulo} 
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
               onError={(e) => {
-                // Caso a imagem não seja carregada, usar uma imagem de fallback
                 const target = e.target as HTMLImageElement;
                 console.error("Erro ao carregar imagem:", target.src);
                 target.src = getImagemPorDestino(local);
@@ -359,9 +331,9 @@ const InfoPacote: React.FC = () => {
           </div>
         </div>
 
-        {/* Seção principal reorganizada */}
+        {/* Seção principal */}
         <div className="space-y-6 mb-8">
-          {/* Informações do Pacote - OCUPANDO TODA A LARGURA */}
+          {/* Informações do Pacote  */}
           <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
             <PacoteInfoCard
               local={local}

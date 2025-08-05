@@ -23,7 +23,6 @@ const PreDefinedPackages: React.FC<PreDefinedPackagesProps> = ({
   className = ""
 }) => {
 
-  // Estados para controlar as informações do DatePickerDinamico
   const [duracaoSelecionada, setDuracaoSelecionada] = useState(duracao);
   const [valorTotalSelecionado, setValorTotalSelecionado] = useState(valorDiaria * duracao * pessoas);
   const [tipoEstadia, setTipoEstadia] = useState("Pacote Original");
@@ -35,7 +34,6 @@ const PreDefinedPackages: React.FC<PreDefinedPackagesProps> = ({
     });
   };
 
-  // Função para obter o tipo de estadia baseado na duração
   const getTipoEstadia = (noites: number) => {
     if (noites === duracao) return "Pacote Original";
     if (noites === duracao + 2) return "Pacote +2 dias";
@@ -44,10 +42,8 @@ const PreDefinedPackages: React.FC<PreDefinedPackagesProps> = ({
     return "Personalizado";
   };
 
-  // Função para lidar com mudanças do DatePickerDinamico
   const handleDataPickerChange = (dataInicio: string, dataFim: string, valorCalculado: number, duracaoRecebida: number) => {
-    // Debug: verificar valores recebidos
-    console.log('🎯 PreDefinedPackages recebeu:', {
+    console.log('PreDefinedPackages recebeu:', {
       dataInicio,
       dataFim,
       valorCalculado,
@@ -55,7 +51,6 @@ const PreDefinedPackages: React.FC<PreDefinedPackagesProps> = ({
       duracaoOriginalProp: duracao
     });
     
-    // Atualizar estados locais usando a duração recebida diretamente
     setDuracaoSelecionada(duracaoRecebida);
     setValorTotalSelecionado(valorCalculado);
     setTipoEstadia(getTipoEstadia(duracaoRecebida));
@@ -66,7 +61,6 @@ const PreDefinedPackages: React.FC<PreDefinedPackagesProps> = ({
       tipoEstadia: getTipoEstadia(duracaoRecebida)
     });
     
-    // Propagar para o componente pai
     onDataChange(dataInicio, dataFim, valorCalculado, duracaoRecebida);
   };
 
@@ -85,7 +79,7 @@ const PreDefinedPackages: React.FC<PreDefinedPackagesProps> = ({
           valorDiaria={valorDiaria}
           quantidadePessoas={pessoas}
           duracaoPacote={duracao}
-          duracaoFixa={false} // IMPORTANTE: False para permitir opções dinâmicas
+          duracaoFixa={false} 
           onDataChange={handleDataPickerChange}
           dataInicialSugerida={dataIda}
         />

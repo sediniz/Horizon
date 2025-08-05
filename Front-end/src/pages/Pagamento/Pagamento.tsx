@@ -24,7 +24,6 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   const { usuario } = useAuth();
   const stripeContext = useStripeContext();
   
-  // Função gambiarra para adicionar +1 dia
   const adicionarUmDia = (dataString: string): string => {
     if (!dataString) return '';
     const data = new Date(dataString);
@@ -32,7 +31,6 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     return data.toISOString().split('T')[0];
   };
 
-  // Função para calcular duração entre duas datas
   const calcularDuracao = (dataInicio: string, dataFim: string): number => {
     if (!dataInicio || !dataFim) return 0;
     const inicio = new Date(dataInicio);
@@ -42,7 +40,6 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     return diffDays;
   };
   
-  // Extrair parâmetros da URL
   const pacoteIdFromQuery = query.get('pacoteId');
   const tituloFromQuery = query.get('titulo');
   const valorFromQuery = query.get('valor');
@@ -51,8 +48,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   const dataVoltaFromQuery = query.get('dataVolta');
   const duracaoFromQuery = query.get('duracao');
   
-  // Debug dos parâmetros da URL
-  console.log('🔍 Parâmetros da URL:', {
+  console.log(' Parâmetros da URL:', {
     pacoteId: pacoteIdFromQuery,
     titulo: tituloFromQuery,
     valor: valorFromQuery,
@@ -76,20 +72,18 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     cpf: usuario?.cpfPassaporte || ''
   });
 
-  // Debug do formData inicial
-  console.log('📝 FormData inicial:', {
+  console.log('FormData inicial:', {
     data: dataIdaFromQuery,
     dataVolta: dataVoltaFromQuery,
     formDataData: formData.data,
     formDataDataVolta: formData.dataVolta
   });
 
-  // Calcular duração correta baseada nas datas originais (sem gambiarra)
   const duracaoCalculada = dataIdaFromQuery && dataVoltaFromQuery 
     ? calcularDuracao(dataIdaFromQuery, dataVoltaFromQuery)
     : Number(duracaoFromQuery) || 0;
 
-  console.log('⏱️ Duração calculada:', {
+  console.log('Duração calculada:', {
     dataIdaFromQuery,
     dataVoltaFromQuery,
     duracaoFromQuery,
@@ -113,7 +107,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
         setLoading(true);
         
         if (valorFromQuery && tituloFromQuery && duracaoFromQuery && pessoasFromQuery && dataIdaFromQuery) {
-          console.log('✅ Usando dados da URL para criar pacoteData');
+          console.log('Usando dados da URL para criar pacoteData');
           const dadosFromURL: DadosPacote = {
             pacoteId: Number(pacoteIdFromQuery) || 0,
             titulo: tituloFromQuery || '',
@@ -124,7 +118,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
             valorTotal: parseFloat(valorFromQuery)
           };
           setPacoteData(dadosFromURL);
-          console.log('📦 PacoteData definido:', dadosFromURL);
+          console.log('PacoteData definido:', dadosFromURL);
         } else {
           const dados = await buscarDadosPacote(pacoteId);
           setPacoteData(dados);
@@ -142,7 +136,6 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     }
   }, [pacoteId, valorFromQuery, tituloFromQuery, duracaoFromQuery, pessoasFromQuery, pacoteIdFromQuery, dataVoltaFromQuery]);
 
-  // Atualizar dados do usuário quando logar
   useEffect(() => {
     if (usuario) {
       setFormData(prev => ({
@@ -199,7 +192,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
         pacoteId
       );
     } catch (err) {
-      console.error('❌ Erro ao configurar pagamento:', err);
+      console.error('Erro ao configurar pagamento:', err);
       setError('Não foi possível configurar o pagamento. Tente novamente.');
     } finally {
       setLoading(false);
@@ -260,7 +253,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
         }
       }
     } catch (error) {
-      console.error('❌ Erro no processamento:', error);
+      console.error(' Erro no processamento:', error);
       setError('Erro ao processar pagamento. Tente novamente.');
     } finally {
       setLoading(false);
@@ -635,7 +628,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
               </div>
             </div>
 
-            {/* Sidebar - Resumo da compra */}
+            {/* Sidebar Resumo da compra */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
                 <div className="mb-6">

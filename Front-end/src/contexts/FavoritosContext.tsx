@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 // Tipos
 interface FavoritosContextType {
-  favoritos: number[]; // Array de IDs dos pacotes favoritados
+  favoritos: number[]; 
   adicionarFavorito: (pacoteId: number) => void;
   removerFavorito: (pacoteId: number) => void;
   isFavorito: (pacoteId: number) => boolean;
