@@ -36,7 +36,10 @@ namespace Horizon.Services.Implementations
             //hora que a pessoa fez a avaliação
             avaliacao.DataAvaliacao = DateTime.UtcNow;
 
-            return await _avaliacaoRepository.AddAsync(avaliacao);
+            var novaAvaliacao = await _avaliacaoRepository.AddAsync(avaliacao);
+            
+            // Busca a avaliação completa com as navegações
+            return await _avaliacaoRepository.GetByIdAsync(novaAvaliacao.IdAvaliacao) ?? novaAvaliacao;
         }
 
         public async Task<Avaliacao> UpdateAsync(Avaliacao avaliacao)

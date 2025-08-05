@@ -39,6 +39,8 @@ Desktop.ini
 *.sqlite
 *.sqlite3
  
+# Entity Framework Migrations
+Migrations/
 
 
 # Local appsettings with connection strings
