@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useStripeContext } from '../../contexts/StripeContext';
 import type { StripeCardElementOptions } from '@stripe/stripe-js';
+import { useStripeContext } from '../../contexts/StripeContext';
 
 interface StripeCardFormProps {
   clientSecret: string;
   valorTotal: number;
   pacoteId: number;
   dataViagem: string;
-  dataInicio?: string; // Nova prop para data de início
-  dataFim?: string;    // Nova prop para data de fim
+  dataInicio?: string;
+  dataFim?: string;
   quantidadePessoas: number;
   onPaymentSuccess: (paymentMethodId: string, reservaId?: number) => void;
   onPaymentError: (error: string) => void;
@@ -37,16 +37,16 @@ const cardStyle: StripeCardElementOptions = {
   },
 };
 
-const StripeCardForm: React.FC<StripeCardFormProps> = ({ 
-  clientSecret, 
+const StripeCardForm: React.FC<StripeCardFormProps> = ({
+  clientSecret,
   valorTotal,
   pacoteId,
   dataViagem,
   dataInicio,
   dataFim,
   quantidadePessoas,
-  onPaymentSuccess, 
-  onPaymentError 
+  onPaymentSuccess,
+  onPaymentError
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -57,10 +57,7 @@ const StripeCardForm: React.FC<StripeCardFormProps> = ({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!stripe || !elements) {
-      // Stripe.js ainda não carregou
-      return;
-    }
+    if (!stripe || !elements) return;
 
     setLoading(true);
 
@@ -72,65 +69,34 @@ const StripeCardForm: React.FC<StripeCardFormProps> = ({
     }
 
     try {
-      // Verificar se é um client secret válido do Stripe
-      const isValidStripeClientSecret = clientSecret.startsWith('pi_') && 
-                                       clientSecret.includes('_secret_') && 
-                                       clientSecret.length > 50;
+      const isValidStripeClientSecret =
+        clientSecret.startsWith('pi_') &&
+        clientSecret.includes('_secret_') &&
+        clientSecret.length > 50;
 
       if (!isValidStripeClientSecret) {
-        // Se não for um client secret válido, mostrar erro
         onPaymentError("Configuração de pagamento inválida. Tente novamente.");
         setLoading(false);
         return;
       }
 
-      // Confirmar o pagamento com o Stripe real
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: {
-            // Aqui você pode adicionar detalhes de cobrança
+            // Adicione detalhes se necessário
           },
-        }
+        },
       });
 
       if (result.error) {
-        // Mostrar erro para o cliente
         onPaymentError(result.error.message || "Erro ao processar pagamento");
-      } else {
-        // O pagamento foi processado!
-        if (result.paymentIntent) {
-          if (result.paymentIntent.status === 'succeeded') {
-            // Pagamento concluído com sucesso - agora criar a reserva
-            console.log('💳 Pagamento aprovado pelo Stripe, criando reserva...');
-            
-            const reservaCriada = await confirmarPagamentoCompleto(
-              result.paymentIntent.id,
-              {
-                pacoteId,
-                dataViagem,
-                dataInicio: dataInicio || dataViagem, // Usar dataInicio se disponível, senão dataViagem
-                dataFim: dataFim || dataViagem, // Usar dataFim se disponível, senão dataViagem
-                quantidadePessoas
-              }
-            );
+      } else if (result.paymentIntent) {
+        const status = result.paymentIntent.status;
+        console.log(`💳 Status do pagamento: ${status}`);
 
-            if (reservaCriada) {
-              onPaymentSuccess(result.paymentIntent.id);
-            } else {
-              onPaymentError("Pagamento aprovado, mas houve erro ao criar a reserva. Entre em contato conosco.");
-            }
-          } else if (result.paymentIntent.status === 'requires_action' || 
-                    result.paymentIntent.status === 'requires_confirmation') {
-            // Precisa de autenticação adicional
-            console.log(`Pagamento requer ação adicional: ${result.paymentIntent.status}`);
-            onPaymentSuccess(result.paymentIntent.id);
-          } else {
-            // Outros status (processing, requires_capture, etc.)
-            console.log(`Status do pagamento: ${result.paymentIntent.status}`);
-            onPaymentSuccess(result.paymentIntent.id);
-          }
-        }
+        // Passar o paymentIntent.id para confirmação
+        onPaymentSuccess(result.paymentIntent.id);
       }
     } catch (error) {
       console.error("Erro no pagamento:", error);
@@ -150,13 +116,13 @@ const StripeCardForm: React.FC<StripeCardFormProps> = ({
         <span>Seus dados estão protegidos com criptografia SSL</span>
       </div>
 
-      {/* Formulário do cartão */}
+      {/* Card input */}
       <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Dados do Cartão
         </label>
-        <CardElement 
-          options={cardStyle} 
+        <CardElement
+          options={cardStyle}
           onChange={(e) => {
             setCardComplete(e.complete);
             if (e.error) {
@@ -166,7 +132,7 @@ const StripeCardForm: React.FC<StripeCardFormProps> = ({
         />
       </div>
 
-      {/* Informações de pagamento */}
+      {/* Total a pagar */}
       <div className="bg-gray-50 p-4 rounded-lg">
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Total a pagar:</span>
@@ -177,13 +143,13 @@ const StripeCardForm: React.FC<StripeCardFormProps> = ({
       </div>
 
       {/* Botão de pagamento */}
-      <button 
+      <button
         type="submit"
-        disabled={!stripe || loading || !cardComplete} 
+        disabled={!stripe || loading || !cardComplete}
         className={`
           w-full py-4 px-6 rounded-lg font-semibold text-white text-lg
-          ${(!stripe || loading || !cardComplete) 
-            ? 'bg-gray-400 cursor-not-allowed' 
+          ${(!stripe || loading || !cardComplete)
+            ? 'bg-gray-400 cursor-not-allowed'
             : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl'}
           transition-all duration-200 transform ${(!stripe || loading || !cardComplete) ? '' : 'hover:scale-105'}
         `}
