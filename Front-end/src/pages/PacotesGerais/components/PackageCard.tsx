@@ -16,13 +16,6 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
   const navigate = useNavigate();
   const { isFavorito, toggleFavorito } = useFavoritos();
 
-  // Log para debug do rating
-  console.log(`📦 PackageCard - Pacote: ${pkg.title}`, {
-    rating: pkg.rating,
-    reviewCount: pkg.reviewCount,
-    hotelName: pkg.hotelName
-  });
-
   const handleViewPackage = () => {
     navigate(`/pacote/${pkg.id}`);
   };

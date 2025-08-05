@@ -75,8 +75,6 @@ const Favoritos: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        console.log('❤️ Carregando favoritos...', favoritos);
-        
         if (favoritos.length === 0) {
           setPackages([]);
           setLoading(false);
@@ -84,15 +82,12 @@ const Favoritos: React.FC = () => {
         }
         
         // Buscar todos os pacotes da API
-        console.log('📦 Buscando todos os pacotes...');
         const todosPacotes = await getAllPacotes();
         
         // Filtrar apenas os pacotes que estão nos favoritos
         const pacotesFavoritos = todosPacotes.filter(pacote => 
           favoritos.includes(pacote.pacoteId)
         );
-        
-        console.log('❤️ Pacotes favoritos encontrados:', pacotesFavoritos);
         
         if (pacotesFavoritos.length === 0) {
           setPackages([]);
@@ -102,7 +97,6 @@ const Favoritos: React.FC = () => {
         
         // Extrair IDs únicos dos hotéis
         const hotelIds = [...new Set(pacotesFavoritos.map(p => p.hotelId))];
-        console.log('🏨 IDs dos hotéis para carregar:', hotelIds);
         
         // Carregar dados dos hotéis com avaliações
         const hoteis = await getHoteisByIds(hotelIds);

@@ -26,13 +26,11 @@ const Admin: React.FC = () => {
   React.useEffect(() => {
     const testConnection = async () => {
       try {
-        console.log('🔍 Testando conectividade com a API...');
         const response = await fetch('https://localhost:7202/api/pacotes');
-        console.log('📡 Status da resposta:', response.status);
         if (response.ok) {
-          console.log('✅ API está respondendo!');
+          console.log('API está respondendo!');
         } else {
-          console.log(' API retornou erro:', response.status);
+          console.log('API retornou erro:', response.status);
         }
       } catch (error) {
         console.error(' Erro ao conectar com a API:', error);

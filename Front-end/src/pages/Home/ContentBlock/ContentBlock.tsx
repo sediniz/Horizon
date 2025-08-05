@@ -83,9 +83,6 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     const somaNotas = pacote.hotel.avaliacoes.reduce((soma, av) => soma + av.nota, 0);
     realRating = somaNotas / pacote.hotel.avaliacoes.length;
     reviewCount = pacote.hotel.avaliacoes.length;
-    console.log(`📊 Hotel ${pacote.hotel.nome}: ${reviewCount} avaliações, média ${realRating.toFixed(1)}`);
-  } else {
-    console.log(`📊 Hotel ${pacote.hotel?.nome || 'N/A'}: Sem avaliações, usando rating padrão ${realRating}`);
   }
   
   return {
@@ -166,22 +163,18 @@ const TravelPackages: React.FC = () => {
     const fetchPacotes = async () => {
       try {
         setLoading(true);
-        console.log('🏠 HOME: Carregando pacotes da API...');
         
         // Buscar pacotes
         const pacotesAPI = await getAllPacotes();
-        console.log('📦 HOME: Pacotes recebidos:', pacotesAPI);
         
         // Pegar apenas os primeiros 3 pacotes para a home
         const primeiros3Pacotes = pacotesAPI.slice(0, 3);
         
         // Extrair IDs únicos dos hotéis
         const hotelIds = [...new Set(primeiros3Pacotes.map(p => p.hotelId))];
-        console.log('🏨 HOME: IDs dos hotéis para carregar:', hotelIds);
         
         // Carregar dados dos hotéis com avaliações
         const hoteis = await getHoteisByIds(hotelIds);
-        console.log('🏨 HOME: Hotéis carregados com avaliações:', hoteis);
         
         // Criar um mapa hotelId -> hotel para lookup rápido
         const hotelMap = new Map(hoteis.map(hotel => [hotel.hotelId, hotel]));
@@ -191,8 +184,6 @@ const TravelPackages: React.FC = () => {
           ...pacote,
           hotel: hotelMap.get(pacote.hotelId)
         }));
-        
-        console.log('📦 HOME: Pacotes com hotéis associados:', pacotesComHoteis);
         
         // Mapear para o formato de exibição
         const displayPackages = pacotesComHoteis.map(mapPacoteToDisplay);
