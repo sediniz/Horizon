@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Horizon.Migrations
 {
     /// <inheritdoc />
-    public partial class AtualizarReservaModel : Migration
+    public partial class DataBaseHorizon : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -138,8 +138,13 @@ namespace Horizon.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     DataInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DataFim = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DataReserva = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DataViagem = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    QuantidadePessoas = table.Column<int>(type: "int", nullable: false),
+                    ValorTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     UsuarioId = table.Column<int>(type: "int", nullable: false),
-                    HotelId = table.Column<int>(type: "int", nullable: false)
+                    HotelId = table.Column<int>(type: "int", nullable: true),
+                    PacoteId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -148,8 +153,12 @@ namespace Horizon.Migrations
                         name: "FK_Reservas_Hoteis_HotelId",
                         column: x => x.HotelId,
                         principalTable: "Hoteis",
-                        principalColumn: "HotelId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "HotelId");
+                    table.ForeignKey(
+                        name: "FK_Reservas_Pacotes_PacoteId",
+                        column: x => x.PacoteId,
+                        principalTable: "Pacotes",
+                        principalColumn: "PacoteId");
                     table.ForeignKey(
                         name: "FK_Reservas_Usuarios_UsuarioId",
                         column: x => x.UsuarioId,
@@ -210,6 +219,11 @@ namespace Horizon.Migrations
                 column: "HotelId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Reservas_PacoteId",
+                table: "Reservas",
+                column: "PacoteId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reservas_UsuarioId",
                 table: "Reservas",
                 column: "UsuarioId");
@@ -222,19 +236,19 @@ namespace Horizon.Migrations
                 name: "Avaliacoes");
 
             migrationBuilder.DropTable(
-                name: "Pacotes");
-
-            migrationBuilder.DropTable(
                 name: "Pagamentos");
 
             migrationBuilder.DropTable(
                 name: "Reservas");
 
             migrationBuilder.DropTable(
-                name: "Hoteis");
+                name: "Pacotes");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");
+
+            migrationBuilder.DropTable(
+                name: "Hoteis");
 
             migrationBuilder.DropTable(
                 name: "Quartos");
