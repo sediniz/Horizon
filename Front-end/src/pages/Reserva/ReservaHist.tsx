@@ -1020,7 +1020,7 @@ export default function ReservaHist() {
                   onClick={handleConfirmCancel}
                   className="flex-1 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-red-200"
                 >
-                  Confirmar Cancelamento
+                  Sim, desejo cancelar
                 </button>
               </div>
             </div>
