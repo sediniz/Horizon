@@ -24,18 +24,49 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   const { usuario } = useAuth();
   const stripeContext = useStripeContext();
   
+  // Função gambiarra para adicionar +1 dia
+  const adicionarUmDia = (dataString: string): string => {
+    if (!dataString) return '';
+    const data = new Date(dataString);
+    data.setDate(data.getDate() + 1);
+    return data.toISOString().split('T')[0];
+  };
+
+  // Função para calcular duração entre duas datas
+  const calcularDuracao = (dataInicio: string, dataFim: string): number => {
+    if (!dataInicio || !dataFim) return 0;
+    const inicio = new Date(dataInicio);
+    const fim = new Date(dataFim);
+    const diffTime = fim.getTime() - inicio.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  
   // Extrair parâmetros da URL
   const pacoteIdFromQuery = query.get('pacoteId');
   const tituloFromQuery = query.get('titulo');
   const valorFromQuery = query.get('valor');
   const pessoasFromQuery = query.get('pessoas');
   const dataIdaFromQuery = query.get('dataIda');
+  const dataVoltaFromQuery = query.get('dataVolta');
   const duracaoFromQuery = query.get('duracao');
+  
+  // Debug dos parâmetros da URL
+  console.log('🔍 Parâmetros da URL:', {
+    pacoteId: pacoteIdFromQuery,
+    titulo: tituloFromQuery,
+    valor: valorFromQuery,
+    pessoas: pessoasFromQuery,
+    dataIda: dataIdaFromQuery,
+    dataVolta: dataVoltaFromQuery,
+    duracao: duracaoFromQuery
+  });
   
   // Estados principais
   const [etapa, setEtapa] = useState<'pagamento' | 'sucesso'>('pagamento');
   const [formData, setFormData] = useState({
-    data: dataIdaFromQuery || '',
+    data: adicionarUmDia(dataIdaFromQuery || ''),
+    dataVolta: adicionarUmDia(dataVoltaFromQuery || ''),
     quantidadePessoas: pessoasFromQuery || '',
     desconto: '',
     formaPagamento: 'PIX' as 'PIX' | 'Cartão de Crédito' | 'Cartão de Débito' | 'Boleto',
@@ -43,6 +74,26 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     email: usuario?.email || '',
     telefone: usuario?.telefone || '',
     cpf: usuario?.cpfPassaporte || ''
+  });
+
+  // Debug do formData inicial
+  console.log('📝 FormData inicial:', {
+    data: dataIdaFromQuery,
+    dataVolta: dataVoltaFromQuery,
+    formDataData: formData.data,
+    formDataDataVolta: formData.dataVolta
+  });
+
+  // Calcular duração correta baseada nas datas originais (sem gambiarra)
+  const duracaoCalculada = dataIdaFromQuery && dataVoltaFromQuery 
+    ? calcularDuracao(dataIdaFromQuery, dataVoltaFromQuery)
+    : Number(duracaoFromQuery) || 0;
+
+  console.log('⏱️ Duração calculada:', {
+    dataIdaFromQuery,
+    dataVoltaFromQuery,
+    duracaoFromQuery,
+    duracaoCalculada
   });
 
   const [pacoteData, setPacoteData] = useState<DadosPacote | null>(null);
@@ -61,7 +112,8 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
       try {
         setLoading(true);
         
-        if (valorFromQuery && tituloFromQuery && duracaoFromQuery && pessoasFromQuery) {
+        if (valorFromQuery && tituloFromQuery && duracaoFromQuery && pessoasFromQuery && dataIdaFromQuery) {
+          console.log('✅ Usando dados da URL para criar pacoteData');
           const dadosFromURL: DadosPacote = {
             pacoteId: Number(pacoteIdFromQuery) || 0,
             titulo: tituloFromQuery || '',
@@ -72,6 +124,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
             valorTotal: parseFloat(valorFromQuery)
           };
           setPacoteData(dadosFromURL);
+          console.log('📦 PacoteData definido:', dadosFromURL);
         } else {
           const dados = await buscarDadosPacote(pacoteId);
           setPacoteData(dados);
@@ -87,7 +140,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     if (pacoteId) {
       carregarDados();
     }
-  }, [pacoteId, valorFromQuery, tituloFromQuery, duracaoFromQuery, pessoasFromQuery, pacoteIdFromQuery]);
+  }, [pacoteId, valorFromQuery, tituloFromQuery, duracaoFromQuery, pessoasFromQuery, pacoteIdFromQuery, dataVoltaFromQuery]);
 
   // Atualizar dados do usuário quando logar
   useEffect(() => {
@@ -174,7 +227,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
             pacoteId,
             dataViagem: formData.data,
             dataInicio: formData.data,
-            dataFim: formData.data,
+            dataFim: formData.dataVolta || formData.data,
             quantidadePessoas: parseInt(formData.quantidadePessoas)
           }
         );
@@ -276,13 +329,24 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
                 </div>
                 <div className="p-6">
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
-                        <label className="block text-gray-700 font-semibold mb-3">📅 Data da Viagem</label>
+                        <label className="block text-gray-700 font-semibold mb-3">📅 Check-in</label>
                         <input
                           type="date"
                           name="data"
                           value={formData.data}
+                          onChange={handleInputChange}
+                          className="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 font-semibold mb-3">📅 Check-out</label>
+                        <input
+                          type="date"
+                          name="dataVolta"
+                          value={formData.dataVolta}
                           onChange={handleInputChange}
                           className="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                           required
@@ -493,7 +557,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
                               pacoteId={pacoteId}
                               dataViagem={formData.data}
                               dataInicio={formData.data}
-                              dataFim={formData.data}
+                              dataFim={formData.dataVolta || formData.data}
                               quantidadePessoas={parseInt(formData.quantidadePessoas) || 1}
                               onPaymentSuccess={handlePaymentSuccess}
                               onPaymentError={handlePaymentError}
@@ -638,7 +702,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
                       `R$ ${valorFinal.toFixed(2).replace('.', ',')}`
                     )}
                   </p>
-                  <p className="text-xs text-gray-500">Duração: {pacoteData?.duracao || duracaoFromQuery || '-'} dias</p>
+                  <p className="text-xs text-gray-500">Duração: {duracaoCalculada || pacoteData?.duracao || '-'} dias</p>
                 </div>
 
                 <div className="space-y-3">
@@ -715,8 +779,12 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
                           <span className="font-semibold">{pacoteData?.titulo || tituloFromQuery}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">📅 Data:</span>
-                          <span className="font-semibold">{formData.data}</span>
+                          <span className="text-gray-600">📅 Check-in:</span>
+                          <span className="font-semibold">{formData.data ? new Date(formData.data).toLocaleDateString('pt-BR') : '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">📅 Check-out:</span>
+                          <span className="font-semibold">{formData.dataVolta ? new Date(formData.dataVolta).toLocaleDateString('pt-BR') : '-'}</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">👥 Pessoas:</span>
@@ -730,7 +798,7 @@ const PagamentoSimples = ({ pacoteId: propPacoteId }: PagamentoProps) => {
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">⏱️ Duração:</span>
-                          <span className="font-semibold">{pacoteData?.duracao || duracaoFromQuery} dias</span>
+                          <span className="font-semibold">{duracaoCalculada || pacoteData?.duracao || duracaoFromQuery} dias</span>
                         </div>
                         <hr className="my-3"/>
                         <div className="flex justify-between items-center text-xl">
