@@ -1,16 +1,20 @@
 ﻿using Horizon.Models;
 using Horizon.Repositories.Interface;
 using Horizon.Services.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Horizon.Services.Implementations
 {
     public class ReservaService : IReservaService
     {
         private readonly IReservaRepository _reservaRepository;
+        private readonly IHotelRepository _hotelRepository;
         
-        public ReservaService(IReservaRepository reservaRepository)
+        public ReservaService(IReservaRepository reservaRepository, IHotelRepository hotelRepository)
         {
             _reservaRepository = reservaRepository;
+            _hotelRepository = hotelRepository;
         }
 
         public async Task<Reserva> AddAsync(Reserva entity)
@@ -128,31 +132,52 @@ namespace Horizon.Services.Implementations
 
         private async Task VerificarDisponibilidadeAsync(int hotelId, DateTime dataInicio, DateTime dataFim)
         {
+            // Obter informações do hotel para verificar o número total de quartos
+            var hotel = await _hotelRepository.GetByIdAsync(hotelId);
+            if (hotel == null)
+            {
+                throw new ArgumentException($"Hotel com ID {hotelId} não encontrado");
+            }
+            
+            int totalQuartosHotel = hotel.QuantidadeDeQuartos;
+            
+            // Obter reservas existentes que se sobrepõem ao período solicitado
             var reservasConflitantes = await _reservaRepository.GetReservasByHotelIdAsync(hotelId);
             
             Console.WriteLine($"🏨 Verificando disponibilidade para Hotel {hotelId} de {dataInicio:yyyy-MM-dd} até {dataFim:yyyy-MM-dd}");
-            Console.WriteLine($"📋 Encontradas {reservasConflitantes.Count()} reservas existentes para este hotel");
+            Console.WriteLine($"�️ Total de quartos no hotel: {totalQuartosHotel}");
+            Console.WriteLine($"�📋 Encontradas {reservasConflitantes.Count()} reservas existentes para este hotel");
             
-            foreach (var reserva in reservasConflitantes.Where(r => r.Status != StatusReserva.Cancelada))
+            // Filtrar apenas as reservas que se sobrepõem ao período solicitado e não estão canceladas
+            var reservasSobrepostas = reservasConflitantes.Where(r => 
+                r.Status != StatusReserva.Cancelada &&
+                ((dataInicio >= r.DataInicio && dataInicio < r.DataFim) ||
+                 (dataFim > r.DataInicio && dataFim <= r.DataFim) ||
+                 (dataInicio <= r.DataInicio && dataFim >= r.DataFim))
+            ).ToList();
+            
+            foreach (var reserva in reservasSobrepostas)
             {
                 Console.WriteLine($"   - Reserva {reserva.ReservaId}: {reserva.DataInicio:yyyy-MM-dd} até {reserva.DataFim:yyyy-MM-dd} (Status: {reserva.Status})");
             }
             
-            bool temConflito = reservasConflitantes.Any(r => 
-                r.Status != StatusReserva.Cancelada &&
-                ((dataInicio >= r.DataInicio && dataInicio < r.DataFim) ||
-                 (dataFim > r.DataInicio && dataFim <= r.DataFim) ||
-                 (dataInicio <= r.DataInicio && dataFim >= r.DataFim)));
-
-            if (temConflito)
+            // Verificar para cada dia se temos quartos suficientes
+            for (var data = dataInicio.Date; data < dataFim.Date; data = data.AddDays(1))
             {
-                Console.WriteLine($"❌ CONFLITO DETECTADO para Hotel {hotelId} no período {dataInicio:yyyy-MM-dd} até {dataFim:yyyy-MM-dd}");
-                throw new InvalidOperationException("Hotel não disponível nas datas solicitadas");
+                // Contar quantas reservas ocupam esta data específica
+                int quartosOcupados = reservasSobrepostas.Count(r => 
+                    r.Status != StatusReserva.Cancelada &&
+                    data >= r.DataInicio.Date && data < r.DataFim.Date
+                );
+                
+                if (quartosOcupados >= totalQuartosHotel)
+                {
+                    Console.WriteLine($"❌ CONFLITO DETECTADO para Hotel {hotelId} na data {data:yyyy-MM-dd}: {quartosOcupados}/{totalQuartosHotel} quartos ocupados");
+                    throw new InvalidOperationException($"Hotel não tem quartos disponíveis na data {data:dd/MM/yyyy}");
+                }
             }
-            else
-            {
-                Console.WriteLine($"✅ Hotel {hotelId} disponível no período {dataInicio:yyyy-MM-dd} até {dataFim:yyyy-MM-dd}");
-            }
+            
+            Console.WriteLine($"✅ Hotel {hotelId} tem quartos disponíveis no período {dataInicio:yyyy-MM-dd} até {dataFim:yyyy-MM-dd}");
         }
 
         private void ValidarTransicaoStatus(StatusReserva statusAtual, StatusReserva novoStatus)

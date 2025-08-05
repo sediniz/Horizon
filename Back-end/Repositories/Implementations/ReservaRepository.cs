@@ -21,45 +21,67 @@ namespace Horizon.Repositories.Implementations
             return entry.Entity;
         }
 
-        public async Task<IEnumerable<Reserva>> GetAllAsync()
-        {
-            return await _context.Reservas.ToListAsync();
-        }
+    public async Task<IEnumerable<Reserva>> GetAllAsync()
+    {
+        // Carrega explicitamente todas as propriedades necessárias, incluindo Imagens dos hotéis
+        return await _context.Reservas
+            .Include(r => r.Hotel)
+            .Include(r => r.Usuario)
+            .Include(r => r.Pacote)
+                .ThenInclude(p => p.Hotel)
+            .AsNoTracking() // Melhora o desempenho para consultas de leitura
+            .ToListAsync();
+    }
 
-        public async Task<Reserva?> GetByIdAsync(int id)
-        {
-            return await _context.Reservas.FindAsync(id).AsTask();
-        }
-
-        public async Task<IEnumerable<Reserva>> GetReservasByClienteIdAndPeriodoAsync(int usuarioId, DateTime dataInicio, DateTime dataFim)
+    public async Task<Reserva?> GetByIdAsync(int id)
+    {
+        return await _context.Reservas
+            .Include(r => r.Hotel)
+            .Include(r => r.Usuario)
+            .Include(r => r.Pacote)
+            .Include(r => r.Pacote.Hotel)
+            .FirstOrDefaultAsync(r => r.ReservaId == id);
+    }        public async Task<IEnumerable<Reserva>> GetReservasByClienteIdAndPeriodoAsync(int usuarioId, DateTime dataInicio, DateTime dataFim)
         {
             return await _context.Reservas
+                .Include(r => r.Hotel)
+                .Include(r => r.Pacote)
+                .Include(r => r.Pacote.Hotel)
                 .Where(r => r.UsuarioId == usuarioId && r.DataInicio >= dataInicio && r.DataFim <= dataFim)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Reserva>> GetReservasByClienteIdAsync(int usuarioId)
-        {
-            return await _context.Reservas
-                .Where(r => r.UsuarioId == usuarioId)
-                .ToListAsync();
-        }
+    public async Task<IEnumerable<Reserva>> GetReservasByClienteIdAsync(int usuarioId)
+    {
+        return await _context.Reservas
+            .Include(r => r.Hotel)
+            .Include(r => r.Pacote)
+                .ThenInclude(p => p.Hotel)
+            .Where(r => r.UsuarioId == usuarioId)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 
-        public async Task<IEnumerable<Reserva>> GetReservasByDataAsync(DateTime data)
-        {
-            return await _context.Reservas
-                .Where(r => r.DataInicio.Date <= data.Date && r.DataFim.Date >= data.Date)
-                .ToListAsync();
-        }
+    public async Task<IEnumerable<Reserva>> GetReservasByDataAsync(DateTime data)
+    {
+        return await _context.Reservas
+            .Include(r => r.Hotel)
+            .Include(r => r.Pacote)
+            .Include(r => r.Pacote.Hotel)
+            .Where(r => r.DataInicio.Date <= data.Date && r.DataFim.Date >= data.Date)
+            .ToListAsync();
+    }
 
-        public async Task<IEnumerable<Reserva>> GetReservasByHotelIdAsync(int hotelId)
-        {
-            return await _context.Reservas
-                .Where(r => r.HotelId == hotelId)
-                .ToListAsync();
-        }
-
-        public async Task<bool> DeleteAsync(int id)
+    public async Task<IEnumerable<Reserva>> GetReservasByHotelIdAsync(int hotelId)
+    {
+        return await _context.Reservas
+            .Include(r => r.Hotel)
+            .Include(r => r.Usuario)
+            .Include(r => r.Pacote)
+            .Include(r => r.Pacote.Hotel)
+            .Where(r => r.HotelId == hotelId)
+            .ToListAsync();
+    }        public async Task<bool> DeleteAsync(int id)
         {
             return await _context.Reservas
                 .Where(r => r.ReservaId == id)
