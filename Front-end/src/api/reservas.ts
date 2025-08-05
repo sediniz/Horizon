@@ -19,6 +19,9 @@ export interface Reserva {
   pacoteId?: number;
   hotelId?: number; // campo que provavelmente existe no backend
   observacoes?: string;
+  descricao?: string; // descrição detalhada do pacote
+  inclui?: string[]; // o que está incluído no pacote
+  naoInclui?: string[]; // o que não está incluído no pacote
   // Campos que podem existir no backend:
   dataInicio?: string;
   dataFim?: string;
