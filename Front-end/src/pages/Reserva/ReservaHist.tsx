@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Rating from '../../components/Rating/Rating';
 import { reservasApi } from '../../api/reservas';
 import type { Reserva, CancelamentoReserva, AvaliacaoReserva } from '../../api/reservas';
+import { useAuth } from '../../contexts/AuthContext';
 export default function ReservaHist() {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
   const [filtroStatus, setFiltroStatus] = useState('todas');
   const [filtroData, setFiltroData] = useState('todas');
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -337,12 +339,18 @@ export default function ReservaHist() {
   };
   // Carregar reservas da API
   useEffect(() => {
+    // Se o usuário não estiver autenticado, redireciona para a página de login
+    if (!usuario) {
+      navigate('/login');
+      return;
+    }
+    
     const carregarReservas = async () => {
       try {
         setLoading(true);
         setError(null);
-        // TODO: Pegar userId do contexto de autenticação
-        const reservasCarregadas = await reservasApi.buscarReservas(1);
+        // Usa o ID do usuário do contexto de autenticação
+        const reservasCarregadas = await reservasApi.buscarReservas(usuario?.usuarioId);
         setReservas(reservasCarregadas);
       } catch (err) {
         console.error('Erro ao carregar reservas:', err);
@@ -415,7 +423,7 @@ export default function ReservaHist() {
       }
     };
     carregarReservas();
-  }, []);
+  }, [usuario, navigate]);
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'confirmada':
@@ -744,9 +752,13 @@ export default function ReservaHist() {
                       <div className="lg:col-span-1">
                         <div className="relative">
                           <img
-                            src={reserva.imagem || '/src/assets/img1.jpeg'}
+                            src={reserva.imagem || 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg'}
                             alt={reserva.hotel}
                             className="w-full h-48 lg:h-40 object-cover rounded-xl shadow-lg"
+                            onError={(e) => {
+                              console.log('Erro ao carregar imagem:', e);
+                              (e.target as HTMLImageElement).src = 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg';
+                            }}
                           />
                           <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-gray-800 shadow-lg">
                             {reserva.codigo}
@@ -1008,7 +1020,7 @@ export default function ReservaHist() {
                   onClick={handleConfirmCancel}
                   className="flex-1 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-red-200"
                 >
-                  Confirmar Cancelamento
+                  Sim, desejo cancelar
                 </button>
               </div>
             </div>

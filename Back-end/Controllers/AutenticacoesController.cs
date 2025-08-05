@@ -50,7 +50,7 @@ namespace Horizon.Controllers
             };
 
             // Obtenha a chave, Issuer e Audience das configurações
-            var jwtKey = _configuration["Jwt:Key"];
+            var jwtKey = _configuration["Jwt:SecretKey"];
             var jwtIssuer = _configuration["Jwt:Issuer"];
             var jwtAudience = _configuration["Jwt:Audience"];
 

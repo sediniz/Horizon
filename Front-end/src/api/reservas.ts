@@ -57,7 +57,74 @@ export const reservasApi = {
       const response = await apiRequest(`/reservas${userId ? `?userId=${userId}` : ''}`, {
         method: 'GET'
       });
-      return response;
+      
+      // Mapeando dados do backend para o formato esperado pelo frontend
+      console.log('Todas as reservas recebidas:', JSON.stringify(response, null, 2));
+      
+      return response.map((reserva: any) => {
+        console.log('Processando reserva ID:', reserva.reservaId);
+        
+        // Determinar os dados do hotel - seja diretamente ou via pacote
+        const hotelInfo = reserva.hotel || (reserva.pacote?.hotel);
+        const destino = reserva.hotel?.localizacao || reserva.pacote?.destino;
+        const hotelNome = reserva.hotel?.nome || (reserva.pacote?.hotel?.nome);
+        
+        // Verificar imagens disponíveis e logar detalhadamente
+        const hotelImagens = reserva.hotel?.imagens;
+        const hotelImagem = reserva.hotel?.imagem;
+        const pacoteHotelImagens = reserva.pacote?.hotel?.imagens;
+        const pacoteHotelImagem = reserva.pacote?.hotel?.imagem;
+        
+        console.log('Dados de imagens:', { 
+          hotelImagens, 
+          hotelImagem, 
+          pacoteHotelImagens, 
+          pacoteHotelImagem,
+          hotelId: reserva.hotel?.hotelId,
+          pacoteHotelId: reserva.pacote?.hotel?.hotelId
+        });
+        
+        return {
+          id: reserva.reservaId,
+          codigo: `HZ${new Date().getFullYear()}${reserva.reservaId.toString().padStart(3, '0')}`,
+          destino: destino || 'Destino não especificado',
+          hotel: hotelNome || 'Hotel não especificado',
+          dataViagem: `${new Date(reserva.dataInicio).toLocaleDateString('pt-BR')} - ${new Date(reserva.dataFim).toLocaleDateString('pt-BR')}`,
+          dataReserva: new Date(reserva.dataReserva).toLocaleDateString('pt-BR'),
+          status: reserva.status === 0 ? 'pendente' : reserva.status === 1 ? 'confirmada' : 'cancelada',
+          valor: reserva.valorTotal,
+          pessoas: reserva.quantidadePessoas,
+          // Escolher a primeira imagem disponível no formato correto
+          imagem: (() => {
+            // Tentar encontrar imagens em todos os lugares possíveis
+            const possibleImages = [
+              reserva.hotel?.imagens,
+              reserva.hotel?.imagem,
+              reserva.pacote?.hotel?.imagens,
+              reserva.pacote?.hotel?.imagem,
+              reserva.pacote?.imagem,
+              reserva.imagem
+            ].filter(Boolean);
+            
+            // Retornar a primeira imagem válida ou uma imagem padrão
+            return possibleImages.length > 0 
+              ? possibleImages[0] 
+              : 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg';
+          })(),
+          voo: reserva.pacote?.incluiVoo ? `${reserva.pacote?.origemVoo || 'GRU'} → ${reserva.pacote?.destinoVoo || 'Destino'}` : 'Não incluído',
+          avaliacao: hotelInfo?.avaliacaoMedia || 0,
+          estrelas: hotelInfo?.categoria || 0,
+          userId: reserva.usuarioId,
+          pacoteId: reserva.pacoteId,
+          hotelId: reserva.hotelId,
+          observacoes: reserva.observacoes,
+          dataInicio: reserva.dataInicio,
+          dataFim: reserva.dataFim,
+          dataCriacao: reserva.dataReserva,
+          valorTotal: reserva.valorTotal,
+          quantidadePessoas: reserva.quantidadePessoas
+        };
+      });
     } catch (error) {
       console.error('Erro ao buscar reservas:', error);
       

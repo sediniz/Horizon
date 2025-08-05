@@ -250,7 +250,19 @@ namespace Horizon.Migrations
                     b.Property<DateTime>("DataInicio")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("HotelId")
+                    b.Property<DateTime>("DataReserva")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DataViagem")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PacoteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantidadePessoas")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -259,9 +271,14 @@ namespace Horizon.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("ValorTotal")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("ReservaId");
 
                     b.HasIndex("HotelId");
+
+                    b.HasIndex("PacoteId");
 
                     b.HasIndex("UsuarioId");
 
@@ -350,9 +367,11 @@ namespace Horizon.Migrations
                 {
                     b.HasOne("Horizon.Models.Hotel", "Hotel")
                         .WithMany()
-                        .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("HotelId");
+
+                    b.HasOne("Horizon.Models.Pacote", "Pacote")
+                        .WithMany()
+                        .HasForeignKey("PacoteId");
 
                     b.HasOne("Horizon.Models.Usuario", "Usuario")
                         .WithMany()
@@ -361,6 +380,8 @@ namespace Horizon.Migrations
                         .IsRequired();
 
                     b.Navigation("Hotel");
+
+                    b.Navigation("Pacote");
 
                     b.Navigation("Usuario");
                 });

@@ -25,6 +25,8 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  // Acesse o contexto do Stripe no nível superior do componente
+  const stripeContext = useStripeContext();
   
   // Extrair parâmetros da URL e state
   const pacoteIdFromQuery = query.get('pacoteId');
@@ -185,7 +187,6 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
     }
   };
    // Integração com Stripe Context
-  const stripeContext = useStripeContext();
   const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
 
   // Iniciar o processo de pagamento com Stripe
@@ -241,49 +242,67 @@ const PagamentoConteudo = ({ pacoteId: propPacoteId }: PagamentoProps) => {
       return;
     }
 
-    // Verificar se os campos obrigatórios estão preenchidos
-    if (!formData.data || !formData.quantidadePessoas || !formData.nome || !formData.email) {
-      setError('Por favor, preencha todos os campos obrigatórios');
-      return;
-    }
-
-    if (formData.formaPagamento === 'Cartão de Crédito' && !paymentMethodId) {
-      setError('Processamento do cartão de crédito incompleto');
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
-
-      const dadosPagamento: DadosPagamento = {
-        data: formData.data,
-        quantidadePessoas: parseInt(formData.quantidadePessoas),
-        desconto: formData.desconto || undefined,
-        formaPagamento: formData.formaPagamento,
-        pacoteId,
-        usuarioId: usuarioId, // Sempre terá um valor (usuário logado ou convidado)
-        paymentMethodId: paymentMethodId || undefined
-      };
-
-      // Processar o pagamento e mostrar feedback apropriado
-      const resultado = await processarPagamento(dadosPagamento);
       
-      console.log('✅ Resultado do processamento:', resultado);
-      
-      if (resultado.status === 'aprovado') {
-        // Mostrar feedback de sucesso
-        setActiveTab('sucesso');
+      // Se for cartão de crédito e temos o paymentMethodId, criar a reserva agora
+      if (formData.formaPagamento === 'Cartão de Crédito' && paymentMethodId) {
+        // Usar o stripeContext que foi definido no nível superior do componente
         
-        // Se temos um código de pagamento, podemos mostrá-lo
-        if (resultado.codigoPagamento) {
-          setCodigoPagamento(resultado.codigoPagamento);
+        // Criar a reserva usando o paymentIntentId que já foi processado pelo Stripe
+        const reservaCriada = await stripeContext.confirmarPagamentoCompleto(
+          paymentMethodId,
+          {
+            pacoteId,
+            dataViagem: formData.data,
+            dataInicio: formData.data, 
+            dataFim: formData.data, // A duração será calculada no backend
+            quantidadePessoas: parseInt(formData.quantidadePessoas)
+          }
+        );
+        
+        if (reservaCriada) {
+          // Mostrar feedback de sucesso
+          setActiveTab('sucesso');
+          
+          // Gerar um número de pedido aleatório para exibição
+          setNumeroPedido(`PED${Date.now().toString().substring(6)}`);
+        } else {
+          setError('Erro ao criar a reserva. Entre em contato com nosso suporte.');
         }
+      } 
+      // Para outras formas de pagamento, seguir o fluxo original
+      else {
+        const dadosPagamento: DadosPagamento = {
+          data: formData.data,
+          quantidadePessoas: parseInt(formData.quantidadePessoas),
+          desconto: formData.desconto || undefined,
+          formaPagamento: formData.formaPagamento,
+          pacoteId,
+          usuarioId: usuarioId,
+          paymentMethodId: paymentMethodId || undefined
+        };
+
+        // Processar o pagamento e mostrar feedback apropriado
+        const resultado = await processarPagamento(dadosPagamento);
         
-        // Gerar um número de pedido aleatório para exibição
-        setNumeroPedido(`PED${Date.now().toString().substring(6)}`);
-      } else {
-        setError('Pagamento não foi aprovado. Tente novamente.');
+        console.log('✅ Resultado do processamento:', resultado);
+        
+        if (resultado.status === 'aprovado') {
+          // Mostrar feedback de sucesso
+          setActiveTab('sucesso');
+          
+          // Se temos um código de pagamento, podemos mostrá-lo
+          if (resultado.codigoPagamento) {
+            setCodigoPagamento(resultado.codigoPagamento);
+          }
+          
+          // Gerar um número de pedido aleatório para exibição
+          setNumeroPedido(`PED${Date.now().toString().substring(6)}`);
+        } else {
+          setError('Pagamento não foi aprovado. Tente novamente.');
+        }
       }
     } catch (error) {
       console.error('❌ Erro no processamento:', error);

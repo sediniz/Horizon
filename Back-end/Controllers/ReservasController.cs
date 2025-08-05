@@ -20,8 +20,14 @@ namespace Horizon.Controllers
 
         // GET: api/reservas
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? userId)
         {
+            if (userId.HasValue)
+            {
+                var reservasUsuario = await _reservaService.GetReservasByClienteIdAsync(userId.Value);
+                return Ok(reservasUsuario);
+            }
+            
             var reservas = await _reservaService.GetAllAsync();
             return Ok(reservas);
         }

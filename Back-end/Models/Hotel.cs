@@ -34,7 +34,13 @@ namespace Horizon.Models
 
         public DateTime DatasDisponiveis { get; set; }
         public decimal ValorDiaria { get; set; }
+        
+        // Campo para armazenar URLs de imagens
         public string? Imagens { get; set; }
+        
+        // Propriedade para compatibilidade com o front-end que espera "imagem"
+        [NotMapped]
+        public string? Imagem => Imagens;
 
         public ICollection<Avaliacao>? Avaliacoes { get; set; }
 

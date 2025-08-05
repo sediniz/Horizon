@@ -7,5 +7,6 @@ namespace Horizon.Models.Requests
         public int? PacoteId { get; set; }
         public DateTime DataViagem { get; set; }
         public int QuantidadePessoas { get; set; }
+        public int? ReservaId { get; set; } // ID opcional para reservas existentes
     }
 }
