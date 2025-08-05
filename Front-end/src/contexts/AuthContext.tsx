@@ -18,6 +18,7 @@ interface AuthContextType {
   register: (userData: RegisterData) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 interface RegisterData {
@@ -157,6 +158,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const isAuthenticated = !!usuario;
+  const isAdmin = isAuthenticated && usuario?.tipoUsuario === 'Admin';
 
   const value: AuthContextType = {
     usuario,
@@ -165,6 +167,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     isAuthenticated,
+    isAdmin,
   };
 
   return (

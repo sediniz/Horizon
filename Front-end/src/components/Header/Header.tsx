@@ -4,9 +4,10 @@ import LogoSemTexto from '../../assets/LogoSemTexto.png';
 import planeIcon from '../../assets/aviao.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser } from "react-icons/fa";
-import { MdBookmarkBorder } from "react-icons/md";
+import { MdBookmarkBorder, MdAdminPanelSettings } from "react-icons/md";
 import { FaGlobeAmericas } from "react-icons/fa";
 import { useAuth } from '../../contexts/AuthContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import AuthModal from '../AuthModal/AuthModal';
 
 
@@ -15,6 +16,7 @@ import AuthModal from '../AuthModal/AuthModal';
 
 const Header: React.FC = () => {
   const { usuario, isAuthenticated, logout } = useAuth();
+  const { isAdmin } = usePermissions();
   const navigate = useNavigate();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -241,6 +243,20 @@ const Header: React.FC = () => {
                       Minhas Reservas
                     </div>
                   </Link>
+
+                  {/* Link do Painel Administrativo - apenas para admins */}
+                  {isAdmin() && (
+                    <Link 
+                      to="/admin" 
+                      onClick={() => setShowUserDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdAdminPanelSettings className="w-4 h-4" />
+                        Painel Administrativo
+                      </div>
+                    </Link>
+                  )}
 
                   <hr className="my-2" />
                   

@@ -34,7 +34,7 @@ namespace Horizon.Controllers
         }
 
         // POST: api/hotel
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateHotel([FromBody] Hotel hotel)
         {
@@ -43,7 +43,7 @@ namespace Horizon.Controllers
         }
 
         // PUT: api/hotel/{id}
-        //[Authorize]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateHotel(int id, [FromBody] Hotel hotel)
         {
@@ -79,7 +79,7 @@ namespace Horizon.Controllers
         }
 
         // DELETE: api/hotel/{id}
-        //[Authorize]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHotel(int id)
         {
