@@ -38,12 +38,14 @@ Desktop.ini
 *.db
 *.sqlite
 *.sqlite3
- 
-
 
 # Local appsettings with connection strings
 appsettings.Development.json
 appsettings.local.json
- 
+
 # Others
 *.DS_Store
+
+# Ignore migrations
+Migrations/
+
