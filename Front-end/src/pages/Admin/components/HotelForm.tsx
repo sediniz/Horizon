@@ -143,6 +143,7 @@ const HotelForm: React.FC<HotelFormProps> = ({
             />
           </div>
 
+          {/* Comentado o campo de Data Disponível
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Data Disponível
@@ -155,6 +156,7 @@ const HotelForm: React.FC<HotelFormProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          */}
         </div>
 
         <div>

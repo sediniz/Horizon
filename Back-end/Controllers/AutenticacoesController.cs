@@ -2,6 +2,7 @@
 using Horizon.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration; // Necessário para IConfiguration
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,11 +15,12 @@ namespace Horizon.Controllers
     public class AutenticacoesController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
-        private readonly string _jwtKey = "wKsv5YpvwKsv5YpvwKsv5YpvwKsv5Ypv"; // Atualize aqui e no Program.cs
+        private readonly IConfiguration _configuration; // Injetar IConfiguration
 
-        public AutenticacoesController(IUsuarioService usuarioService)
+        public AutenticacoesController(IUsuarioService usuarioService, IConfiguration configuration)
         {
             _usuarioService = usuarioService;
+            _configuration = configuration; // Atribuir IConfiguration
         }
 
         /// <summary>
@@ -28,7 +30,7 @@ namespace Horizon.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // Remover esta restrição
+            // Remover esta restrição (já está comentado no seu código, ótimo!)
             // if (request.Email != "adm123@gmail.com")
             //     return Unauthorized("Apenas o e-mail autorizado pode acessar.");
 
@@ -47,12 +49,25 @@ namespace Horizon.Controllers
                 new Claim("cpfPassaporte", usuario.CpfPassaporte ?? "")
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtKey));
+            // Obtenha a chave, Issuer e Audience das configurações
+            var jwtKey = _configuration["Jwt:SecretKey"];
+            var jwtIssuer = _configuration["Jwt:Issuer"];
+            var jwtAudience = _configuration["Jwt:Audience"];
+
+            if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
+            {
+                // Isso deve ser tratado como um erro de configuração grave
+                throw new InvalidOperationException("Configurações JWT (Key, Issuer, Audience) não encontradas ou inválidas.");
+            }
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
+                issuer: jwtIssuer,       // Adicionado o Issuer
+                audience: jwtAudience,   // Adicionado o Audience
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(2), // Considere um tempo de expiração menor (ex: 30 minutos a 1 hora) para JWTs de acesso
                 signingCredentials: creds);
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
@@ -67,6 +82,7 @@ namespace Horizon.Controllers
         [AllowAnonymous] // Altere para [Authorize(Roles = "Admin")] se quiser proteger
         public async Task<IActionResult> CorrigirSenhas()
         {
+            // Idealmente, este endpoint não deveria existir em produção ou deveria ser muito bem protegido.
             int totalCorrigidas = await _usuarioService.CorrigirSenhasNaoHasheadasAsync();
             return Ok(new { senhasCorrigidas = totalCorrigidas });
         }

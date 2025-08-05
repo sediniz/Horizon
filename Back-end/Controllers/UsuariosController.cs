@@ -66,8 +66,7 @@ namespace Horizon.Controllers
             }
         }
         // GET: api/usuarios/{id}
-                [AllowAnonymous]
-
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -90,7 +89,7 @@ namespace Horizon.Controllers
         }
 
         // PUT: api/usuarios/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Usuario usuario)
         {
@@ -109,7 +108,7 @@ namespace Horizon.Controllers
         }
 
         // DELETE: api/usuarios/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

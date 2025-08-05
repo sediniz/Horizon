@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPacotes, type PacoteAPI } from '../../../api/pacotes';
+import { getHoteisByIds } from '../../../api/hoteis';
+import { useFavoritos } from '../../../contexts/FavoritosContext';
 import PraiaImg from '../../../assets/Praia01.png';
 import Paris2Img from '../../../assets/Paris2.png';
 import CancunImg from '../../../assets/cancun.png';
@@ -27,8 +29,6 @@ type DisplayPackage = {
   reviewCount: number;
   location: string;
   amenities: Amenity[];
-  highlights: string[];
-  discount?: number;
 };
 
 // Imagens para usar como fallback baseado no destino
@@ -46,40 +46,47 @@ const getImageByDestino = (destino: string): string => {
 
 // Função para mapear pacote da API para formato de exibição
 const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
-  // Gerar amenidades baseadas no tipo de destino
-  const amenities: Amenity[] = [
-    { name: 'WiFi Grátis', icon: 'wifi' },
-    { name: 'Ar Condicionado', icon: 'ac' },
-    { name: 'Piscina', icon: 'pool' },
-    { name: 'Restaurante', icon: 'restaurant' }
-  ];
-
-  // Adicionar amenidades específicas baseadas no destino
-  const destinoLower = pacote.destino.toLowerCase();
-  if (destinoLower.includes('praia') || destinoLower.includes('mar')) {
-    amenities.push({ name: 'Vista para o mar', icon: 'beach' });
-    amenities.push({ name: 'Esportes aquáticos', icon: 'sports' });
+  // Gerar amenidades baseadas nas comodidades REAIS do hotel
+  const amenities: Amenity[] = [];
+  
+  // Usar as comodidades reais do hotel se disponível
+  if (pacote.hotel) {
+    if (pacote.hotel.wifi) amenities.push({ name: 'WiFi Grátis', icon: 'wifi' });
+    if (pacote.hotel.piscina) amenities.push({ name: 'Piscina', icon: 'pool' });
+    if (pacote.hotel.estacionamento) amenities.push({ name: 'Estacionamento', icon: 'car' });
+    if (pacote.hotel.petFriendly) amenities.push({ name: 'Pet Friendly', icon: 'heart' });
+    if (pacote.hotel.cafeDaManha) amenities.push({ name: 'Café da Manhã', icon: 'coffee' });
+    if (pacote.hotel.almoco) amenities.push({ name: 'Almoço', icon: 'utensils' });
+    if (pacote.hotel.jantar) amenities.push({ name: 'Jantar', icon: 'utensils' });
+    if (pacote.hotel.allInclusive) amenities.push({ name: 'All Inclusive', icon: 'star' });
   }
-  if (destinoLower.includes('resort') || pacote.valorTotal > 3000) {
-    amenities.push({ name: 'Spa', icon: 'spa' });
-    amenities.push({ name: 'Room Service', icon: 'room-service' });
-  }
-
-  // Gerar highlights baseados no pacote
-  const highlights: string[] = ['Café da manhã incluso'];
-  if (pacote.valorTotal > 4000) {
-    highlights.push('Hospedagem de luxo');
-  }
-  if (pacote.duracao >= 5) {
-    highlights.push('Roteiro completo');
-  }
-  if (pacote.quantidadeDePessoas > 2) {
-    highlights.push('Ideal para grupos');
+  
+  // Se não tem amenidades do hotel, usar fallback genérico
+  if (amenities.length === 0) {
+    amenities.push(
+      { name: 'WiFi Grátis', icon: 'wifi' },
+      { name: 'Ar Condicionado', icon: 'ac' },
+      { name: 'Piscina', icon: 'pool' },
+      { name: 'Restaurante', icon: 'restaurant' }
+    );
   }
 
   // Usar a imagem do hotel se disponível, senão usar fallback baseado no destino
   const hotelImage = pacote.hotel?.imagens;
   const fallbackImage = getImageByDestino(pacote.destino);
+  
+  // Calcular rating real baseado nas avaliações do hotel
+  let realRating = 4.0; // Rating padrão
+  let reviewCount = 0;
+  
+  if (pacote.hotel?.avaliacoes && pacote.hotel.avaliacoes.length > 0) {
+    const somaNotas = pacote.hotel.avaliacoes.reduce((soma, av) => soma + av.nota, 0);
+    realRating = somaNotas / pacote.hotel.avaliacoes.length;
+    reviewCount = pacote.hotel.avaliacoes.length;
+    console.log(`📊 Hotel ${pacote.hotel.nome}: ${reviewCount} avaliações, média ${realRating.toFixed(1)}`);
+  } else {
+    console.log(`📊 Hotel ${pacote.hotel?.nome || 'N/A'}: Sem avaliações, usando rating padrão ${realRating}`);
+  }
   
   return {
     id: pacote.pacoteId,
@@ -88,12 +95,11 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     price: `R$ ${pacote.valorTotal.toFixed(2).replace('.', ',')}`,
     duration: `${pacote.duracao} dias / ${pacote.duracao - 1} noites`,
     image: hotelImage || fallbackImage, // Usar imagem do hotel ou fallback
-    rating: 4.5 + Math.random() * 0.5, // Rating simulado entre 4.5 e 5.0
-    reviewCount: Math.floor(Math.random() * 500) + 100, // Entre 100 e 600 reviews
+    rating: realRating, // Rating real das avaliações
+    reviewCount: reviewCount, // Número real de avaliações
     location: pacote.destino,
-    amenities,
-    highlights,
-    discount: pacote.valorTotal > 3500 ? Math.floor(Math.random() * 20) + 10 : undefined
+    amenities
+    
   };
 };
 
@@ -150,6 +156,7 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
 
 const TravelPackages: React.FC = () => {
   const navigate = useNavigate();
+  const { isFavorito, toggleFavorito } = useFavoritos();
   const [packages, setPackages] = useState<DisplayPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -159,13 +166,36 @@ const TravelPackages: React.FC = () => {
     const fetchPacotes = async () => {
       try {
         setLoading(true);
+        console.log('🏠 HOME: Carregando pacotes da API...');
+        
+        // Buscar pacotes
         const pacotesAPI = await getAllPacotes();
+        console.log('📦 HOME: Pacotes recebidos:', pacotesAPI);
         
         // Pegar apenas os primeiros 3 pacotes para a home
         const primeiros3Pacotes = pacotesAPI.slice(0, 3);
         
+        // Extrair IDs únicos dos hotéis
+        const hotelIds = [...new Set(primeiros3Pacotes.map(p => p.hotelId))];
+        console.log('🏨 HOME: IDs dos hotéis para carregar:', hotelIds);
+        
+        // Carregar dados dos hotéis com avaliações
+        const hoteis = await getHoteisByIds(hotelIds);
+        console.log('🏨 HOME: Hotéis carregados com avaliações:', hoteis);
+        
+        // Criar um mapa hotelId -> hotel para lookup rápido
+        const hotelMap = new Map(hoteis.map(hotel => [hotel.hotelId, hotel]));
+        
+        // Associar hotéis aos pacotes
+        const pacotesComHoteis = primeiros3Pacotes.map(pacote => ({
+          ...pacote,
+          hotel: hotelMap.get(pacote.hotelId)
+        }));
+        
+        console.log('📦 HOME: Pacotes com hotéis associados:', pacotesComHoteis);
+        
         // Mapear para o formato de exibição
-        const displayPackages = primeiros3Pacotes.map(mapPacoteToDisplay);
+        const displayPackages = pacotesComHoteis.map(mapPacoteToDisplay);
         
         setPackages(displayPackages);
         setError(null);
@@ -190,8 +220,7 @@ const TravelPackages: React.FC = () => {
               { name: 'Piscina', icon: 'pool' },
               { name: 'Ar Condicionado', icon: 'ac' },
               { name: 'Restaurante', icon: 'restaurant' }
-            ],
-            highlights: ['Café da manhã incluso', 'Vista espetacular', 'Atividades incluídas']
+            ]
           }
         ];
         setPackages(fallbackPackages);
@@ -257,39 +286,34 @@ const TravelPackages: React.FC = () => {
               className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
               onClick={() => handlePacoteClick(pkg.id)}
             >
-              {/* Imagem com badge de desconto */}
-              <div className="relative h-64 overflow-hidden">
+              {/* Imagem */}
+              <div className="relative h-48 overflow-hidden">
                 <img
                   src={pkg.image}
                   alt={pkg.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                {pkg.discount && (
-                  <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                    -{pkg.discount}%
-                  </div>
-                )}
                 <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
                   {pkg.location}
                 </div>
               </div>
 
               {/* Conteúdo do card */}
-              <div className="p-6">
+              <div className="p-4">{/* Reduzido padding de p-6 para p-4 */}
                 {/* Título e Hotel */}
-                <div className="mb-4">
+                <div className="mb-3">
                   <h3 className="text-xl font-bold text-gray-900 mb-1">{pkg.title}</h3>
                   <p className="text-gray-600 text-sm">{pkg.hotelName}</p>
                 </div>
 
                 {/* Avaliação */}
-                <div className="mb-4">
+                <div className="mb-3">
                   <StarRating rating={pkg.rating} />
                   <p className="text-xs text-gray-500 mt-1">{pkg.reviewCount} avaliações</p>
                 </div>
 
                 {/* Preço */}
-                <div className="mb-4">
+                <div className="mb-3">
                   <div className="flex items-center gap-2">
                     {pkg.originalPrice && (
                       <span className="text-sm text-gray-500 line-through">{pkg.originalPrice}</span>
@@ -300,7 +324,7 @@ const TravelPackages: React.FC = () => {
                 </div>
 
                 {/* Comodidades */}
-                <div className="mb-4">
+                <div className="mb-4">{/* Reduzido de mb-6 para mb-4 */}
                   <p className="text-sm font-semibold text-gray-800 mb-2">Comodidades:</p>
                   <div className="grid grid-cols-3 gap-2">
                     {pkg.amenities.slice(0, 6).map((amenity: Amenity, index: number) => (
@@ -312,25 +336,10 @@ const TravelPackages: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Destaques */}
-                <div className="mb-6">
-                  <p className="text-sm font-semibold text-gray-800 mb-2">Destaques:</p>
-                  <ul className="space-y-1">
-                    {pkg.highlights.map((highlight: string, index: number) => (
-                      <li key={index} className="text-xs text-gray-600 flex items-center gap-2">
-                        <svg className="w-3 h-3 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                        </svg>
-                        {highlight}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
                 {/* Botões de ação */}
                 <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                   <button 
-                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                    className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       // Rota para pacote id
@@ -339,8 +348,28 @@ const TravelPackages: React.FC = () => {
                   >
                     Reservar Agora
                   </button>
-                  <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-red-300 hover:text-red-500 transition-all duration-200 group">
-                    <svg className="w-5 h-5 group-hover:fill-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button 
+                    className={`px-3 py-2 border rounded-lg transition-all duration-200 group ${
+                      isFavorito(pkg.id) 
+                        ? 'border-red-300 bg-red-50 text-red-600' 
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-red-300 hover:text-red-500'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorito(pkg.id);
+                    }}
+                    title={isFavorito(pkg.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                  >
+                    <svg 
+                      className={`w-4 h-4 transition-colors ${
+                        isFavorito(pkg.id) 
+                          ? 'fill-red-500 text-red-500' 
+                          : 'group-hover:fill-red-500'
+                      }`} 
+                      fill={isFavorito(pkg.id) ? 'currentColor' : 'none'} 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                     </svg>
                   </button>

@@ -166,28 +166,59 @@ namespace Horizon.Controllers
                     return NotFound(new { mensagem = "Usuário não encontrado" });
                 }
 
-                // Criar uma nova reserva usando apenas as colunas que existem no banco
+                // Verificar se é uma reserva existente ou nova
                 var dataViagem = request.DataViagem;
                 var duracaoPacote = pacote?.Duracao ?? 7; // Usar duração do pacote ou padrão de 7 dias
                 
                 Console.WriteLine($"💳 Processando pagamento para Pacote {request.PacoteId} - Hotel {pacote?.HotelId}");
                 Console.WriteLine($"📅 Datas: {dataViagem:yyyy-MM-dd} até {dataViagem.AddDays(duracaoPacote):yyyy-MM-dd}");
                 
-                var reserva = new Reserva
+                Reserva reserva;
+                
+                if (request.ReservaId.HasValue && request.ReservaId.Value > 0)
                 {
-                    UsuarioId = request.UsuarioId,
-                    DataInicio = dataViagem, // Data de início da viagem
-                    DataFim = dataViagem.AddDays(duracaoPacote), // Data de fim baseada na duração do pacote
-                    HotelId = pacote?.HotelId, // Incluir HotelId se tiver pacote
-                    DataReserva = DateTime.Now,
-                    DataViagem = request.DataViagem,
-                    QuantidadePessoas = request.QuantidadePessoas,
-                    ValorTotal = (decimal)intent.Amount / 100,
-                    PacoteId = request.PacoteId,
-                    Status = StatusReserva.Confirmada // Definir como confirmada quando pagamento é aprovado
-                };
-
-                await _reservaService.AddAsync(reserva);
+                    // Se temos uma reserva existente, atualizá-la
+                    Console.WriteLine($"♻️ Atualizando reserva existente: {request.ReservaId}");
+                    
+                    reserva = await _reservaService.GetByIdAsync(request.ReservaId.Value);
+                    if (reserva == null)
+                    {
+                        return NotFound(new { mensagem = "Reserva não encontrada" });
+                    }
+                    
+                    // Atualizar os dados da reserva
+                    reserva.DataInicio = dataViagem;
+                    reserva.DataFim = dataViagem.AddDays(duracaoPacote);
+                    reserva.DataViagem = request.DataViagem;
+                    reserva.QuantidadePessoas = request.QuantidadePessoas;
+                    reserva.ValorTotal = (decimal)intent.Amount / 100;
+                    reserva.Status = StatusReserva.Confirmada;
+                    
+                    // Atualizar reserva existente
+                    await _reservaService.UpdateAsync(reserva);
+                }
+                else
+                {
+                    // Criar uma nova reserva
+                    Console.WriteLine($"🆕 Criando nova reserva");
+                    
+                    reserva = new Reserva
+                    {
+                        UsuarioId = request.UsuarioId,
+                        DataInicio = dataViagem, // Data de início da viagem
+                        DataFim = dataViagem.AddDays(duracaoPacote), // Data de fim baseada na duração do pacote
+                        HotelId = pacote?.HotelId, // Incluir HotelId se tiver pacote
+                        DataReserva = DateTime.Now,
+                        DataViagem = request.DataViagem,
+                        QuantidadePessoas = request.QuantidadePessoas,
+                        ValorTotal = (decimal)intent.Amount / 100,
+                        PacoteId = request.PacoteId,
+                        Status = StatusReserva.Confirmada // Definir como confirmada quando pagamento é aprovado
+                    };
+                    
+                    // Adicionar nova reserva
+                    await _reservaService.AddAsync(reserva);
+                }
                 await _reservaService.SaveChangesAsync();
 
                 // Criar registro de pagamento vinculado à reserva
