@@ -66,11 +66,20 @@ export const reservasApi = {
       
       return response.map((reserva: any) => {
         console.log('Processando reserva ID:', reserva.reservaId);
+        console.log('Dados completos da reserva:', JSON.stringify(reserva, null, 2));
         
         // Determinar os dados do hotel - seja diretamente ou via pacote
         const hotelInfo = reserva.hotel || (reserva.pacote?.hotel);
         const destino = reserva.hotel?.localizacao || reserva.pacote?.destino;
         const hotelNome = reserva.hotel?.nome || (reserva.pacote?.hotel?.nome);
+        
+        // Verificar dados do pacote para detalhes
+        console.log('Dados do pacote:', {
+          pacote: reserva.pacote,
+          descricao: reserva.pacote?.descricao || reserva.descricao,
+          inclui: reserva.pacote?.inclui || reserva.inclui,
+          observacoes: reserva.observacoes
+        });
         
         // Verificar imagens disponíveis e logar detalhadamente
         const hotelImagens = reserva.hotel?.imagens;
@@ -121,6 +130,19 @@ export const reservasApi = {
           pacoteId: reserva.pacoteId,
           hotelId: reserva.hotelId,
           observacoes: reserva.observacoes,
+          // Adicionar campos que estão faltando para o modal de detalhes
+          descricao: reserva.pacote?.descricao || reserva.descricao || hotelInfo?.descricao || 'Pacote de viagem completo com hospedagem e serviços incluídos.',
+          inclui: reserva.pacote?.inclui || reserva.inclui || [
+            'Hospedagem',
+            'Transfer aeroporto-hotel-aeroporto',
+            'Café da manhã',
+            'Suporte 24h'
+          ],
+          naoInclui: reserva.pacote?.naoInclui || reserva.naoInclui || [
+            'Passagens aéreas',
+            'Refeições (exceto café da manhã)',
+            'Gastos pessoais'
+          ],
           dataInicio: reserva.dataInicio,
           dataFim: reserva.dataFim,
           dataCriacao: reserva.dataReserva,
@@ -148,7 +170,51 @@ export const reservasApi = {
       const response = await apiRequest(`/reservas/${id}`, {
         method: 'GET'
       });
-      return response;
+      
+      console.log('Reserva específica encontrada:', JSON.stringify(response, null, 2));
+      
+      // Mapeamento similar ao da lista, mas com mais detalhes
+      const reserva = response;
+      const hotelInfo = reserva.hotel || (reserva.pacote?.hotel);
+      const destino = reserva.hotel?.localizacao || reserva.pacote?.destino;
+      const hotelNome = reserva.hotel?.nome || (reserva.pacote?.hotel?.nome);
+      
+      return {
+        id: reserva.reservaId,
+        codigo: `HZ${new Date().getFullYear()}${reserva.reservaId.toString().padStart(3, '0')}`,
+        destino: destino || 'Destino não especificado',
+        hotel: hotelNome || 'Hotel não especificado',
+        dataViagem: `${new Date(reserva.dataInicio).toLocaleDateString('pt-BR')} - ${new Date(reserva.dataFim).toLocaleDateString('pt-BR')}`,
+        dataReserva: new Date(reserva.dataReserva).toLocaleDateString('pt-BR'),
+        status: reserva.status === 0 ? 'pendente' : reserva.status === 1 ? 'confirmada' : 'cancelada',
+        valor: reserva.valorTotal,
+        pessoas: reserva.quantidadePessoas,
+        imagem: reserva.hotel?.imagem || reserva.pacote?.hotel?.imagem || reserva.pacote?.imagem || 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg',
+        voo: reserva.pacote?.incluiVoo ? `${reserva.pacote?.origemVoo || 'GRU'} → ${reserva.pacote?.destinoVoo || 'Destino'}` : 'Não incluído',
+        avaliacao: hotelInfo?.avaliacaoMedia || 0,
+        estrelas: hotelInfo?.categoria || 0,
+        userId: reserva.usuarioId,
+        pacoteId: reserva.pacoteId,
+        hotelId: reserva.hotelId,
+        observacoes: reserva.observacoes,
+        descricao: reserva.pacote?.descricao || reserva.descricao || hotelInfo?.descricao || 'Pacote de viagem completo com hospedagem e serviços incluídos.',
+        inclui: reserva.pacote?.inclui || reserva.inclui || [
+          'Hospedagem',
+          'Transfer aeroporto-hotel-aeroporto', 
+          'Café da manhã',
+          'Suporte 24h'
+        ],
+        naoInclui: reserva.pacote?.naoInclui || reserva.naoInclui || [
+          'Passagens aéreas',
+          'Refeições (exceto café da manhã)',
+          'Gastos pessoais'
+        ],
+        dataInicio: reserva.dataInicio,
+        dataFim: reserva.dataFim,
+        dataCriacao: reserva.dataReserva,
+        valorTotal: reserva.valorTotal,
+        quantidadePessoas: reserva.quantidadePessoas
+      };
     } catch (error) {
       console.error('Erro ao buscar reserva:', error);
       throw new Error('Reserva não encontrada');
