@@ -6,15 +6,18 @@ interface PacoteInfoCardProps {
   dataIda: string;
   dataVolta: string;
   pessoas: number;
+  duracao: number; 
   pacoteId?: number;
   onModificar: (novo: { local: string; hotel?: string; dataIda: string; dataVolta: string; pessoas: number }) => void;
 }
 
-const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', dataIda, dataVolta, pessoas }) => {
-  // Formatação das datas
-  const formatarData = (dataString: string) => {
+const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', dataIda, dataVolta, pessoas, duracao }) => {
+  console.log(' PacoteInfoCard recebeu duracao:', duracao);
+  
+  const formatarDataComMaisUmDia = (dataString: string) => {
     try {
       const data = new Date(dataString);
+      data.setDate(data.getDate() + 1); 
       return data.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
@@ -78,7 +81,7 @@ const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', data
               </div>
               <div>
                 <div className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Check-in</div>
-                <div className="font-semibold text-gray-800">{formatarData(dataIda)}</div>
+                <div className="font-semibold text-gray-800">{formatarDataComMaisUmDia(dataIda)}</div>
               </div>
             </div>
           </div>
@@ -92,7 +95,7 @@ const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', data
               </div>
               <div>
                 <div className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Check-out</div>
-                <div className="font-semibold text-gray-800">{formatarData(dataVolta)}</div>
+                <div className="font-semibold text-gray-800">{formatarDataComMaisUmDia(dataVolta)}</div>
               </div>
             </div>
           </div>
@@ -107,6 +110,20 @@ const PacoteInfoCard: React.FC<PacoteInfoCardProps> = ({ local, hotel = '', data
               <div>
                 <div className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Pessoas</div>
                 <div className="font-semibold text-gray-800">{pessoas}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/40 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Duração</div>
+                <div className="font-semibold text-gray-800">{duracao} {duracao === 1 ? 'dia' : 'dias'}</div>
               </div>
             </div>
           </div>

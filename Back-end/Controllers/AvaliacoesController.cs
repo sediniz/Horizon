@@ -37,7 +37,7 @@ namespace Horizon.Controllers
         public async Task<IActionResult> Create([FromBody] Avaliacao avaliacao)
         {
             if (avaliacao == null)
-                return BadRequest("Avaliação não pode ser nula.");
+                return BadRequest("Avaliacaoo nao pode ser nula.");
 
             var created = await _avaliacaoService.AddAsync(avaliacao);
             return CreatedAtAction(nameof(GetById), new { id = created.IdAvaliacao }, created);
@@ -48,7 +48,7 @@ namespace Horizon.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] Avaliacao avaliacao)
         {
             if (id != avaliacao.IdAvaliacao)
-                return BadRequest("ID não corresponde à avaliação informada.");
+                return BadRequest("ID nao corresponde avaliacao informada.");
 
             var existing = await _avaliacaoService.GetByIdAsync(id);
             if (existing == null)

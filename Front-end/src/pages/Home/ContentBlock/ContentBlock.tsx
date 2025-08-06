@@ -1,10 +1,10 @@
-// src/components/TravelPackages.tsx
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPacotes, type PacoteAPI } from '../../../api/pacotes';
 import { getHoteisByIds } from '../../../api/hoteis';
 import { useFavoritos } from '../../../contexts/FavoritosContext';
+import { useHotelAvaliacoes } from '../../../hooks/useHotelAvaliacoes';
 import PraiaImg from '../../../assets/Praia01.png';
 import Paris2Img from '../../../assets/Paris2.png';
 import CancunImg from '../../../assets/cancun.png';
@@ -16,9 +16,9 @@ type Amenity = {
   icon: string;
 };
 
-// Definindo o tipo do pacote para exibição (mapeado da API)
 type DisplayPackage = {
   id: number;
+  hotelId?: number; // Adicionado para buscar avaliações reais
   title: string;
   hotelName: string;
   price: string;
@@ -44,12 +44,9 @@ const getImageByDestino = (destino: string): string => {
   return PraiaImg; // Fallback padrão
 };
 
-// Função para mapear pacote da API para formato de exibição
 const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
-  // Gerar amenidades baseadas nas comodidades REAIS do hotel
   const amenities: Amenity[] = [];
   
-  // Usar as comodidades reais do hotel se disponível
   if (pacote.hotel) {
     if (pacote.hotel.wifi) amenities.push({ name: 'WiFi Grátis', icon: 'wifi' });
     if (pacote.hotel.piscina) amenities.push({ name: 'Piscina', icon: 'pool' });
@@ -61,7 +58,6 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     if (pacote.hotel.allInclusive) amenities.push({ name: 'All Inclusive', icon: 'star' });
   }
   
-  // Se não tem amenidades do hotel, usar fallback genérico
   if (amenities.length === 0) {
     amenities.push(
       { name: 'WiFi Grátis', icon: 'wifi' },
@@ -71,12 +67,10 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     );
   }
 
-  // Usar a imagem do hotel se disponível, senão usar fallback baseado no destino
   const hotelImage = pacote.hotel?.imagens;
   const fallbackImage = getImageByDestino(pacote.destino);
   
-  // Calcular rating real baseado nas avaliações do hotel
-  let realRating = 4.0; // Rating padrão
+  let realRating = 4.0; 
   let reviewCount = 0;
   
   if (pacote.hotel?.avaliacoes && pacote.hotel.avaliacoes.length > 0) {
@@ -85,22 +79,29 @@ const mapPacoteToDisplay = (pacote: PacoteAPI): DisplayPackage => {
     reviewCount = pacote.hotel.avaliacoes.length;
   }
   
+  // CALCULAR PREÇO POR PESSOA (diária × dias)
+  const valorDiaria = pacote.hotel?.valorDiaria || 
+                     (pacote.hotel?.quarto?.valorDoQuarto || 0) + 200 || 
+                     (pacote.valorTotal / pacote.duracao / pacote.quantidadeDePessoas);
+  
+  const precoPorPessoa = valorDiaria * pacote.duracao;
+  
   return {
     id: pacote.pacoteId,
+    hotelId: pacote.hotelId, // Incluir hotelId para buscar avaliações
     title: pacote.titulo,
     hotelName: pacote.hotel?.nome || 'Hotel Incluído',
-    price: `R$ ${pacote.valorTotal.toFixed(2).replace('.', ',')}`,
+    price: `R$ ${precoPorPessoa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
     duration: `${pacote.duracao} dias / ${pacote.duracao - 1} noites`,
-    image: hotelImage || fallbackImage, // Usar imagem do hotel ou fallback
-    rating: realRating, // Rating real das avaliações
-    reviewCount: reviewCount, // Número real de avaliações
+    image: hotelImage || fallbackImage, 
+    rating: realRating, 
+    reviewCount: reviewCount, 
     location: pacote.destino,
     amenities
     
   };
 };
 
-// Componente para renderizar as estrelas
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   const stars = [];
   const fullStars = Math.floor(rating);
@@ -151,9 +152,122 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   );
 };
 
+// Componente PackageCard que usa avaliações reais
+const PackageCard: React.FC<{ pkg: DisplayPackage; onPacoteClick: (id: number) => void }> = ({ pkg, onPacoteClick }) => {
+  const { isFavorito, toggleFavorito } = useFavoritos();
+  
+  // Buscar avaliações reais do hotel
+  const { rating: realRating, reviewCount: realReviewCount, isLoading: avaliacoesLoading } = useHotelAvaliacoes(pkg.hotelId);
+  
+  // Usar avaliações reais se disponíveis, senão usar fallback
+  const displayRating = realRating > 0 ? realRating : pkg.rating;
+  const displayReviewCount = realReviewCount > 0 ? realReviewCount : pkg.reviewCount;
+
+  return (
+    <div
+      className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
+      onClick={() => onPacoteClick(pkg.id)}
+    >
+      {/* Imagem */}
+      <div className="relative h-48 overflow-hidden">
+        <img
+          src={pkg.image}
+          alt={pkg.title}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+        <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
+          {pkg.location}
+        </div>
+      </div>
+
+      {/* Conteúdo do card */}
+      <div className="p-4">
+        {/* Título e Hotel */}
+        <div className="mb-3">
+          <h3 className="text-xl font-bold text-gray-900 mb-1">{pkg.title}</h3>
+          <p className="text-gray-600 text-sm">{pkg.hotelName}</p>
+        </div>
+
+        {/* Avaliação com dados reais */}
+        <div className="mb-3">
+          <StarRating rating={displayRating} />
+          <p className="text-xs text-gray-500 mt-1">
+            {displayReviewCount} avaliações
+            {realReviewCount > 0 && !avaliacoesLoading && (
+              <span className="ml-1 text-green-600">✓</span>
+            )}
+          </p>
+        </div>
+
+        {/* Preço */}
+        <div className="mb-3">
+          <div className="flex items-center gap-2">
+            {pkg.originalPrice && (
+              <span className="text-sm text-gray-500 line-through">{pkg.originalPrice}</span>
+            )}
+            <span className="text-2xl font-bold text-blue-600">{pkg.price}</span>
+          </div>
+          <p className="text-sm text-gray-600">{pkg.duration}</p>
+          <p className="text-xs text-gray-500">por pessoa</p>
+        </div>
+
+        {/* Comodidades */}
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-gray-800 mb-2">Comodidades:</p>
+          <div className="grid grid-cols-3 gap-2">
+            {pkg.amenities.slice(0, 6).map((amenity: Amenity, index: number) => (
+              <div key={index} className="flex items-center gap-1 text-xs text-gray-600">
+                <IconRenderer iconName={amenity.icon} className="w-4 h-4 text-blue-600" />
+                <span className="truncate">{amenity.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Botões de ação */}
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+          <button 
+            className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPacoteClick(pkg.id);
+            }}
+          >
+            Reservar Agora
+          </button>
+          <button 
+            className={`px-3 py-2 border rounded-lg transition-all duration-200 group ${
+              isFavorito(pkg.id) 
+                ? 'border-red-300 bg-red-50 text-red-600' 
+                : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-red-300 hover:text-red-500'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorito(pkg.id);
+            }}
+            title={isFavorito(pkg.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          >
+            <svg 
+              className={`w-4 h-4 transition-colors ${
+                isFavorito(pkg.id) 
+                  ? 'fill-red-500 text-red-500' 
+                  : 'group-hover:fill-red-500'
+              }`} 
+              fill={isFavorito(pkg.id) ? 'currentColor' : 'none'} 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TravelPackages: React.FC = () => {
   const navigate = useNavigate();
-  const { isFavorito, toggleFavorito } = useFavoritos();
   const [packages, setPackages] = useState<DisplayPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -164,28 +278,22 @@ const TravelPackages: React.FC = () => {
       try {
         setLoading(true);
         
-        // Buscar pacotes
         const pacotesAPI = await getAllPacotes();
         
         // Pegar apenas os primeiros 3 pacotes para a home
         const primeiros3Pacotes = pacotesAPI.slice(0, 3);
         
-        // Extrair IDs únicos dos hotéis
         const hotelIds = [...new Set(primeiros3Pacotes.map(p => p.hotelId))];
         
-        // Carregar dados dos hotéis com avaliações
         const hoteis = await getHoteisByIds(hotelIds);
         
-        // Criar um mapa hotelId -> hotel para lookup rápido
         const hotelMap = new Map(hoteis.map(hotel => [hotel.hotelId, hotel]));
         
-        // Associar hotéis aos pacotes
         const pacotesComHoteis = primeiros3Pacotes.map(pacote => ({
           ...pacote,
           hotel: hotelMap.get(pacote.hotelId)
         }));
         
-        // Mapear para o formato de exibição
         const displayPackages = pacotesComHoteis.map(mapPacoteToDisplay);
         
         setPackages(displayPackages);
@@ -194,7 +302,6 @@ const TravelPackages: React.FC = () => {
         console.error('Erro ao carregar pacotes:', err);
         setError('Erro ao carregar pacotes. Usando dados de exemplo.');
         
-        // Fallback para dados mockados em caso de erro
         const fallbackPackages: DisplayPackage[] = [
           {
             id: 1,
@@ -272,101 +379,7 @@ const TravelPackages: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {packages.map((pkg: DisplayPackage) => (
-            <div
-              key={pkg.id}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
-              onClick={() => handlePacoteClick(pkg.id)}
-            >
-              {/* Imagem */}
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={pkg.image}
-                  alt={pkg.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
-                  {pkg.location}
-                </div>
-              </div>
-
-              {/* Conteúdo do card */}
-              <div className="p-4">{/* Reduzido padding de p-6 para p-4 */}
-                {/* Título e Hotel */}
-                <div className="mb-3">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{pkg.title}</h3>
-                  <p className="text-gray-600 text-sm">{pkg.hotelName}</p>
-                </div>
-
-                {/* Avaliação */}
-                <div className="mb-3">
-                  <StarRating rating={pkg.rating} />
-                  <p className="text-xs text-gray-500 mt-1">{pkg.reviewCount} avaliações</p>
-                </div>
-
-                {/* Preço */}
-                <div className="mb-3">
-                  <div className="flex items-center gap-2">
-                    {pkg.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">{pkg.originalPrice}</span>
-                    )}
-                    <span className="text-2xl font-bold text-blue-600">{pkg.price}</span>
-                  </div>
-                  <p className="text-sm text-gray-600">{pkg.duration}</p>
-                </div>
-
-                {/* Comodidades */}
-                <div className="mb-4">{/* Reduzido de mb-6 para mb-4 */}
-                  <p className="text-sm font-semibold text-gray-800 mb-2">Comodidades:</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {pkg.amenities.slice(0, 6).map((amenity: Amenity, index: number) => (
-                      <div key={index} className="flex items-center gap-1 text-xs text-gray-600">
-                        <IconRenderer iconName={amenity.icon} className="w-4 h-4 text-blue-600" />
-                        <span className="truncate">{amenity.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Botões de ação */}
-                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                  <button 
-                    className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Rota para pacote id
-                      navigate(`/pacote/${pkg.id}`);
-                    }}
-                  >
-                    Reservar Agora
-                  </button>
-                  <button 
-                    className={`px-3 py-2 border rounded-lg transition-all duration-200 group ${
-                      isFavorito(pkg.id) 
-                        ? 'border-red-300 bg-red-50 text-red-600' 
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-red-300 hover:text-red-500'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorito(pkg.id);
-                    }}
-                    title={isFavorito(pkg.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                  >
-                    <svg 
-                      className={`w-4 h-4 transition-colors ${
-                        isFavorito(pkg.id) 
-                          ? 'fill-red-500 text-red-500' 
-                          : 'group-hover:fill-red-500'
-                      }`} 
-                      fill={isFavorito(pkg.id) ? 'currentColor' : 'none'} 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <PackageCard key={pkg.id} pkg={pkg} onPacoteClick={handlePacoteClick} />
           ))}
         </div>
 

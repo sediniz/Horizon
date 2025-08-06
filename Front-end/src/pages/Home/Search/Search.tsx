@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch } from "react-icons/fa";
+import SmartSearch from '../../../components/SmartSearch';
 
 // Tipos para os dados do formulário
 interface SearchFormData {
@@ -14,7 +15,6 @@ interface SearchFormData {
 
 // Lista de destinos disponíveis
 const destinations = [
-  // Brasil - Principais cidades e estados
   { value: 'sao-paulo', label: 'São Paulo, SP', flag: '🇧🇷' },
   { value: 'rio-de-janeiro', label: 'Rio de Janeiro, RJ', flag: '🇧🇷' },
   { value: 'salvador', label: 'Salvador, BA', flag: '🇧🇷' },
@@ -262,11 +262,9 @@ const InlineCalendar: React.FC<{
     const dateStr = formatDate(date);
     
     if (!tempCheckIn || (tempCheckIn && tempCheckOut)) {
-      // Primeira seleção ou reiniciar
       setTempCheckIn(dateStr);
       setTempCheckOut('');
     } else if (tempCheckIn && !tempCheckOut) {
-      // Segunda seleção
       if (dateStr > tempCheckIn) {
         setTempCheckOut(dateStr);
       } else {
@@ -456,15 +454,11 @@ const Search: React.FC = () => {
 
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isDestinationOpen, setIsDestinationOpen] = useState(false);
-  const [destinationQuery, setDestinationQuery] = useState('');
 
-  // Função para abrir/fechar calendário
   const toggleCalendar = () => {
     setIsCalendarOpen(!isCalendarOpen);
   };
 
-  // Função para selecionar datas do calendário
   const handleDateSelection = (checkIn: string, checkOut: string) => {
     setFormData(prev => ({
       ...prev,
@@ -473,22 +467,15 @@ const Search: React.FC = () => {
     }));
   };
 
-  // Função para selecionar destino
-  const handleDestinationSelect = (destination: string) => {
+  const handleDestinationSelect = (cityName: string) => {
     setFormData(prev => ({
       ...prev,
-      destination
+      destination: cityName // SmartSearch já retorna apenas o nome da cidade
     }));
-    setDestinationQuery(destination);
-    setIsDestinationOpen(false);
   };
 
-  // Filtrar destinos baseado na busca
-  const filteredDestinations = destinations.filter(dest =>
-    dest.label.toLowerCase().includes(destinationQuery.toLowerCase())
-  );
 
-  // Função para formatar data para exibição
+
   const formatDateDisplay = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString + 'T00:00:00');
@@ -498,7 +485,6 @@ const Search: React.FC = () => {
     });
   };
 
-  // Função para incrementar/decrementar valores
   const updateCounter = (field: 'rooms' | 'adults' | 'children', operation: 'increment' | 'decrement') => {
     setFormData(prev => {
       const currentValue = prev[field];
@@ -517,9 +503,7 @@ const Search: React.FC = () => {
     });
   };
 
-  // Função para buscar
   const handleSearch = () => {
-    // Validações básicas
     if (!formData.destination) {
       alert('Por favor, selecione um destino');
       return;
@@ -530,7 +514,6 @@ const Search: React.FC = () => {
       return;
     }
     
-    // Criar parâmetros URL com os dados do formulário
     const searchParams = new URLSearchParams({
       destino: formData.destination,
       checkin: formData.checkIn,
@@ -540,15 +523,12 @@ const Search: React.FC = () => {
       criancas: formData.children.toString()
     });
     
-    console.log('🧳 Navegando para PacotesGerais com parâmetros:', searchParams.toString());
+    console.log('Navegando para PacotesGerais com parâmetros:', searchParams.toString());
     
-    // Navegar para a página de pacotes com os parâmetros
     navigate(`/pacotes?${searchParams.toString()}`);
   };
 
-  // Fechar dropdowns quando clicar fora
   const handleClickOutside = () => {
-    setIsDestinationOpen(false);
     setIsGuestsOpen(false);
   };
 
@@ -569,46 +549,17 @@ const Search: React.FC = () => {
         {/* Formulário de busca */}
         <div className="relative">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {/* Destino */}
+            {/* Destino com SmartSearch */}
             <div className="relative" onClick={(e) => e.stopPropagation()}>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Destino
+                Destino
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Para onde você quer ir?"
-                  value={destinationQuery}
-                  onChange={(e) => {
-                    setDestinationQuery(e.target.value);
-                    setIsDestinationOpen(true);
-                  }}
-                  onFocus={() => setIsDestinationOpen(true)}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                />
-                
-                {/* Dropdown de sugestões */}
-                {isDestinationOpen && destinationQuery && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-xl shadow-lg mt-1 z-20 max-h-60 overflow-y-auto">
-                    {filteredDestinations.length > 0 ? (
-                      filteredDestinations.map((dest) => (
-                        <button
-                          key={dest.value}
-                          onClick={() => handleDestinationSelect(dest.label)}
-                          className="w-full p-3 text-left hover:bg-gray-50 flex items-center gap-3 first:rounded-t-xl last:rounded-b-xl"
-                        >
-                          <span className="text-xl">{dest.flag}</span>
-                          <span className="text-gray-700">{dest.label}</span>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="p-3 text-gray-500 text-center">
-                        Nenhum destino encontrado
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <SmartSearch
+                destinations={destinations}
+                onSelect={handleDestinationSelect}
+                placeholder="Para onde você quer ir?"
+                value={formData.destination}
+              />
             </div>
 
             {/* Datas - Check-in e Check-out */}

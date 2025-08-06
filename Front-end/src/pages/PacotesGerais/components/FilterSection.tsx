@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { matchesDestination } from '../../../utils/searchUtils';
 import IconRenderer from '../../../components/IconRenderer/IconRenderer';
 
 interface FilterSectionProps {
@@ -46,9 +47,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     };
   }, []);
 
-  // Filtrar localizações baseado no termo de busca
   const filteredLocations = availableLocations.filter(location =>
-    location.toLowerCase().includes(searchTerm.toLowerCase())
+    matchesDestination(location, searchTerm)
   );
 
   // Fechar dropdown quando clicar fora

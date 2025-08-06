@@ -105,7 +105,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     }
   };
 
-  // Prevent body scroll when modal is open
   React.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

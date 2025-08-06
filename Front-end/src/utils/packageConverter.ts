@@ -207,11 +207,21 @@ export const convertAPIToPackage = (pacoteAPI: PacoteAPI, index: number = 0): Pa
   // Usar imagem do hotel se disponível, senão usar padrão
   const image = pacoteAPI.hotel?.imagens || defaultImages[index % defaultImages.length];
   
+  // CALCULAR PREÇO POR PESSOA (diária × dias ÷ pessoas)
+  // Usar valorDiaria do hotel se disponível, senão calcular baseado no valorTotal
+  const valorDiaria = pacoteAPI.hotel?.valorDiaria || 
+                     (pacoteAPI.hotel?.quarto?.valorDoQuarto || 0) + 200 || 
+                     (pacoteAPI.valorTotal / pacoteAPI.duracao / pacoteAPI.quantidadeDePessoas);
+  
+  // Calcular preço por pessoa: diária × número de dias
+  const precoPorPessoa = valorDiaria * pacoteAPI.duracao;
+  
   return {
     id: pacoteAPI.pacoteId,
+    hotelId: pacoteAPI.hotelId, // Incluir hotelId para buscar avaliações
     title: pacoteAPI.titulo,
     hotelName,
-    price: `R$ ${pacoteAPI.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+    price: `R$ ${precoPorPessoa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
     originalPrice,
     duration: formatDuration(pacoteAPI.duracao),
     image,

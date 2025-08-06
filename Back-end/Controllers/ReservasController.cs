@@ -97,7 +97,6 @@ namespace Horizon.Controllers
 
         }
 
-        // Additional methods for filtering, sorting, etc. can be added here
 
         // GET api/reservas/filtro?dataInicio=2023-01-01&dataFim=2023-12-31
         [HttpGet("filtro")]

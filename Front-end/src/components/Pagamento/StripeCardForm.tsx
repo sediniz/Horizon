@@ -84,7 +84,6 @@ const StripeCardForm: React.FC<StripeCardFormProps> = ({
         payment_method: {
           card: cardElement,
           billing_details: {
-            // Adicione detalhes se necessário
           },
         },
       });

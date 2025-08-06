@@ -25,13 +25,10 @@ const ReservaCard: React.FC<ReservaCardProps> = ({
   valorTotal,
   mostrarOpcoes = true
 }) => {
-  // Valor base da diária por pessoa - usa o valor do backend ou o default
   const diaria = valorDiaria;
   
-  // Se temos um valorTotal específico do DatePicker dinâmico, usar ele
   const valorFinalCalculado = valorTotal || (diaria * duracaoPacote * pessoas);
   
-  // Formatar as datas para exibição
   const formatarDataParaExibicao = (dataString: string) => {
     if (!dataString) return '';
     try {
@@ -50,27 +47,23 @@ const ReservaCard: React.FC<ReservaCardProps> = ({
     // Duração do pacote como opção central
     const baseNoites = duracaoPacote || 5;
     
-    // Criar opções ao redor da duração base
-    // Por exemplo, se duracaoPacote = 7, opções serão [3, 5, 7, 9]
     return [
-      Math.max(3, baseNoites - 4), // Mínimo de 3 noites
-      Math.max(baseNoites - 2, 3), // Mínimo de 3 noites
+      Math.max(3, baseNoites - 4),
+      Math.max(baseNoites - 2, 3), 
       baseNoites,
       baseNoites + 2
-    ].filter((v, i, a) => a.indexOf(v) === i); // Remove duplicados
+    ].filter((v, i, a) => a.indexOf(v) === i); 
   }, [duracaoPacote]);
   const [precoSelecionado, setPrecoSelecionado] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [dataVoltaCalculada, setDataVoltaCalculada] = useState(dataVolta);
   
-  // Gera os preços multiplicados (diária por pessoa x noites x pessoas)
   const precosGrid = noitesArray.map(noites => ({ 
     valor: diaria * noites * pessoas,  // Valor total (diária x noites x pessoas)
     valorPorPessoa: diaria * noites,   // Valor por pessoa (diária x noites)
     noites 
   }));
   
-  // Atualiza a data de volta quando o número de noites mudar
   React.useEffect(() => {
     if (dataIda && precoSelecionado !== null) {
       try {
@@ -90,12 +83,10 @@ const ReservaCard: React.FC<ReservaCardProps> = ({
 
   const handleConfirmarModal = () => {
     setShowModal(false);
-    // Se não estamos mostrando opções (usando DatePicker dinâmico), usar o valor calculado
     if (!mostrarOpcoes && valorFinalCalculado) {
       console.log("Valor final calculado a ser passado:", valorFinalCalculado);
       onReservar(valorFinalCalculado);
     } else {
-      // Pegar o valor do pacote selecionado atual
       const valorPacoteSelecionado = precoSelecionado !== null ? precosGrid[precoSelecionado].valor : valorFinalCalculado;
       console.log("Valor do pacote selecionado a ser passado:", valorPacoteSelecionado);
       onReservar(valorPacoteSelecionado);
