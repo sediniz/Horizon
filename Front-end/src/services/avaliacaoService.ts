@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://localhost:7202/api';
+import { apiRequest } from '../api/config';
 
 // Interfaces para requests (DTOs)
 export interface CriarAvaliacaoDto {
@@ -82,19 +82,8 @@ export const avaliacaoService = {
   // Buscar todas as avaliações (com Include de usuário e hotel)
   async getAll(): Promise<Avaliacao[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar avaliações: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      const response = await apiRequest('/avaliacoes', { method: 'GET' });
+      return response;
     } catch (error) {
       console.error('Erro ao buscar avaliações:', error);
       throw error;
@@ -104,19 +93,8 @@ export const avaliacaoService = {
   // Buscar avaliação por ID
   async getById(id: number): Promise<Avaliacao> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar avaliação: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      const response = await apiRequest(`/avaliacoes/${id}`, { method: 'GET' });
+      return response;
     } catch (error) {
       console.error('Erro ao buscar avaliação:', error);
       throw error;
@@ -126,20 +104,11 @@ export const avaliacaoService = {
   // Criar nova avaliação (usando DTO simples)
   async create(dto: CriarAvaliacaoDto): Promise<Avaliacao> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes`, {
+      const response = await apiRequest('/avaliacoes', { 
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dto),
+        data: dto
       });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao criar avaliação: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      return response;
     } catch (error) {
       console.error('Erro ao criar avaliação:', error);
       throw error;
@@ -149,20 +118,11 @@ export const avaliacaoService = {
   // Atualizar avaliação (usando DTO simples)
   async update(dto: AtualizarAvaliacaoDto): Promise<Avaliacao> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes/${dto.idAvaliacao}`, {
+      const response = await apiRequest(`/avaliacoes/${dto.idAvaliacao}`, { 
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dto),
+        data: dto
       });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao atualizar avaliação: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      return response;
     } catch (error) {
       console.error('Erro ao atualizar avaliação:', error);
       throw error;
