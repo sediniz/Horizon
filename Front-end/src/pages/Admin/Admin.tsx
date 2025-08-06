@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import HotelForm from './components/HotelForm';
 import PacoteForm from './components/PacoteForm';
+import AvaliacaoForm from './components/AvaliacaoForm';
 import HotelList from './components/HotelList';
 import PacoteList from './components/PacoteList';
 import type { HotelFormData, PacoteFormData } from './types';
@@ -341,6 +342,17 @@ const Admin: React.FC = () => {
               )}
             </>
           )}
+        </div>
+
+        {/* Seção de Avaliações - Posicionada discretamente na parte inferior */}
+        <div className="mt-16 pt-8 border-t border-gray-200">
+          <div className="max-w-4xl mx-auto">
+            <AvaliacaoForm 
+              onSuccess={() => {
+                console.log('Avaliação criada com sucesso!');
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
