@@ -104,9 +104,13 @@ const HotelForm: React.FC<HotelFormProps> = ({
             value={formData.descricao}
             onChange={handleInputChange}
             rows={3}
+            maxLength={200}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Descreva o hotel..."
+            placeholder="Descreva o hotel... (máx. 200 caracteres)"
           />
+          <div className="text-sm text-gray-500 mt-1">
+            {formData.descricao.length}/200 caracteres
+          </div>
         </div>
 
         {/* Valores e Dados */}
