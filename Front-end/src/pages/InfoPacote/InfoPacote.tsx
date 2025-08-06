@@ -49,11 +49,8 @@ const InfoPacote: React.FC = () => {
   const [duracao, setDuracao] = useState(0);
   const [imagem, setImagem] = useState(cancunImg);
   const [descricao, setDescricao] = useState("");
-  const [avaliacoes, setAvaliacoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usarDatePickerDinamico, setUsarDatePickerDinamico] = useState(true);
-  const [valorTotalCalculado, setValorTotalCalculado] = useState(0);
   const [hotelInfo, setHotelInfo] = useState<any>(null); 
   
   const [duracaoOriginal, setDuracaoOriginal] = useState(0);
@@ -89,9 +86,6 @@ const InfoPacote: React.FC = () => {
           if (hotelInfoTemp) {
             setHotelInfo(hotelInfoTemp);
             
-            if (hotelInfoTemp.avaliacoes) {
-              setAvaliacoes(hotelInfoTemp.avaliacoes);
-            }
             if (hotelInfoTemp.imagens && hotelInfoTemp.imagens.trim() !== '') {
               setImagem(hotelInfoTemp.imagens);
             } else {
@@ -167,7 +161,6 @@ const InfoPacote: React.FC = () => {
     
     setDataIda(dataInicio);
     setDataVolta(dataFim);
-    setValorTotalCalculado(valorCalculado);
     
     setDuracaoAtual(duracao);
     
@@ -380,7 +373,7 @@ const InfoPacote: React.FC = () => {
             />
           </div>
           <div className="glass-effect rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
-            <AvaliacaoPacote avaliacoes={avaliacoes} />
+            <AvaliacaoPacote hotelId={hotelInfo?.hotelId} />
           </div>
         </div>
 
