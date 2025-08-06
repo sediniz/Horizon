@@ -16,34 +16,23 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
   initialData = {}, 
   isLoading = false 
 }) => {
-  const [formData, setFormData] = useState<PacoteFormData>({
+  const [formData, setFormData] = useState<Omit<PacoteFormData, 'valorTotal'>>({
     titulo: initialData.titulo || '',
     descricao: initialData.descricao || '',
     destino: initialData.destino || '',
     duracao: initialData.duracao || 1,
     quantidadeDePessoas: initialData.quantidadeDePessoas || 1,
-    valorTotal: 0, // Será calculado automaticamente
     hotelId: initialData.hotelId || 0,
   });
 
   const [hoteis, setHoteis] = useState<HotelAPI[]>([]);
   const [loadingHoteis, setLoadingHoteis] = useState(true);
 
-  // Calcular valor total automaticamente
+  // Calcular valor total dinamicamente
   const selectedHotel = hoteis.find(hotel => hotel.hotelId === formData.hotelId);
-  const valorCalculado = selectedHotel 
-    ? selectedHotel.valorDiaria * Number(formData.duracao) * Number(formData.quantidadeDePessoas) 
+  const valorCalculado = selectedHotel
+    ? selectedHotel.valorDiaria * Number(formData.duracao) * Number(formData.quantidadeDePessoas)
     : 0;
-
-  // Atualizar valor total quando houver mudanças nos campos que afetam o cálculo
-  useEffect(() => {
-    if (selectedHotel) {
-      setFormData(prev => ({
-        ...prev,
-        valorTotal: valorCalculado
-      }));
-    }
-  }, [formData.duracao, formData.quantidadeDePessoas, formData.hotelId, valorCalculado]);
 
   useEffect(() => {
     loadHoteis();
@@ -62,14 +51,27 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(formData);
+    // Sempre enviar o valor calculado no momento do submit
+    await onSubmit({
+      ...formData,
+      valorTotal: valorCalculado
+    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
+    let processedValue: string | number = value;
+    if (type === 'number') {
+      processedValue = value === '' ? 1 : Number(value);
+    } else if (name === 'hotelId') {
+      // Converter hotelId para number sempre
+      processedValue = Number(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? (value === '' ? '' : Number(value)) : value,
+      [name]: processedValue,
     }));
   };
 
