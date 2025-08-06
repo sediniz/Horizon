@@ -7,6 +7,7 @@ export type Amenity = {
 // Definindo o tipo do pacote completo
 export type PackageProps = {
   id: number;
+  hotelId?: number; // Adicionado para buscar avaliações reais
   title: string;
   hotelName: string;
   price: string;

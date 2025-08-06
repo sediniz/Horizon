@@ -3,18 +3,23 @@ import IconRenderer from '../../../components/IconRenderer/IconRenderer';
 import StarRating from './StarRating';
 import { useNavigate } from 'react-router-dom';
 import { useFavoritos } from '../../../contexts/FavoritosContext';
+import { useHotelAvaliacoes } from '../../../hooks/useHotelAvaliacoes';
 import type { PackageProps } from '../types';
 
 interface PackageCardProps {
   package: PackageProps;
 }
 
-
-
-
 const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
   const navigate = useNavigate();
   const { isFavorito, toggleFavorito } = useFavoritos();
+  
+  // Buscar avaliações reais do hotel
+  const { rating: realRating, reviewCount: realReviewCount, isLoading: avaliacoesLoading } = useHotelAvaliacoes(pkg.hotelId);
+  
+  // Usar avaliações reais se disponíveis, senão usar fallback
+  const displayRating = realRating > 0 ? realRating : pkg.rating;
+  const displayReviewCount = realReviewCount > 0 ? realReviewCount : pkg.reviewCount;
 
   const handleViewPackage = () => {
     navigate(`/pacote/${pkg.id}`);
@@ -55,8 +60,13 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
               </div>
 
               <div className="mb-3">
-                <StarRating rating={pkg.rating} />
-                <p className="text-xs text-gray-500 mt-1">{pkg.reviewCount} avaliações</p>
+                <StarRating rating={displayRating} />
+                <p className="text-xs text-gray-500 mt-1">
+                  {displayReviewCount} avaliações
+                  {realReviewCount > 0 && !avaliacoesLoading && (
+                    <span className="ml-1 text-green-600">✓</span>
+                  )}
+                </p>
               </div>
 
               <p className="text-gray-600 text-sm mb-4 leading-relaxed">

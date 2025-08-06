@@ -218,6 +218,7 @@ export const convertAPIToPackage = (pacoteAPI: PacoteAPI, index: number = 0): Pa
   
   return {
     id: pacoteAPI.pacoteId,
+    hotelId: pacoteAPI.hotelId, // Incluir hotelId para buscar avaliações
     title: pacoteAPI.titulo,
     hotelName,
     price: `R$ ${precoPorPessoa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
