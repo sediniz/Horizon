@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch } from "react-icons/fa";
+import SmartSearch from '../../../components/SmartSearch';
 
 // Tipos para os dados do formulário
 interface SearchFormData {
@@ -453,8 +454,6 @@ const Search: React.FC = () => {
 
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isDestinationOpen, setIsDestinationOpen] = useState(false);
-  const [destinationQuery, setDestinationQuery] = useState('');
 
   const toggleCalendar = () => {
     setIsCalendarOpen(!isCalendarOpen);
@@ -468,18 +467,14 @@ const Search: React.FC = () => {
     }));
   };
 
-  const handleDestinationSelect = (destination: string) => {
+  const handleDestinationSelect = (cityName: string) => {
     setFormData(prev => ({
       ...prev,
-      destination
+      destination: cityName // SmartSearch já retorna apenas o nome da cidade
     }));
-    setDestinationQuery(destination);
-    setIsDestinationOpen(false);
   };
 
-  const filteredDestinations = destinations.filter(dest =>
-    dest.label.toLowerCase().includes(destinationQuery.toLowerCase())
-  );
+
 
   const formatDateDisplay = (dateString: string) => {
     if (!dateString) return '';
@@ -534,7 +529,6 @@ const Search: React.FC = () => {
   };
 
   const handleClickOutside = () => {
-    setIsDestinationOpen(false);
     setIsGuestsOpen(false);
   };
 
@@ -555,46 +549,17 @@ const Search: React.FC = () => {
         {/* Formulário de busca */}
         <div className="relative">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {/* Destino */}
+            {/* Destino com SmartSearch */}
             <div className="relative" onClick={(e) => e.stopPropagation()}>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Destino
+                Destino
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Para onde você quer ir?"
-                  value={destinationQuery}
-                  onChange={(e) => {
-                    setDestinationQuery(e.target.value);
-                    setIsDestinationOpen(true);
-                  }}
-                  onFocus={() => setIsDestinationOpen(true)}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                />
-                
-                {/* Dropdown de sugestões */}
-                {isDestinationOpen && destinationQuery && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-xl shadow-lg mt-1 z-20 max-h-60 overflow-y-auto">
-                    {filteredDestinations.length > 0 ? (
-                      filteredDestinations.map((dest) => (
-                        <button
-                          key={dest.value}
-                          onClick={() => handleDestinationSelect(dest.label)}
-                          className="w-full p-3 text-left hover:bg-gray-50 flex items-center gap-3 first:rounded-t-xl last:rounded-b-xl"
-                        >
-                          <span className="text-xl">{dest.flag}</span>
-                          <span className="text-gray-700">{dest.label}</span>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="p-3 text-gray-500 text-center">
-                        Nenhum destino encontrado
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <SmartSearch
+                destinations={destinations}
+                onSelect={handleDestinationSelect}
+                placeholder="Para onde você quer ir?"
+                value={formData.destination}
+              />
             </div>
 
             {/* Datas - Check-in e Check-out */}
