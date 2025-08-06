@@ -38,14 +38,14 @@ Desktop.ini
 *.db
 *.sqlite
 *.sqlite3
+ 
+# Entity Framework Migrations
+Migrations/
+
 
 # Local appsettings with connection strings
 appsettings.Development.json
 appsettings.local.json
-
+ 
 # Others
 *.DS_Store
-
-# Ignore migrations
-Migrations/
-
