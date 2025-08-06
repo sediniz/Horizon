@@ -13,6 +13,8 @@ export default function ReservaHist() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showSelectRatingModal, setShowSelectRatingModal] = useState(false);
+  const [showNoTripsModal, setShowNoTripsModal] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState<number | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,8 +75,74 @@ export default function ReservaHist() {
     });
   };
 
-  const handleDetailsClick = (reservaId: number) => {
+  // Handler para o botão "Avaliar viagens" das ações rápidas
+  const handleAvaliarViagensRapidas = () => {
+    // Buscar reservas que podem ser avaliadas (concluídas)
+    const reservasConcluidas = reservas.filter(r => r.status === 'concluida');
+    
+    if (reservasConcluidas.length === 0) {
+      setShowNoTripsModal(true);
+      return;
+    }
+    
+    // Se houver apenas uma reserva concluída, abrir diretamente
+    if (reservasConcluidas.length === 1) {
+      handleRatingClick(reservasConcluidas[0].id);
+      return;
+    }
+    
+    // Se houver múltiplas reservas, mostrar modal de seleção
+    setShowSelectRatingModal(true);
+  };
+
+  const handleDetailsClick = async (reservaId: number) => {
     setSelectedReserva(reservaId);
+    
+    // Verificar se a reserva atual já tem dados completos
+    const reservaAtual = reservas.find(r => r.id === reservaId);
+    
+    // Se não tem descrição ou inclui, tentar buscar dados completos da API
+    if (reservaAtual && (!reservaAtual.descricao || !reservaAtual.inclui || reservaAtual.inclui.length === 0)) {
+      try {
+        console.log('Buscando dados completos da reserva:', reservaId);
+        const reservaCompleta = await reservasApi.buscarReservaPorId(reservaId);
+        
+        // Se ainda não tiver dados e tiver pacoteId, tentar buscar do pacote
+        if ((!reservaCompleta.descricao || !reservaCompleta.inclui) && reservaCompleta.pacoteId) {
+          try {
+            console.log('Tentando buscar dados do pacote:', reservaCompleta.pacoteId);
+            // Importar dinamicamente a API de pacotes para evitar dependência circular
+            const { getPacoteById } = await import('../../api/pacotes');
+            const pacote = await getPacoteById(reservaCompleta.pacoteId);
+            
+            // Enriquecer com dados do pacote
+            reservaCompleta.descricao = reservaCompleta.descricao || pacote.descricao;
+            // Note: pacotes podem não ter campo 'inclui', seria necessário adaptar o modelo
+          } catch (pacoteErr) {
+            console.warn('Não foi possível buscar dados do pacote:', pacoteErr);
+          }
+        }
+        
+        // Atualizar a reserva na lista com os dados completos
+        setReservas(prevReservas => 
+          prevReservas.map(r => 
+            r.id === reservaId 
+              ? { ...r, ...reservaCompleta }
+              : r
+          )
+        );
+        
+        console.log('Dados completos obtidos:', {
+          descricao: reservaCompleta.descricao,
+          inclui: reservaCompleta.inclui,
+          observacoes: reservaCompleta.observacoes
+        });
+      } catch (err) {
+        console.error('Erro ao buscar dados completos da reserva:', err);
+        // Continuar mesmo se falhar - mostrará dados básicos ou placeholders
+      }
+    }
+    
     setShowDetailsModal(true);
   };
   const handleCancelSubmit = async (e: React.FormEvent) => {
@@ -950,9 +1018,17 @@ export default function ReservaHist() {
                     </svg>
                     <span>Baixar comprovante</span>
                   </button>
-                  <button className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-yellow-700 transition-all duration-200 hover:scale-105">
+                  <button 
+                    onClick={handleAvaliarViagensRapidas}
+                    className="w-full flex items-center gap-2 bg-white/40 hover:bg-white/60 px-3 py-2 rounded-lg text-sm font-medium text-yellow-700 transition-all duration-200 hover:scale-105"
+                  >
                     <Rating rating={1} size="xs" color="text-yellow-600" />
                     <span>Avaliar viagens</span>
+                    {reservas.filter(r => r.status === 'concluida').length > 0 && (
+                      <span className="ml-auto bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {reservas.filter(r => r.status === 'concluida').length}
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -1126,10 +1202,10 @@ export default function ReservaHist() {
                 <p className="text-gray-600 mb-8 max-w-md mx-auto">Não há reservas que correspondam aos filtros selecionados. Que tal planejar sua próxima viagem?</p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 hover:scale-105 shadow-lg">
-                    ✈️ Nova Reserva
+                    Nova Reserva
                   </button>
                   <button onClick={() => { setFiltroStatus('todas'); setFiltroData('todas'); }} className="bg-white/60 backdrop-blur-sm text-gray-700 border border-gray-300 hover:bg-white/80 hover:border-gray-400 px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
-                    🔄 Limpar Filtros
+                    Limpar Filtros
                   </button>
                 </div>
               </div>
@@ -1374,7 +1450,9 @@ export default function ReservaHist() {
                           <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                           Sobre o Pacote
                         </h3>
-                        <p className="text-gray-700 leading-relaxed">{reserva.descricao || 'Informações não disponíveis'}</p>
+                        <p className="text-gray-700 leading-relaxed">
+                          {reserva.descricao || 'Descrição detalhada não disponível no banco de dados. Esta reserva foi criada quando o sistema ainda não armazenava informações detalhadas do pacote.'}
+                        </p>
                       </div>
                     </div>
 
@@ -1409,7 +1487,11 @@ export default function ReservaHist() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </div>
-                          <p className="text-gray-500">Informações sobre inclusos não disponíveis</p>
+                          <p className="text-gray-500 font-medium">Detalhes dos inclusos não disponíveis</p>
+                          <p className="text-gray-400 text-sm mt-2">
+                            Os dados detalhados deste pacote não estão disponíveis no banco de dados. 
+                            Para informações específicas, entre em contato com o suporte.
+                          </p>
                         </div>
                       )}
                     </div>
@@ -1540,6 +1622,148 @@ export default function ReservaHist() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de Seleção de Avaliação */}
+      {showSelectRatingModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-200/50 border-t-4 border-t-emerald-500">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800">Selecionar Viagem para Avaliar</h2>
+                  <p className="text-slate-600 mt-2">Escolha qual viagem concluída você deseja avaliar</p>
+                </div>
+                <button
+                  onClick={() => setShowSelectRatingModal(false)}
+                  className="text-slate-400 hover:text-slate-600 text-2xl font-bold hover:scale-110 transition-all duration-200"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {reservas
+                  .filter(r => r.status === 'concluida')
+                  .map((reserva) => (
+                    <div 
+                      key={reserva.id}
+                      className="bg-gradient-to-r from-emerald-50 to-cyan-50 border-2 border-emerald-200 rounded-xl p-4 hover:border-emerald-300 transition-all duration-200 cursor-pointer hover:scale-105"
+                      onClick={() => {
+                        setShowSelectRatingModal(false);
+                        handleRatingClick(reserva.id);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={reserva.imagem || 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg'}
+                            alt={reserva.hotel}
+                            className="w-16 h-16 object-cover rounded-lg shadow-md"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg';
+                            }}
+                          />
+                          <div>
+                            <h3 className="text-lg font-bold text-slate-800">{reserva.hotel}</h3>
+                            <p className="text-slate-600">{reserva.destino}</p>
+                            <p className="text-sm text-slate-500">{reserva.dataViagem}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <div className="text-sm text-slate-600">Código</div>
+                            <div className="font-mono font-bold text-emerald-600">{reserva.codigo}</div>
+                          </div>
+                          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                            <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+              
+              {reservas.filter(r => r.status === 'concluida').length === 0 && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500">Nenhuma viagem concluída encontrada para avaliação</p>
+                </div>
+              )}
+              
+              <div className="flex justify-end pt-6 border-t border-gray-100">
+                <button
+                  onClick={() => setShowSelectRatingModal(false)}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de Nenhuma Viagem Disponível para Avaliação */}
+      {showNoTripsModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl shadow-gray-200/50 border-t-4 border-t-amber-500">
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-8 text-amber-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 mb-2">Nenhuma Viagem para Avaliar</h2>
+                <p className="text-slate-600 mb-4">
+                  Você não possui viagens concluídas disponíveis para avaliação no momento.
+                </p>
+              </div>
+              
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-5 text-blue-600 flex-shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                  </svg>
+                  <span className="font-semibold text-blue-800 text-sm">Como avaliar uma viagem?</span>
+                </div>
+                <ul className="text-sm text-blue-700 space-y-1 ml-8">
+                  <li>• Complete uma viagem (status deve ser "Concluída")</li>
+                  <li>• Use o botão "Avaliar" individual em cada reserva</li>
+                  <li>• Ou use este botão quando tiver viagens concluídas</li>
+                </ul>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowNoTripsModal(false)}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105"
+                >
+                  Entendido
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNoTripsModal(false);
+                    // Redirecionar para a tela de viagens/pacotes
+                    navigate('/');
+                  }}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+                >
+                   Planejar Viagem
+                </button>
+              </div>
             </div>
           </div>
         </div>

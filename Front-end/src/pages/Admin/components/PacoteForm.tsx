@@ -16,18 +16,23 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
   initialData = {}, 
   isLoading = false 
 }) => {
-  const [formData, setFormData] = useState<PacoteFormData>({
+  const [formData, setFormData] = useState<Omit<PacoteFormData, 'valorTotal'>>({
     titulo: initialData.titulo || '',
     descricao: initialData.descricao || '',
     destino: initialData.destino || '',
     duracao: initialData.duracao || 1,
     quantidadeDePessoas: initialData.quantidadeDePessoas || 1,
-    valorTotal: initialData.valorTotal || 0,
     hotelId: initialData.hotelId || 0,
   });
 
   const [hoteis, setHoteis] = useState<HotelAPI[]>([]);
   const [loadingHoteis, setLoadingHoteis] = useState(true);
+
+  // Calcular valor total dinamicamente
+  const selectedHotel = hoteis.find(hotel => hotel.hotelId === formData.hotelId);
+  const valorCalculado = selectedHotel
+    ? selectedHotel.valorDiaria * Number(formData.duracao) * Number(formData.quantidadeDePessoas)
+    : 0;
 
   useEffect(() => {
     loadHoteis();
@@ -46,18 +51,29 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(formData);
+    // Sempre enviar o valor calculado no momento do submit
+    await onSubmit({
+      ...formData,
+      valorTotal: valorCalculado
+    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
+    let processedValue: string | number = value;
+    if (type === 'number') {
+      processedValue = value === '' ? 1 : Number(value);
+    } else if (name === 'hotelId') {
+      // Converter hotelId para number sempre
+      processedValue = Number(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? (value === '' ? '' : Number(value)) : value,
+      [name]: processedValue,
     }));
   };
-
-  const selectedHotel = hoteis.find(hotel => hotel.hotelId === formData.hotelId);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -109,12 +125,12 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
             onChange={handleInputChange}
             rows={3}
             required
-            maxLength={50}
+            maxLength={200}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Descreva o pacote de viagem... (máx. 50 caracteres)"
+            placeholder="Descreva o pacote de viagem... (máx. 200 caracteres)"
           />
           <div className="text-sm text-gray-500 mt-1">
-            {formData.descricao.length}/50 caracteres
+            {formData.descricao.length}/200 caracteres
           </div>
         </div>
 
@@ -152,19 +168,14 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Valor Total (R$) *
+              Valor Total (R$)
             </label>
-            <input
-              type="number"
-              name="valorTotal"
-              value={formData.valorTotal}
-              onChange={handleInputChange}
-              min="0"
-              step="0.01"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="0.00"
-            />
+            <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 font-medium">
+              R$ {valorCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              Calculado automaticamente: {selectedHotel ? `R$ ${selectedHotel.valorDiaria}/diária × ${formData.duracao} dias × ${formData.quantidadeDePessoas} pessoas` : 'Selecione um hotel para calcular'}
+            </div>
           </div>
         </div>
 
@@ -211,6 +222,15 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
                   selectedHotel.piscina && 'Piscina',
                   selectedHotel.petFriendly && 'Pet Friendly'
                 ].filter(Boolean).join(', ') || 'Nenhuma'}
+              </div>
+            </div>
+            
+            {/* Cálculo detalhado */}
+            <div className="mt-3 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+              <h4 className="font-medium text-blue-800 text-sm mb-1">💰 Cálculo do Valor Total:</h4>
+              <div className="text-blue-700 text-sm">
+                R$ {selectedHotel.valorDiaria}/diária × {formData.duracao} dias × {formData.quantidadeDePessoas} pessoas = 
+                <span className="font-bold text-blue-800"> R$ {valorCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>

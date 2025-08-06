@@ -56,9 +56,14 @@ export const getPacotesComFiltros = async (filtros: PacoteFiltros): Promise<Paco
     let pacotesFiltrados = allPacotes;
     
     if (filtros.destino) {
-      pacotesFiltrados = pacotesFiltrados.filter(pacote => 
-        pacote.destino.toLowerCase().includes(filtros.destino!.toLowerCase())
-      );
+      // Busca flexível - aceita nome da cidade ou destino completo
+      const searchTerm = filtros.destino.toLowerCase();
+      pacotesFiltrados = pacotesFiltrados.filter(pacote => {
+        const destino = pacote.destino.toLowerCase();
+        // Busca tanto no texto completo quanto apenas na primeira parte (cidade)
+        const cityName = destino.split(',')[0].trim();
+        return destino.includes(searchTerm) || cityName.includes(searchTerm);
+      });
     }
     
     if (filtros.valorMinimo !== undefined) {

@@ -89,7 +89,7 @@ const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto, hotel
       </h2>
 
       <div className="space-y-4">
-        <div className="bg-white/40 rounded-lg p-4 border border-white/20 text-gray-700 leading-relaxed">
+        <div className="bg-white/40 rounded-lg p-4 border border-white/20 text-gray-700 leading-relaxed break-words max-w-prose">
           {descricao}
         </div>
       </div>

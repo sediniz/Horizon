@@ -69,7 +69,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
                 </p>
               </div>
 
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed break-words max-w-prose">
                 {pkg.description}
               </p>
 

@@ -48,6 +48,8 @@ namespace Horizon.Migrations
 
                     b.HasKey("IdAvaliacao");
 
+                    b.HasIndex("IdUsuario");
+
                     b.HasIndex("hotelId");
 
                     b.ToTable("Avaliacoes");
@@ -74,8 +76,8 @@ namespace Horizon.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Descricao")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("Estacionamento")
                         .HasColumnType("bit");
@@ -130,8 +132,8 @@ namespace Horizon.Migrations
 
                     b.Property<string>("Descricao")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Destino")
                         .IsRequired()
@@ -325,11 +327,21 @@ namespace Horizon.Migrations
 
             modelBuilder.Entity("Horizon.Models.Avaliacao", b =>
                 {
-                    b.HasOne("Horizon.Models.Hotel", null)
+                    b.HasOne("Horizon.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Horizon.Models.Hotel", "Hotel")
                         .WithMany("Avaliacoes")
                         .HasForeignKey("hotelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Horizon.Models.Hotel", b =>
