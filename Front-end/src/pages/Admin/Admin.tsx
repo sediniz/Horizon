@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import HotelForm from './components/HotelForm';
 import PacoteForm from './components/PacoteForm';
+import AvaliacaoForm from './components/AvaliacaoForm';
 import HotelList from './components/HotelList';
 import PacoteList from './components/PacoteList';
 import type { HotelFormData, PacoteFormData } from './types';
 import type { HotelAPI } from '../../api/hoteis';
 import type { PacoteAPI } from '../../api/pacotes';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Importar as funções da API
 import { createHotel, updateHotel, deleteHotel } from '../../api/hoteis';
@@ -15,6 +17,7 @@ type ActiveTab = 'hoteis' | 'pacotes';
 type ViewMode = 'list' | 'form';
 
 const Admin: React.FC = () => {
+  const { usuario } = useAuth();
   const [activeTab, setActiveTab] = useState<ActiveTab>('hoteis');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [editingHotel, setEditingHotel] = useState<HotelAPI | null>(null);
@@ -26,13 +29,11 @@ const Admin: React.FC = () => {
   React.useEffect(() => {
     const testConnection = async () => {
       try {
-        console.log('🔍 Testando conectividade com a API...');
         const response = await fetch('https://localhost:7202/api/pacotes');
-        console.log('📡 Status da resposta:', response.status);
         if (response.ok) {
-          console.log('✅ API está respondendo!');
+          console.log('API está respondendo!');
         } else {
-          console.log(' API retornou erro:', response.status);
+          console.log('API retornou erro:', response.status);
         }
       } catch (error) {
         console.error(' Erro ao conectar com a API:', error);
@@ -41,9 +42,7 @@ const Admin: React.FC = () => {
     testConnection();
   }, []);
 
-  // ================================
-  // FUNÇÕES HELPER
-  // ================================
+ 
   const convertHotelFormData = (data: HotelFormData) => ({
     nome: data.nome,
     localizacao: data.localizacao,
@@ -64,7 +63,7 @@ const Admin: React.FC = () => {
   });
 
   const convertPacoteFormData = (data: PacoteFormData, pacoteId?: number) => ({
-    pacoteId: pacoteId || 0, // Incluir o ID do pacote para o PUT
+    pacoteId: pacoteId || 0, 
     titulo: data.titulo,
     descricao: data.descricao || 'Pacote de viagem', // Valor padrão se vazio
     destino: data.destino,
@@ -74,9 +73,7 @@ const Admin: React.FC = () => {
     hotelId: Number(data.hotelId) || 0,
   });
 
-  // ================================
-  // FUNÇÕES PARA HOTÉIS
-  // ================================
+
   const handleCreateHotel = async (data: HotelFormData) => {
     try {
       setIsLoading(true);
@@ -101,7 +98,7 @@ const Admin: React.FC = () => {
       setIsLoading(true);
       const convertedData = {
         ...convertHotelFormData(data),
-        hotelId: editingHotel.hotelId  // Incluir o ID do hotel
+        hotelId: editingHotel.hotelId  
       };
       console.log('🔄 Dados sendo enviados para atualização:', convertedData);
       await updateHotel(editingHotel.hotelId, convertedData);
@@ -133,9 +130,8 @@ const Admin: React.FC = () => {
     setViewMode('form');
   };
 
-  // ================================
-  // FUNÇÕES PARA PACOTES
-  // ================================
+
+
   const handleCreatePacote = async (data: PacoteFormData) => {
     try {
       setIsLoading(true);
@@ -152,7 +148,6 @@ const Admin: React.FC = () => {
     } catch (error) {
       console.error(' Erro completo ao criar pacote:', error);
       
-      // Mostrar erro mais detalhado para o usuário
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       alert(`Erro ao criar pacote: ${errorMessage}`);
     } finally {
@@ -200,9 +195,7 @@ const Admin: React.FC = () => {
     setViewMode('form');
   };
 
-  // ================================
-  // FUNÇÕES DE NAVEGAÇÃO
-  // ================================
+
   const handleTabChange = (tab: ActiveTab) => {
     setActiveTab(tab);
     setViewMode('list');
@@ -227,6 +220,25 @@ const Admin: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
+          {/* Badge de Segurança */}
+          <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">
+                  Área Restrita - Acesso Autorizado
+                </p>
+                <p className="text-xs text-green-600">
+                  Logado como: <strong>{usuario?.nome}</strong> ({usuario?.tipoUsuario})
+                </p>
+              </div>
+            </div>
+          </div>
+
           <h1 className="text-3xl font-bold text-gray-900">
             Painel Administrativo
           </h1>
@@ -330,6 +342,17 @@ const Admin: React.FC = () => {
               )}
             </>
           )}
+        </div>
+
+        {/* Seção de Avaliações - Posicionada discretamente na parte inferior */}
+        <div className="mt-16 pt-8 border-t border-gray-200">
+          <div className="max-w-4xl mx-auto">
+            <AvaliacaoForm 
+              onSuccess={() => {
+                console.log('Avaliação criada com sucesso!');
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -2,24 +2,26 @@ import axios from 'axios';
 import { apiRequest } from './config';
 // Tipos para as reservas
 export interface Reserva {
-  id: number; // ou reservaId dependendo do backend
+  id: number; 
   codigo: string;
   destino: string;
   hotel: string;
-  dataViagem: string; // ou dataInicio/dataFim
-  dataReserva: string; // ou dataCriacao
+  dataViagem: string; 
+  dataReserva: string; 
   status: 'confirmada' | 'pendente' | 'concluida' | 'cancelada';
-  valor: number; // ou valorTotal
-  pessoas: number; // ou quantidadePessoas
-  imagem?: string; // opcional, pode vir do hotel/pacote
-  voo?: string; // opcional, pode não existir no backend
-  avaliacao?: number; // opcional, pode vir de tabela separada
-  estrelas?: number; // opcional, pode vir do hotel
+  valor: number; 
+  pessoas: number; 
+  imagem?: string; 
+  voo?: string; 
+  avaliacao?: number; 
+  estrelas?: number; 
   userId?: number;
   pacoteId?: number;
-  hotelId?: number; // campo que provavelmente existe no backend
+  hotelId?: number; 
   observacoes?: string;
-  // Campos que podem existir no backend:
+  descricao?: string; 
+  inclui?: string[]; // o que está incluído no pacote
+  naoInclui?: string[]; // o que não está incluído no pacote
   dataInicio?: string;
   dataFim?: string;
   dataCriacao?: string;
@@ -64,12 +66,10 @@ export const reservasApi = {
       return response.map((reserva: any) => {
         console.log('Processando reserva ID:', reserva.reservaId);
         
-        // Determinar os dados do hotel - seja diretamente ou via pacote
         const hotelInfo = reserva.hotel || (reserva.pacote?.hotel);
         const destino = reserva.hotel?.localizacao || reserva.pacote?.destino;
         const hotelNome = reserva.hotel?.nome || (reserva.pacote?.hotel?.nome);
         
-        // Verificar imagens disponíveis e logar detalhadamente
         const hotelImagens = reserva.hotel?.imagens;
         const hotelImagem = reserva.hotel?.imagem;
         const pacoteHotelImagens = reserva.pacote?.hotel?.imagens;
@@ -94,9 +94,7 @@ export const reservasApi = {
           status: reserva.status === 0 ? 'pendente' : reserva.status === 1 ? 'confirmada' : 'cancelada',
           valor: reserva.valorTotal,
           pessoas: reserva.quantidadePessoas,
-          // Escolher a primeira imagem disponível no formato correto
           imagem: (() => {
-            // Tentar encontrar imagens em todos os lugares possíveis
             const possibleImages = [
               reserva.hotel?.imagens,
               reserva.hotel?.imagem,
@@ -106,7 +104,6 @@ export const reservasApi = {
               reserva.imagem
             ].filter(Boolean);
             
-            // Retornar a primeira imagem válida ou uma imagem padrão
             return possibleImages.length > 0 
               ? possibleImages[0] 
               : 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg';

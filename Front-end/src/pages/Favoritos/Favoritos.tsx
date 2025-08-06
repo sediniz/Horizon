@@ -75,24 +75,17 @@ const Favoritos: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        console.log('❤️ Carregando favoritos...', favoritos);
-        
         if (favoritos.length === 0) {
           setPackages([]);
           setLoading(false);
           return;
         }
         
-        // Buscar todos os pacotes da API
-        console.log('📦 Buscando todos os pacotes...');
         const todosPacotes = await getAllPacotes();
         
-        // Filtrar apenas os pacotes que estão nos favoritos
         const pacotesFavoritos = todosPacotes.filter(pacote => 
           favoritos.includes(pacote.pacoteId)
         );
-        
-        console.log('❤️ Pacotes favoritos encontrados:', pacotesFavoritos);
         
         if (pacotesFavoritos.length === 0) {
           setPackages([]);
@@ -100,26 +93,20 @@ const Favoritos: React.FC = () => {
           return;
         }
         
-        // Extrair IDs únicos dos hotéis
         const hotelIds = [...new Set(pacotesFavoritos.map(p => p.hotelId))];
-        console.log('🏨 IDs dos hotéis para carregar:', hotelIds);
         
-        // Carregar dados dos hotéis com avaliações
         const hoteis = await getHoteisByIds(hotelIds);
-        console.log('🏨 Hotéis carregados:', hoteis);
+        console.log(' Hotéis carregados:', hoteis);
         
-        // Criar um mapa hotelId -> hotel para lookup rápido
         const hotelMap = new Map(hoteis.map(hotel => [hotel.hotelId, hotel]));
         
-        // Combinar pacotes com dados dos hotéis
         const pacotesComHotel = pacotesFavoritos.map(pacote => ({
           ...pacote,
           hotel: hotelMap.get(pacote.hotelId)
         }));
         
-        // Converter para o formato de exibição
         const packageProps = convertAPIPackagesToPackages(pacotesComHotel);
-        console.log('✅ Pacotes favoritos convertidos:', packageProps);
+        console.log('Pacotes favoritos convertidos:', packageProps);
         
         setPackages(packageProps);
         
@@ -132,11 +119,8 @@ const Favoritos: React.FC = () => {
     };
 
     loadFavoritos();
-  }, [favoritos]); // Recarregar quando favoritos mudarem
-
-  // Função para limpar favoritos (não há filtros aqui)
+  }, [favoritos]);
   const handleClearFilters = () => {
-    // Em favoritos, esta função não faz nada
     console.log('Não há filtros para limpar em favoritos');
   };
 

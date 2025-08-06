@@ -10,8 +10,8 @@ export interface PacoteAPI {
   duracao: number;
   quantidadeDePessoas: number;
   valorTotal: number;
-  hotelId: number; // Campo que vem do backend
-  hotel?: HotelAPI; // Relacionamento opcional (caso seja incluído)
+  hotelId: number; 
+  hotel?: HotelAPI; 
 }
 
 // Interface para filtros de busca
@@ -48,16 +48,13 @@ export const getPacoteById = async (id: number): Promise<PacoteAPI> => {
   }
 };
 
-// Função para buscar pacotes com filtros (implementação futura)
 export const getPacotesComFiltros = async (filtros: PacoteFiltros): Promise<PacoteAPI[]> => {
   try {
-    // Por enquanto retorna todos os pacotes
-    // No futuro, pode implementar filtros no backend
+  
     const allPacotes = await getAllPacotes();
     
     let pacotesFiltrados = allPacotes;
     
-    // Aplicar filtros no frontend por enquanto
     if (filtros.destino) {
       pacotesFiltrados = pacotesFiltrados.filter(pacote => 
         pacote.destino.toLowerCase().includes(filtros.destino!.toLowerCase())
@@ -92,16 +89,14 @@ export const getPacotesComFiltros = async (filtros: PacoteFiltros): Promise<Paco
 // Função para criar um novo pacote (admin)
 export const createPacote = async (pacote: Omit<PacoteAPI, 'pacoteId'>): Promise<PacoteAPI> => {
   try {
-    console.log('🚀 Enviando pacote para criação:', pacote);
     const response = await apiRequest('/pacotes', {
       method: 'POST',
       data: pacote,
     });
-    console.log('✅ Pacote criado com sucesso:', response);
     return response;
   } catch (error) {
-    console.error('❌ Erro detalhado ao criar pacote:', error);
-    console.error('📋 Dados que foram enviados:', pacote);
+    console.error('Erro ao criar pacote:', error);
+    console.error('Dados que foram enviados:', pacote);
     
     // Tentar extrair mais informações do erro
     if (error instanceof Error) {
@@ -116,19 +111,14 @@ export const createPacote = async (pacote: Omit<PacoteAPI, 'pacoteId'>): Promise
 // Função para atualizar um pacote (admin)
 export const updatePacote = async (id: number, pacote: Partial<PacoteAPI>): Promise<PacoteAPI> => {
   try {
-    console.log(`🔄 Iniciando UPDATE para pacote ID: ${id}`);
-    console.log('📦 Dados que serão enviados:', pacote);
-    console.log('🎯 URL completa:', `/pacotes/${id}`);
-    
     const response = await apiRequest(`/pacotes/${id}`, {
       method: 'PUT',
       data: pacote,
     });
     
-    console.log('✅ Pacote atualizado com sucesso!');
     return response;
   } catch (error) {
-    console.error(`❌ Erro ao atualizar pacote ${id}:`, error);
+    console.error(`Erro ao atualizar pacote ${id}:`, error);
     throw new Error('Falha ao atualizar pacote');
   }
 };

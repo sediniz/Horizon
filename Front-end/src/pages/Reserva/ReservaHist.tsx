@@ -12,7 +12,7 @@ export default function ReservaHist() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState<number | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +72,11 @@ export default function ReservaHist() {
       comentario: ''
     });
   };
+
+  const handleDetailsClick = (reservaId: number) => {
+    setSelectedReserva(reservaId);
+    setShowDetailsModal(true);
+  };
   const handleCancelSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cancelData.nome || !cancelData.data || !cancelData.motivo) {
@@ -87,11 +92,9 @@ export default function ReservaHist() {
     if (!selectedReserva) return;
     
     try {
-      // Encontrar a reserva sendo cancelada
       const reserva = reservas.find(r => r.id === selectedReserva);
       const reservaInfo = reserva ? `${reserva.hotel} - ${reserva.destino}` : 'Reserva';
       
-      // Chamar API para cancelar
       const dadosCancelamento: CancelamentoReserva = {
         reservaId: selectedReserva,
         nome: cancelData.nome,
@@ -102,7 +105,6 @@ export default function ReservaHist() {
       
       await reservasApi.cancelarReserva(dadosCancelamento);
       
-      // Atualizar estado local
       setReservas(prev => prev.map(r => 
         r.id === selectedReserva ? { ...r, status: 'cancelada' as const } : r
       ));
@@ -149,35 +151,22 @@ export default function ReservaHist() {
       alert('Erro ao enviar a avaliação. Tente novamente.');
     }
   };
-  // Handler para confirmar status da reserva
-  const handleConfirmarStatus = async (reservaId: number) => {
-    setSelectedReserva(reservaId);
-    setShowStatusModal(true);
-  };
-
-  // Handler para confirmar status no modal
-  const handleConfirmarStatusModal = async () => {
-    if (!selectedReserva) return;
-    
+  const handleEnviarPorEmail = async (reservaId: number) => {
     try {
-      const reserva = reservas.find(r => r.id === selectedReserva);
+      const reserva = reservas.find(r => r.id === reservaId);
       if (!reserva) {
         alert('Reserva não encontrada.');
         return;
       }
 
-      // Simular chamada da API para confirmar status
-      await reservasApi.confirmarStatus(selectedReserva);
-      alert(`Status "${getStatusText(reserva.status)}" confirmado com sucesso!\nConfirmação enviada por email.`);
-      setShowStatusModal(false);
-      setSelectedReserva(null);
+      await reservasApi.confirmarStatus(reservaId);
+      alert(`Comprovante da reserva ${reserva.codigo} enviado por e-mail com sucesso!\n\nO comprovante foi enviado para: ${usuario?.email || 'seu e-mail cadastrado'}`);
     } catch (err) {
-      console.error('Erro ao confirmar status:', err);
-      alert('Erro ao confirmar status. Tente novamente.');
+      console.error('Erro ao enviar comprovante por e-mail:', err);
+      alert('Erro ao enviar comprovante por e-mail. Tente novamente.');
     }
   };
 
-  // Handler para reenviar confirmação
   const handleReenviarConfirmacao = async (reservaId: number) => {
     try {
       await reservasApi.reenviarConfirmacao(reservaId);
@@ -196,6 +185,10 @@ export default function ReservaHist() {
         return;
       }
 
+      (window as any).enviarComprovanteEmail = (reservaId: number) => {
+        handleEnviarPorEmail(reservaId);
+      };
+
       // Gerar comprovante em formato HTML
       const comprovanteHTML = `
         <!DOCTYPE html>
@@ -204,33 +197,244 @@ export default function ReservaHist() {
           <meta charset="UTF-8">
           <title>Comprovante de Reserva - ${reserva.codigo}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-            .comprovante { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
-            .header { text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
-            .logo { font-size: 28px; font-weight: bold; color: #3b82f6; margin-bottom: 10px; }
-            .titulo { font-size: 24px; color: #1f2937; margin-bottom: 5px; }
-            .codigo { font-size: 14px; color: #6b7280; }
-            .secao { margin-bottom: 25px; }
-            .secao-titulo { font-size: 18px; font-weight: bold; color: #374151; margin-bottom: 15px; border-left: 4px solid #3b82f6; padding-left: 15px; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-            .info-item { background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #e5e7eb; }
-            .info-label { font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
-            .info-valor { font-size: 16px; color: #1f2937; font-weight: 600; }
-            .status { padding: 8px 16px; border-radius: 20px; font-weight: bold; text-align: center; }
-            .status-confirmada { background: #dcfce7; color: #166534; }
-            .status-pendente { background: #fef3c7; color: #92400e; }
-            .status-concluida { background: #dbeafe; color: #1e40af; }
-            .status-cancelada { background: #fee2e2; color: #dc2626; }
-            .valor-total { font-size: 24px; color: #059669; font-weight: bold; text-align: center; padding: 20px; background: #f0fdf4; border-radius: 10px; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
-            .qr-placeholder { width: 80px; height: 80px; background: #f3f4f6; border: 2px dashed #d1d5db; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 10px; }
-            .voltar-btn { position: fixed; top: 20px; left: 20px; background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-            .voltar-btn:hover { background: #2563eb; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              background: #ffffff;
+              min-height: 100vh;
+              padding: 15px;
+              line-height: 1.5;
+            }
+            .comprovante { 
+              background: white; 
+              padding: 30px; 
+              border-radius: 15px; 
+              box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+              max-width: 550px; 
+              margin: 0 auto;
+              position: relative;
+              overflow: hidden;
+              border: 1px solid #e5e7eb;
+            }
+            .comprovante::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 5px;
+              background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06d6a0);
+            }
+            .header { 
+              text-align: center; 
+              border-bottom: 2px solid #e5e7eb; 
+              padding-bottom: 20px; 
+              margin-bottom: 25px; 
+              position: relative;
+            }
+            .logo { 
+              font-size: 26px; 
+              font-weight: 900; 
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              margin-bottom: 10px;
+              text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .titulo { 
+              font-size: 22px; 
+              color: #1f2937; 
+              margin-bottom: 6px; 
+              font-weight: 700;
+            }
+            .codigo { 
+              font-size: 14px; 
+              color: #6b7280; 
+              background: #f3f4f6;
+              padding: 6px 12px;
+              border-radius: 20px;
+              display: inline-block;
+              font-weight: 600;
+            }
+            .secao { 
+              margin-bottom: 25px; 
+              background: #fafbfc;
+              padding: 18px;
+              border-radius: 12px;
+              border: 1px solid #e5e7eb;
+            }
+            .secao-titulo { 
+              font-size: 16px; 
+              font-weight: 700; 
+              color: #374151; 
+              margin-bottom: 15px; 
+              border-left: 4px solid #3b82f6; 
+              padding-left: 15px;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .info-grid { 
+              display: grid; 
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+              gap: 15px; 
+            }
+            .info-item { 
+              background: white; 
+              padding: 15px; 
+              border-radius: 10px; 
+              border-left: 3px solid #3b82f6;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+              transition: all 0.3s ease;
+            }
+            .info-item:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            }
+            .info-label { 
+              font-size: 11px; 
+              color: #6b7280; 
+              text-transform: uppercase; 
+              font-weight: 700; 
+              margin-bottom: 6px; 
+              letter-spacing: 0.5px;
+            }
+            .info-valor { 
+              font-size: 15px; 
+              color: #1f2937; 
+              font-weight: 600; 
+            }
+            .status { 
+              padding: 10px 20px; 
+              border-radius: 20px; 
+              font-weight: 700; 
+              text-align: center; 
+              font-size: 14px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .status-confirmada { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; border: 2px solid #22c55e; }
+            .status-pendente { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 2px solid #f59e0b; }
+            .status-concluida { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; border: 2px solid #3b82f6; }
+            .status-cancelada { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626; border: 2px solid #ef4444; }
+            .valor-total { 
+              font-size: 22px; 
+              background: linear-gradient(135deg, #059669, #10b981);
+              color: white;
+              font-weight: 900; 
+              text-align: center; 
+              padding: 18px; 
+              border-radius: 12px; 
+              margin: 20px 0;
+              box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+              text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            .footer { 
+              text-align: center; 
+              margin-top: 30px; 
+              padding-top: 20px; 
+              border-top: 1px solid #e5e7eb; 
+              color: #6b7280; 
+              font-size: 13px; 
+            }
+            .qr-placeholder { 
+              width: 80px; 
+              height: 80px; 
+              background: linear-gradient(135deg, #f3f4f6, #e5e7eb); 
+              border: 2px dashed #d1d5db; 
+              margin: 15px auto; 
+              display: flex; 
+              align-items: center; 
+              justify-content: center; 
+              color: #9ca3af; 
+              font-size: 11px;
+              font-weight: 600;
+              border-radius: 12px;
+            }
+            .voltar-btn { 
+              position: fixed; 
+              top: 25px; 
+              left: 25px; 
+              background: linear-gradient(135deg, #3b82f6, #2563eb);
+              color: white; 
+              padding: 15px 25px; 
+              border: none; 
+              border-radius: 50px; 
+              cursor: pointer; 
+              font-weight: 700;
+              font-size: 16px;
+              box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+              transition: all 0.3s ease;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              z-index: 1000;
+            }
+            .voltar-btn:hover { 
+              background: linear-gradient(135deg, #2563eb, #1d4ed8);
+              transform: translateY(-2px);
+              box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
+            }
+            .voltar-btn:active {
+              transform: translateY(0);
+            }
+            .email-btn { 
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
+              color: white; 
+              padding: 12px 24px; 
+              border: none; 
+              border-radius: 25px; 
+              cursor: pointer; 
+              font-weight: 700; 
+              font-size: 14px; 
+              box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); 
+              transition: all 0.3s ease;
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .email-btn:hover { 
+              transform: translateY(-2px); 
+              box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); 
+              background: linear-gradient(135deg, #2563eb, #7c3aed);
+            }
+            .email-btn:active {
+              transform: translateY(0);
+            }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              font-size: 80px;
+              color: rgba(59, 130, 246, 0.03);
+              font-weight: 900;
+              pointer-events: none;
+              z-index: 1;
+            }
+            .badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 4px;
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              color: white;
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 600;
+            }
           </style>
         </head>
         <body>
-          <button class="voltar-btn" onclick="window.location.href='/reservas'">← Voltar para Reservas</button>
+          <button class="voltar-btn" onclick="window.close(); window.opener?.focus();">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 19-7-7 7-7"/>
+              <path d="M19 12H5"/>
+            </svg>
+            Voltar para Reservas
+          </button>
           <div class="comprovante">
+            <div class="watermark">HORIZON</div>
             <div class="header">
               <div class="logo">🌅 HORIZON VIAGENS</div>
               <div class="titulo">Comprovante de Reserva</div>
@@ -238,7 +442,10 @@ export default function ReservaHist() {
             </div>
 
             <div class="secao">
-              <div class="secao-titulo">📍 Informações da Viagem</div>
+              <div class="secao-titulo">
+                <span>📍</span>
+                Informações da Viagem
+              </div>
               <div class="info-grid">
                 <div class="info-item">
                   <div class="info-label">Destino</div>
@@ -260,24 +467,24 @@ export default function ReservaHist() {
             </div>
 
             <div class="secao">
-              <div class="secao-titulo">✈️ Detalhes do Voo</div>
-              <div class="info-item">
-                <div class="info-label">Rota</div>
-                <div class="info-valor">${reserva.voo || 'Não incluído'}</div>
+              <div class="secao-titulo">
+                <span>📋</span>
+                Status da Reserva
+              </div>
+              <div style="text-align: center; padding: 20px;">
+                <div class="status status-${reserva.status}">${getStatusText(reserva.status).toUpperCase()}</div>
               </div>
             </div>
 
-            <div class="secao">
-              <div class="secao-titulo">📋 Status da Reserva</div>
-              <div class="status status-${reserva.status}">${getStatusText(reserva.status).toUpperCase()}</div>
-            </div>
-
             <div class="valor-total">
-              Valor Total: R$ ${reserva.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              💰 Valor Total: R$ ${Number.isFinite(reserva.valor) ? reserva.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
             </div>
 
             <div class="secao">
-              <div class="secao-titulo">📅 Informações da Reserva</div>
+              <div class="secao-titulo">
+                <span>📅</span>
+                Informações da Reserva
+              </div>
               <div class="info-grid">
                 <div class="info-item">
                   <div class="info-label">Data da Reserva</div>
@@ -292,19 +499,45 @@ export default function ReservaHist() {
 
             <div class="footer">
               <div class="qr-placeholder">QR CODE</div>
-              <p>Este comprovante foi gerado automaticamente em ${new Date().toLocaleString('pt-BR')}</p>
-              <p><strong>Horizon Viagens</strong> - Expanda seus Horizontes</p>
-              <p>Em caso de dúvidas, entre em contato: (11) 9999-9999 | contato@horizon.com</p>
+              <div style="margin: 20px 0; text-align: center;">
+                <button 
+                  class="email-btn"
+                  onclick="window.opener && window.opener.enviarComprovanteEmail ? window.opener.enviarComprovanteEmail(${reserva.id}) : alert('Funcionalidade disponível apenas quando aberto pela aplicação principal.')"
+                >
+                  <span>📧</span>
+                  Enviar por E-mail
+                </button>
+              </div>
+              <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #e2e8f0;">
+                <p style="color: #475569; font-weight: 600; margin-bottom: 3px; font-size: 12px;">
+                  <strong>🕒 Gerado em:</strong> ${new Date().toLocaleString('pt-BR')}
+                </p>
+                <p style="color: #64748b; font-size: 11px;">
+                  Este comprovante foi gerado automaticamente pelo sistema Horizon Viagens
+                </p>
+              </div>
+              <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #1e293b, #334155); color: white; border-radius: 10px;">
+                <p style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">
+                  🌅 <strong>Horizon Viagens</strong> - Expanda seus Horizontes
+                </p>
+                <p style="margin-bottom: 3px; font-size: 12px;">📞 Contato: (11) 9999-9999</p>
+                <p style="margin-bottom: 3px; font-size: 12px;">📧 E-mail: contato@horizon.com</p>
+                <p style="font-size: 11px; opacity: 0.8;">Sua próxima aventura começa aqui!</p>
+              </div>
             </div>
           </div>
         </body>
         </html>
       `;
 
-      // Abrir comprovante na mesma janela
-      document.open();
-      document.write(comprovanteHTML);
-      document.close();
+      // Abrir comprovante em nova aba em vez de substituir a página atual
+      const novaAba = window.open('', '_blank');
+      if (novaAba) {
+        novaAba.document.write(comprovanteHTML);
+        novaAba.document.close();
+      } else {
+        alert('Pop-up bloqueado! Por favor, permita pop-ups e tente novamente.');
+      }
       
     } catch (err) {
       console.error('Erro ao gerar comprovante:', err);
@@ -349,13 +582,11 @@ export default function ReservaHist() {
       try {
         setLoading(true);
         setError(null);
-        // Usa o ID do usuário do contexto de autenticação
         const reservasCarregadas = await reservasApi.buscarReservas(usuario?.usuarioId);
         setReservas(reservasCarregadas);
       } catch (err) {
         console.error('Erro ao carregar reservas:', err);
         setError(err instanceof Error ? err.message : 'Erro ao carregar reservas');
-        // Fallback para dados mock em caso de erro
         setReservas([
           {
             id: 1,
@@ -368,9 +599,12 @@ export default function ReservaHist() {
             valor: 1186,
             pessoas: 2,
             imagem: "https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg",
-            voo: "GRU → GIG",
             avaliacao: 8.3,
-            estrelas: 3
+            estrelas: 3,
+            descricao: "Pacote completo para o Rio de Janeiro com 7 dias e 6 noites no coração da Lapa. Hotel bem localizado próximo aos principais pontos turísticos.",
+            inclui: ["Hospedagem com café da manhã", "Transfer aeroporto-hotel-aeroporto", "City tour pelos principais pontos turísticos", "Ingresso para o Cristo Redentor", "Passeio de barco na Baía de Guanabara"],
+            naoInclui: ["Passagens aéreas", "Refeições (exceto café da manhã)", "Bebidas alcoólicas", "Gastos pessoais", "Seguro viagem"],
+            observacoes: "Check-in a partir das 14h. Check-out até 12h. Cancelamento gratuito até 48h antes da viagem."
           },
           {
             id: 2,
@@ -383,9 +617,12 @@ export default function ReservaHist() {
             valor: 2120,
             pessoas: 2,
             imagem: "https://cdn.pixabay.com/photo/2012/11/10/14/12/copacabana-beach-65598_1280.jpg",
-            voo: "GRU → GIG",
             avaliacao: 8.2,
-            estrelas: 4
+            estrelas: 4,
+            descricao: "Experiência única em Copacabana com 7 dias e 6 noites a poucos metros da praia mais famosa do mundo. Hotel 4 estrelas com vista para o mar.",
+            inclui: ["Hospedagem com café da manhã", "Transfer aeroporto-hotel-aeroporto", "Tour pela cidade maravilhosa", "Ingresso para o Pão de Açúcar", "Visita ao Jardim Botânico"],
+            naoInclui: ["Passagens aéreas", "Almoço e jantar", "Bebidas", "Compras pessoais", "Seguro viagem"],
+            observacoes: "Reserva sujeita à confirmação. Pagamento pendente. Hotel com vista para o mar mediante disponibilidade."
           },
           {
             id: 3,
@@ -398,9 +635,12 @@ export default function ReservaHist() {
             valor: 3500,
             pessoas: 2,
             imagem: "https://segredosdeviagem.com.br/wp-content/uploads/2018/08/5B-Onde-ficar-Fernando-Noronha-pousada-maravilha-fernando-de-noronha_Divulgac%CC%A7a%CC%83o-1024x430.jpg",
-            voo: "GRU → FEN",
             avaliacao: 9.1,
-            estrelas: 5
+            estrelas: 5,
+            descricao: "Paraíso natural único no mundo! 7 dias e 6 noites em Fernando de Noronha com hotel boutique sustentável. Experiência inesquecível no arquipélago.",
+            inclui: ["Hospedagem com pensão completa", "Transfer aeroporto-hotel-aeroporto", "Mergulho com cilindro (2 mergulhos)", "Passeio de barco pelas ilhas", "Taxa de preservação ambiental"],
+            naoInclui: ["Passagens aéreas", "Bebidas alcoólicas premium", "Mergulhos extras", "Passeios opcionais", "Seguro viagem"],
+            observacoes: "Viagem já realizada e concluída com sucesso. Perfeita para casais em lua de mel. Ambiente preservado e sustentável."
           },
           {
             id: 4,
@@ -413,9 +653,12 @@ export default function ReservaHist() {
             valor: 4200,
             pessoas: 2,
             imagem: "https://www.thehotelguru.com/_images/02/8c/028cbe438fa3e6a67281b6da2a9d0911/s1654x900.jpg",
-            voo: "GRU → CDG",
             avaliacao: 8.8,
-            estrelas: 4
+            estrelas: 4,
+            descricao: "Pacote romântico para Paris com 10 dias e 9 noites no charmoso bairro Le Marais. Hotel boutique com arquitetura histórica francesa.",
+            inclui: ["Hospedagem com café da manhã", "Transfer aeroporto-hotel-aeroporto", "Tour pelos principais museus", "Cruzeiro pelo Rio Sena", "Visita à Torre Eiffel"],
+            naoInclui: ["Passagens aéreas", "Refeições (exceto café da manhã)", "Bebidas alcoólicas", "Compras", "Seguro viagem"],
+            observacoes: "Reserva cancelada pelo cliente. Reembolso processado conforme política de cancelamento. Destino disponível para nova reserva."
           }
         ]);
       } finally {
@@ -756,7 +999,7 @@ export default function ReservaHist() {
                             alt={reserva.hotel}
                             className="w-full h-48 lg:h-40 object-cover rounded-xl shadow-lg"
                             onError={(e) => {
-                              console.log('Erro ao carregar imagem:', e);
+                              console.error('Erro ao carregar imagem:', e);
                               (e.target as HTMLImageElement).src = 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg';
                             }}
                           />
@@ -790,14 +1033,6 @@ export default function ReservaHist() {
                         </div>
                         {/* Detalhes Extras */}
                         <div className="flex flex-wrap items-center gap-3">
-                          {reserva.voo && (
-                            <div className="flex items-center gap-2 bg-blue-100 px-3 py-1 rounded-full">
-                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                              </svg>
-                              <span className="text-sm font-medium text-blue-800">{reserva.voo}</span>
-                            </div>
-                          )}
                           <div className="flex items-center gap-2 bg-purple-100 px-3 py-1 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-purple-600">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
@@ -808,18 +1043,12 @@ export default function ReservaHist() {
                         {/* Valor e Ações */}
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pt-4 border-t border-white/20">
                           <div className="flex flex-wrap gap-2">
-                            <button 
-                              onClick={() => handleConfirmarStatus(reserva.id)}
-                              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              Confirmar Status
-                            </button>
                             {reserva.status === 'confirmada' && (
                               <>
-                                <button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                                <button 
+                                  onClick={() => handleDetailsClick(reserva.id)}
+                                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+                                >
                                   Ver Detalhes
                                 </button>
                                 <button 
@@ -919,67 +1148,6 @@ export default function ReservaHist() {
         </div>
       </div>
       )} {/* Closing for main content conditional */}
-      {/* Modal de Confirmação de Status */}
-      {showStatusModal && selectedReserva && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl shadow-indigo-200/50 border-t-4 border-t-indigo-500">
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="flex justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-16 text-indigo-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-slate-800 mb-2">Confirmar Status da Reserva</h2>
-                {(() => {
-                  const reserva = reservas.find(r => r.id === selectedReserva);
-                  return reserva && (
-                    <div className="text-slate-600 space-y-2">
-                      <p>
-                        <span className="font-semibold">{reserva.hotel}</span> - {reserva.destino}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Código:</span> {reserva.codigo}
-                      </p>
-                      <div className="flex items-center justify-center gap-2 mt-3">
-                        <span className="text-sm font-medium">Status atual:</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(reserva.status)}`}>
-                          {getStatusText(reserva.status)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-indigo-800 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4 text-indigo-600 flex-shrink-0">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                  </svg>
-                  <span><span className="font-semibold">Confirmação por email:</span> Uma nova confirmação será enviada para seu email com todos os detalhes da reserva.</span>
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowStatusModal(false);
-                    setSelectedReserva(null);
-                  }}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleConfirmarStatusModal}
-                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-indigo-200"
-                >
-                  Confirmar Status
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       {/* Modal de Confirmação de Cancelamento */}
       {showConfirmModal && selectedReserva && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -1142,6 +1310,151 @@ export default function ReservaHist() {
           </div>
         </div>
       )}
+      
+      {/* Modal de Detalhes do Pacote */}
+      {showDetailsModal && selectedReserva && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+            <div className="p-8">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-100">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Detalhes do Pacote</h2>
+                  {(() => {
+                    const reserva = reservas.find(r => r.id === selectedReserva);
+                    return reserva && (
+                      <p className="text-gray-500 text-lg">
+                        {reserva.hotel} • {reserva.destino} • Código: <span className="font-mono font-semibold text-blue-600">{reserva.codigo}</span>
+                      </p>
+                    );
+                  })()}
+                </div>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-all duration-200"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {(() => {
+                const reserva = reservas.find(r => r.id === selectedReserva);
+                return reserva && (
+                  <div className="space-y-8">
+                    {/* Imagem e Informações Principais */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <img
+                          src={reserva.imagem || 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg'}
+                          alt={reserva.hotel}
+                          className="w-full h-64 object-cover rounded-xl shadow-lg"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg';
+                          }}
+                        />
+                        
+                        {/* Cards de Valor e Pessoas */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                            <div className="text-2xl font-bold text-blue-900">R$ {Number.isFinite(reserva.valor) ? reserva.valor.toLocaleString('pt-BR') : '0'}</div>
+                            <div className="text-sm text-blue-700 font-medium">Valor Total</div>
+                          </div>
+                          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+                            <div className="text-2xl font-bold text-green-900">{reserva.pessoas}</div>
+                            <div className="text-sm text-green-700 font-medium">{reserva.pessoas === 1 ? 'Pessoa' : 'Pessoas'}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Descrição */}
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          Sobre o Pacote
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed">{reserva.descricao || 'Informações não disponíveis'}</p>
+                      </div>
+                    </div>
+
+                    {/* O que está incluído */}
+                    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                      <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        O que está incluído
+                      </h3>
+                      
+                      {reserva.inclui && reserva.inclui.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {reserva.inclui.map((item, index) => (
+                            <div key={index} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
+                              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                              <span className="text-gray-800 font-medium">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <p className="text-gray-500">Informações sobre inclusos não disponíveis</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Observações */}
+                    {reserva.observacoes && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                            <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          Observações Importantes
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed font-medium">{reserva.observacoes}</p>
+                      </div>
+                    )}
+
+                    {/* Botões de Ação */}
+                    <div className="flex gap-4 pt-6 border-t border-gray-100">
+                      <button
+                        onClick={() => setShowDetailsModal(false)}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105"
+                      >
+                        Fechar
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDetailsModal(false);
+                          handleBaixarVoucher(reserva.id);
+                        }}
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+                      >
+                        Ver Comprovante
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Modal de Avaliação */}
       {showRatingModal && selectedReserva && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">

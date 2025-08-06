@@ -9,7 +9,7 @@ export const useAvaliacoes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Função para formatar avaliações para o componente (lógica de apresentação no frontend)
+  // Função para formatar avaliações para o componente 
   const formatarAvaliacoes = (avaliacoes: Avaliacao[]): AvaliacaoFormatada[] => {
     const cores = [
       "from-blue-400 to-blue-600",
@@ -28,7 +28,7 @@ export const useAvaliacoes = () => {
     ];
 
     return avaliacoes.map((avaliacao, index) => {
-      const nomeUsuario = avaliacao.Usuario?.Nome || 'Usuário Anônimo';
+      const nomeUsuario = avaliacao.usuario?.nome || 'Usuário Anônimo';
       const iniciais = nomeUsuario.split(' ')
         .map((nome: string) => nome.charAt(0))
         .join('')
@@ -37,46 +37,57 @@ export const useAvaliacoes = () => {
 
       // Gerar comodidades baseadas nos campos booleanos do hotel
       const amenities: string[] = [];
-      const hotel = avaliacao.Hotel;
-      if (hotel?.Wifi) amenities.push('Wi-Fi');
-      if (hotel?.Piscina) amenities.push('Piscina');
-      if (hotel?.Estacionamento) amenities.push('Estacionamento');
-      if (hotel?.CafeDaManha) amenities.push('Café da Manhã');
-      if (hotel?.PetFriendly) amenities.push('Pet Friendly');
+      const hotel = avaliacao.hotel;
+      if (hotel?.wifi) amenities.push('Wi-Fi');
+      if (hotel?.piscina) amenities.push('Piscina');
+      if (hotel?.estacionamento) amenities.push('Estacionamento');
+      if (hotel?.cafeDaManha) amenities.push('Café da Manhã');
+      if (hotel?.almoco) amenities.push('Almoço');
+      if (hotel?.jantar) amenities.push('Jantar');
+      if (hotel?.petFriendly) amenities.push('Pet Friendly');
+      if (hotel?.allInclusive) amenities.push('All Inclusive');
 
-      // Definir categoria baseada na nota
+      // Definir categoria baseada na nota e valor da diária
       let categoria = 'Hotel';
-      if (avaliacao.Nota >= 4.5) categoria = 'Hotel Premium';
-      else if (avaliacao.Nota >= 4.0) categoria = 'Hotel de Qualidade';
+      if (hotel?.valorDiaria && hotel.valorDiaria >= 800) categoria = 'Hotel Luxo';
+      else if (hotel?.valorDiaria && hotel.valorDiaria >= 500) categoria = 'Hotel Premium';
+      else if (hotel?.valorDiaria && hotel.valorDiaria >= 300) categoria = 'Hotel Confort';
+      else categoria = 'Hotel Econômico';
+
+      // Determinar número de estrelas baseado na nota
+      const estrelas = Math.min(5, Math.max(1, Math.round(Number(avaliacao.nota))));
 
       return {
-        id: avaliacao.IdAvaliacao,
+        id: avaliacao.idAvaliacao,
         name: nomeUsuario,
         initials: iniciais,
-        verified: "Viajante verificado",
-        rating: avaliacao.Nota,
-        title: avaliacao.Comentario ? `"${avaliacao.Comentario}"` : "Experiência maravilhosa!",
-        comment: avaliacao.Comentario || "Foi uma experiência incrível! Recomendo a todos.",
-        date: new Date(avaliacao.DataAvaliacao).toLocaleDateString('pt-BR', {
+        verified: `${avaliacao.usuario?.tipoUsuario || 'Viajante'} verificado`,
+        rating: Number(avaliacao.nota),
+        title: avaliacao.comentario ? `"${avaliacao.comentario}"` : "Experiência maravilhosa!",
+        comment: avaliacao.comentario || "Foi uma experiência incrível! Recomendo a todos.",
+        date: new Date(avaliacao.dataAvaliacao).toLocaleDateString('pt-BR', {
           day: 'numeric',
           month: 'long',
           year: 'numeric'
         }),
         type: tiposViagem[index % tiposViagem.length],
-        image: img1, // Usando imagem padrão por enquanto
+        image: hotel?.imagens || hotel?.imagem || img1, // Usa a imagem do hotel ou imagem padrão
         bgColor: cores[index % cores.length],
         hotel: {
-          name: hotel?.Nome || 'Hotel',
-          location: hotel?.Localizacao || 'Localização não informada',
-          stars: Math.round(avaliacao.Nota),
+          name: hotel?.nome || 'Hotel',
+          location: hotel?.localizacao || 'Localização não informada',
+          stars: estrelas,
           amenities: amenities,
-          category: categoria
+          category: categoria,
+          description: hotel?.descricao || '',
+          dailyRate: hotel?.valorDiaria || 0,
+          rooms: hotel?.quantidadeDeQuartos || 0
         }
       };
     });
   };
 
-  // Carregar avaliações da API - apenas dados reais do banco
+  // Carregar avaliações da API 
   const loadAvaliacoes = async () => {
     try {
       setLoading(true);

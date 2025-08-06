@@ -30,7 +30,7 @@ namespace Horizon.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // Remover esta restrição (já está comentado no seu código, ótimo!)
+            // Remover esta restrição 
             // if (request.Email != "adm123@gmail.com")
             //     return Unauthorized("Apenas o e-mail autorizado pode acessar.");
 
@@ -49,14 +49,13 @@ namespace Horizon.Controllers
                 new Claim("cpfPassaporte", usuario.CpfPassaporte ?? "")
             };
 
-            // Obtenha a chave, Issuer e Audience das configurações
             var jwtKey = _configuration["Jwt:SecretKey"];
             var jwtIssuer = _configuration["Jwt:Issuer"];
             var jwtAudience = _configuration["Jwt:Audience"];
 
             if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
             {
-                // Isso deve ser tratado como um erro de configuração grave
+                
                 throw new InvalidOperationException("Configurações JWT (Key, Issuer, Audience) não encontradas ou inválidas.");
             }
 
@@ -64,10 +63,10 @@ namespace Horizon.Controllers
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: jwtIssuer,       // Adicionado o Issuer
-                audience: jwtAudience,   // Adicionado o Audience
+                issuer: jwtIssuer,      
+                audience: jwtAudience,   
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2), // Considere um tempo de expiração menor (ex: 30 minutos a 1 hora) para JWTs de acesso
+                expires: DateTime.UtcNow.AddHours(2), 
                 signingCredentials: creds);
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
@@ -76,13 +75,12 @@ namespace Horizon.Controllers
         }
 
         /// <summary>
-        /// Corrige senhas não hasheadas no banco (uso temporário).
+        /// Corrige senhas não hasheadas no banco.
         /// </summary>
         [HttpPost("corrigir-senhas")]
-        [AllowAnonymous] // Altere para [Authorize(Roles = "Admin")] se quiser proteger
+        [AllowAnonymous] 
         public async Task<IActionResult> CorrigirSenhas()
         {
-            // Idealmente, este endpoint não deveria existir em produção ou deveria ser muito bem protegido.
             int totalCorrigidas = await _usuarioService.CorrigirSenhasNaoHasheadasAsync();
             return Ok(new { senhasCorrigidas = totalCorrigidas });
         }

@@ -12,7 +12,7 @@ export interface HotelFormData {
   almoco: boolean;
   jantar: boolean;
   allInclusive: boolean;
-  valorDiaria: number | string; // Permite string vazia durante edição
+  valorDiaria: number | string; 
   imagens: string;
   datasDisponiveis: string;
   quartoId?: number;

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://localhost:7202/api';
+import { apiRequest } from '../api/config';
 
 // Interfaces para requests (DTOs)
 export interface CriarAvaliacaoDto {
@@ -14,34 +14,41 @@ export interface AtualizarAvaliacaoDto {
   comentario: string;
 }
 
-// Interface da avaliação com dados completos (como vem da API)
+// Interface da avaliação com dados completos (como vem da API - camelCase)
 export interface Avaliacao {
-  IdAvaliacao: number;
-  Nota: number;
-  Comentario: string;
-  DataAvaliacao: string;
-  IdUsuario: number;
+  idAvaliacao: number;
+  nota: number;
+  comentario: string;
+  dataAvaliacao: string;
+  idUsuario: number;
   hotelId: number;
   // Dados do usuário e hotel (vem com Include)
-  Usuario?: {
-    UsuarioId: number;
-    Nome: string;
-    Email: string;
-    Telefone: string;
-    CpfPassaporte: string;
-    TipoUsuario: string;
+  usuario?: {
+    usuarioId: number;
+    nome: string;
+    email: string;
+    telefone: string;
+    cpfPassaporte: string;
+    tipoUsuario: string;
   };
-  Hotel?: {
-    HotelId: number;
-    QuantidadeDeQuartos: number;
-    Nome: string;
-    Localizacao: string;
-    Descricao: string;
-    Estacionamento: boolean;
-    PetFriendly: boolean;
-    Piscina: boolean;
-    Wifi: boolean;
-    CafeDaManha: boolean;
+  hotel?: {
+    hotelId: number;
+    quantidadeDeQuartos: number;
+    nome: string;
+    localizacao: string;
+    descricao: string;
+    estacionamento: boolean;
+    petFriendly: boolean;
+    piscina: boolean;
+    wifi: boolean;
+    cafeDaManha: boolean;
+    almoco: boolean;
+    jantar: boolean;
+    allInclusive: boolean;
+    datasDisponiveis: string;
+    valorDiaria: number;
+    imagens: string;
+    imagem: string;
   };
 }
 
@@ -64,6 +71,9 @@ export interface AvaliacaoFormatada {
     stars: number;
     amenities: string[];
     category: string;
+    description: string;
+    dailyRate: number;
+    rooms: number;
   };
 }
 
@@ -72,19 +82,8 @@ export const avaliacaoService = {
   // Buscar todas as avaliações (com Include de usuário e hotel)
   async getAll(): Promise<Avaliacao[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar avaliações: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      const response = await apiRequest('/avaliacoes', { method: 'GET' });
+      return response;
     } catch (error) {
       console.error('Erro ao buscar avaliações:', error);
       throw error;
@@ -94,19 +93,8 @@ export const avaliacaoService = {
   // Buscar avaliação por ID
   async getById(id: number): Promise<Avaliacao> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar avaliação: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      const response = await apiRequest(`/avaliacoes/${id}`, { method: 'GET' });
+      return response;
     } catch (error) {
       console.error('Erro ao buscar avaliação:', error);
       throw error;
@@ -116,20 +104,11 @@ export const avaliacaoService = {
   // Criar nova avaliação (usando DTO simples)
   async create(dto: CriarAvaliacaoDto): Promise<Avaliacao> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes`, {
+      const response = await apiRequest('/avaliacoes', { 
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dto),
+        data: dto
       });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao criar avaliação: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      return response;
     } catch (error) {
       console.error('Erro ao criar avaliação:', error);
       throw error;
@@ -139,20 +118,11 @@ export const avaliacaoService = {
   // Atualizar avaliação (usando DTO simples)
   async update(dto: AtualizarAvaliacaoDto): Promise<Avaliacao> {
     try {
-      const response = await fetch(`${API_BASE_URL}/avaliacoes/${dto.idAvaliacao}`, {
+      const response = await apiRequest(`/avaliacoes/${dto.idAvaliacao}`, { 
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dto),
+        data: dto
       });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao atualizar avaliação: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      return response;
     } catch (error) {
       console.error('Erro ao atualizar avaliação:', error);
       throw error;

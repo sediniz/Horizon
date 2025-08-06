@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 // Tipos
 interface FavoritosContextType {
-  favoritos: number[]; // Array de IDs dos pacotes favoritados
+  favoritos: number[]; 
   adicionarFavorito: (pacoteId: number) => void;
   removerFavorito: (pacoteId: number) => void;
   isFavorito: (pacoteId: number) => boolean;
@@ -25,7 +25,6 @@ export const FavoritosProvider: React.FC<{ children: ReactNode }> = ({ children 
       if (favoritosSalvos) {
         const favoritosArray = JSON.parse(favoritosSalvos);
         setFavoritos(Array.isArray(favoritosArray) ? favoritosArray : []);
-        console.log('❤️ Favoritos carregados do localStorage:', favoritosArray);
       }
     } catch (error) {
       console.error('Erro ao carregar favoritos do localStorage:', error);
@@ -37,7 +36,6 @@ export const FavoritosProvider: React.FC<{ children: ReactNode }> = ({ children 
   useEffect(() => {
     try {
       localStorage.setItem('horizon-favoritos', JSON.stringify(favoritos));
-      console.log('💾 Favoritos salvos no localStorage:', favoritos);
     } catch (error) {
       console.error('Erro ao salvar favoritos no localStorage:', error);
     }
@@ -47,7 +45,6 @@ export const FavoritosProvider: React.FC<{ children: ReactNode }> = ({ children 
   const adicionarFavorito = (pacoteId: number) => {
     setFavoritos(prev => {
       if (!prev.includes(pacoteId)) {
-        console.log(`❤️ Adicionando pacote ${pacoteId} aos favoritos`);
         return [...prev, pacoteId];
       }
       return prev;
@@ -58,7 +55,6 @@ export const FavoritosProvider: React.FC<{ children: ReactNode }> = ({ children 
   const removerFavorito = (pacoteId: number) => {
     setFavoritos(prev => {
       const novosFavoritos = prev.filter(id => id !== pacoteId);
-      console.log(`💔 Removendo pacote ${pacoteId} dos favoritos`);
       return novosFavoritos;
     });
   };

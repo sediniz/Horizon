@@ -16,12 +16,18 @@ namespace Horizon.Repositories.Implementations
 
         public async Task<IEnumerable<Avaliacao>> GetAllAsync()
         {
-            return await _context.Avaliacoes.ToListAsync();
+            return await _context.Avaliacoes
+                .Include(a => a.Usuario)
+                .Include(a => a.Hotel)
+                .ToListAsync();
         }
 
         public async Task<Avaliacao?> GetByIdAsync(int id)
         {
-            return await _context.Avaliacoes.FindAsync(id);
+            return await _context.Avaliacoes
+                .Include(a => a.Usuario)
+                .Include(a => a.Hotel)
+                .FirstOrDefaultAsync(a => a.IdAvaliacao == id);
         }
 
         public async Task<Avaliacao> AddAsync(Avaliacao entity)
@@ -55,6 +61,8 @@ namespace Horizon.Repositories.Implementations
         public async Task<IEnumerable<Avaliacao>> GetAvaliacoesByHotelIdAsync(int hotelId)
         {
             return await _context.Avaliacoes
+                .Include(a => a.Usuario)
+                .Include(a => a.Hotel)
                 .Where(a => a.hotelId == hotelId)
                 .ToListAsync();
         }

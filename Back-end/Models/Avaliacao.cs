@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Horizon.Models
 {
@@ -15,9 +16,15 @@ namespace Horizon.Models
 
         public DateTime DataAvaliacao { get; set; }
 
+        // Chave estrangeira para Usuario
+        [ForeignKey("Usuario")]
         public int IdUsuario { get; set; }
+        public virtual Usuario? Usuario { get; set; }
 
+        // Chave estrangeira para Hotel
+        [ForeignKey("Hotel")]
         public int hotelId { get; set; }
+        public virtual Hotel? Hotel { get; set; }
 
     }
 }

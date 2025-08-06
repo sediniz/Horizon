@@ -14,7 +14,6 @@ const Review: React.FC = () => {
     setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="Review max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-lg">
@@ -26,7 +25,6 @@ const Review: React.FC = () => {
     );
   }
 
-  // Error state
   if (error && reviews.length === 0) {
     return (
       <div className="Review max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-lg">
@@ -50,7 +48,6 @@ const Review: React.FC = () => {
     );
   }
 
-  // Se não há reviews, não renderiza o componente
   if (!loading && reviews.length === 0) {
     return null;
   }
@@ -79,7 +76,7 @@ const Review: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row gap-4 items-center">
         {/* Lado esquerdo: Conteúdo da review */}
-        <div className="flex-1 space-y-3">{/* Reduzi de space-y-4 para space-y-3 */}
+        <div className="flex-1 space-y-3">{/*  */}
           {/* Perfil */}
           <div className="flex items-center gap-4">
             <div className={`w-16 h-16 bg-gradient-to-br ${review.bgColor} rounded-full flex items-center justify-center`}>
@@ -146,7 +143,7 @@ const Review: React.FC = () => {
             </div>
 
             {/* Informações do hotel */}
-            <div className="bg-gray-50 rounded-lg p-3 space-y-2">{/* Reduzi padding e spacing */}
+            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
               {/* Nome e estrelas */}
               <div>
                 <h5 className="font-bold text-lg text-gray-800">{review.hotel.name}</h5>
@@ -176,6 +173,29 @@ const Review: React.FC = () => {
                 </svg>
                 <span className="text-sm">{review.hotel.location}</span>
               </div>
+
+              {/* Informações do hotel */}
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center gap-1 text-gray-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span>{review.hotel.rooms} quartos</span>
+                </div>
+                <div className="flex items-center gap-1 text-green-600 font-medium">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                  <span>R$ {review.hotel.dailyRate.toLocaleString('pt-BR')}/noite</span>
+                </div>
+              </div>
+
+              {/* Descrição do hotel */}
+              {review.hotel.description && (
+                <div>
+                  <p className="text-xs text-gray-600 italic">{review.hotel.description}</p>
+                </div>
+              )}
 
               {/* Comodidades */}
               <div>
@@ -211,7 +231,7 @@ const Review: React.FC = () => {
         ))}
       </div>
 
-      {/* Status da fonte dos dados (apenas para desenvolvimento) */}
+      {/*  */}
       {error && (
         <div className="text-center mt-2">
           <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
