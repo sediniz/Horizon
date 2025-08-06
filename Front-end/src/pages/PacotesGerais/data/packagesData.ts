@@ -7,6 +7,7 @@ import CancunImg from '../../../assets/cancun.png';
 export const allPackages: PackageProps[] = [
   {
     id: 1,
+    hotelId: 1, // ID do hotel para buscar avaliações reais
     title: 'Pacote Praia Tropical',
     hotelName: 'Resort Paradise Beach',
     price: 'R$ 2.500',
