@@ -27,8 +27,8 @@ namespace Horizon.Services.Implementations
             if (await _hotelRepository.NameExistsAsync(entity.Nome!))
                 throw new InvalidOperationException("Já existe um hotel com esse nome.");
 
-            if (!string.IsNullOrWhiteSpace(entity.Descricao) && entity.Descricao.Length > 100)
-                throw new ArgumentException("A descrição deve ter no máximo 100 caracteres.");
+            if (!string.IsNullOrWhiteSpace(entity.Descricao) && entity.Descricao.Length > 400)
+                throw new ArgumentException("A descrição deve ter no máximo 400 caracteres.");
 
             if (entity.ValorDiaria < 0)
                 throw new ArgumentException("O valor da diária não pode ser negativo.");
@@ -45,8 +45,8 @@ namespace Horizon.Services.Implementations
             if (string.IsNullOrWhiteSpace(entity.Nome) || entity.Nome.Length > 30)
                 throw new ArgumentException("O nome do hotel é obrigatório e deve ter no máximo 30 caracteres.");
 
-            if (!string.IsNullOrWhiteSpace(entity.Descricao) && entity.Descricao.Length > 100)
-                throw new ArgumentException("A descrição deve ter no máximo 100 caracteres.");
+            if (!string.IsNullOrWhiteSpace(entity.Descricao) && entity.Descricao.Length > 400)
+                throw new ArgumentException("A descrição deve ter no máximo 400 caracteres.");
 
             if (entity.ValorDiaria < 0)
                 throw new ArgumentException("O valor da diária não pode ser negativo.");

@@ -20,7 +20,7 @@ namespace Horizon.Models
         [Required]
         public string? Localizacao { get; set; }
 
-        [StringLength(200, ErrorMessage = "A descrição deve ter no máximo 200 caracteres.")]
+        [StringLength(400, ErrorMessage = "A descrição deve ter no máximo 400 caracteres.")]
 
         public string? Descricao { get; set; }
         public bool Estacionamento { get; set; }
