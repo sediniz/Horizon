@@ -121,9 +121,22 @@ function Perfil() {
               <div className="space-y-6">
                 {/* User Name */}
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                    {userData.nome}
-                  </h2>
+                  {isEditing ? (
+                    <div className="mb-6">
+                      <input
+                        type="text"
+                        name="nome"
+                        value={editForm.nome}
+                        onChange={handleInputChange}
+                        className="text-2xl font-bold text-gray-800 text-center bg-white border-2 border-blue-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full max-w-md mx-auto"
+                        placeholder="Digite seu nome"
+                      />
+                    </div>
+                  ) : (
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      {userData.nome}
+                    </h2>
+                  )}
                 </div>
 
                 {/* Information Grid*/}
@@ -164,13 +177,7 @@ function Perfil() {
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-600">CPF/Passaporte</label>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        name="cpfPassaporte"
-                        value={editForm.cpfPassaporte}
-                        onChange={handleInputChange}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
+                      <p className="text-gray-500 bg-gray-50 p-2 rounded-lg text-sm">{userData.cpfPassaporte}</p>
                     ) : (
                       <p className="text-gray-800 bg-gray-50 p-2 rounded-lg text-sm">{userData.cpfPassaporte}</p>
                     )}
