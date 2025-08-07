@@ -121,7 +121,7 @@ const DescricaoPacote: React.FC<DescricaoPacoteProps> = ({ descricaoTexto, hotel
                 `}>
                   {icones[key as keyof typeof icones]}
                 </div>
-                <span className="text-xs font-medium text-gray-700 block mb-1">
+                <span className="text-xs font-medium text-gray-700 block mb-1 min-h-[2.5rem] flex items-center justify-center">
                   {nomes[key as keyof typeof nomes]}
                 </span>
                 <span className={`
