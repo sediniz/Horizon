@@ -6,6 +6,7 @@ import PackageList from './components/PackageList';
 import { getAllPacotes } from '../../api/pacotes';
 import { getHoteisByIds, getAvailableAmenities } from '../../api/hoteis';
 import { convertAPIPackagesToPackages } from '../../utils/packageConverter';
+import { extractCityName, normalizeForSearch } from '../../utils/searchUtils';
 import type { FilterState } from './types';
 import type { PackageProps } from './types';
 
@@ -60,8 +61,11 @@ const PacotesGerais: React.FC = () => {
         const amenities = await getAvailableAmenities();
         setAvailableAmenities(amenities);
 
-        const locations = [...new Set(hoteis.map(h => h.localizacao))].filter(Boolean);
+        // Extrair localizações únicas dos pacotes convertidos (ao invés dos hotéis)
+        const locations = [...new Set(convertedPackages.map(pkg => pkg.location))].filter(Boolean);
         setAvailableLocations(locations);
+        
+        console.log('📍 Localizações extraídas dos pacotes:', locations);
 
       } catch (err) {
         console.error('Erro ao carregar pacotes:', err);
@@ -70,6 +74,11 @@ const PacotesGerais: React.FC = () => {
         // Em caso de erro, usar dados mockados como fallback
         const { allPackages } = await import('./data/packagesData');
         setPackages(allPackages);
+        
+        // Extrair localizações dos dados mockados
+        const mockLocations = [...new Set(allPackages.map(pkg => pkg.location))].filter(Boolean);
+        setAvailableLocations(mockLocations);
+        console.log('📍 Usando localizações mockadas:', mockLocations);
       } finally {
         setLoading(false);
       }
@@ -80,12 +89,17 @@ const PacotesGerais: React.FC = () => {
 
   // Filtrar pacotes baseado nos filtros selecionados
   const filteredPackages = useMemo(() => {
-    console.log(' Aplicando filtros:', filters);
-    console.log(' Total de pacotes:', packages.length);
-    
-    const filtered = packages.filter(pkg => {
-      // Filtro por localização
-      const locationMatch = !filters.selectedLocation || pkg.location === filters.selectedLocation;
+    let filtered = packages.filter(pkg => {
+      // Filtro por localização - usar a mesma lógica do SmartSearch
+      if (!filters.selectedLocation) return true;
+      
+      // Extrair nomes das cidades e normalizar para busca
+      const searchCity = normalizeForSearch(extractCityName(filters.selectedLocation));
+      const packageCity = normalizeForSearch(extractCityName(pkg.location));
+      
+      const locationMatch = packageCity.includes(searchCity) || 
+                          searchCity.includes(packageCity) ||
+                          normalizeForSearch(pkg.location).includes(normalizeForSearch(filters.selectedLocation));
       
       // Filtro por comodidades
       const amenityMatch = filters.selectedAmenities.length === 0 || 
@@ -96,6 +110,7 @@ const PacotesGerais: React.FC = () => {
       return locationMatch && amenityMatch;
     });
     
+    console.log(`✅ Encontrados ${filtered.length} pacotes de ${packages.length} total`);
     return filtered;
   }, [packages, filters]);
 
