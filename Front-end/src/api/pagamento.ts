@@ -51,22 +51,67 @@ export interface ConfirmarPagamentoRequest {
 // Criar intent de pagamento com Stripe
 export const criarIntentPagamento = async (valorTotal: number, pacoteId: number): Promise<{clientSecret: string}> => {
   try {
+    // Validação básica dos parâmetros
+    if (!valorTotal || valorTotal <= 0) {
+      throw new Error('Valor do pagamento deve ser maior que zero');
+    }
+    
+    if (!pacoteId || isNaN(pacoteId)) {
+      throw new Error('ID do pacote é obrigatório');
+    }
+
     const payload: PaymentIntentRequest = {
-      valorTotal,
+      valorTotal: Math.round(valorTotal * 100) / 100, // Garantir 2 casas decimais
       pacoteId,
       tipoPagamento: "Cartão de Crédito",
     };
     
-    console.log('Enviando payload para criar intent:', payload);
+    console.log('📤 Enviando payload para criar intent:', payload);
     
     const response = await apiRequest('/pagamentos/criar-intent', {
       method: 'POST',
       data: payload,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
-    return response;
-  } catch (error) {
-    console.error('Erro ao criar intent de pagamento:', error);
-    throw new Error('Falha ao iniciar processo de pagamento.');
+    
+    console.log('📥 Resposta recebida do servidor:', response);
+    
+    // Validação da resposta
+    if (!response || !response.clientSecret) {
+      throw new Error('Resposta inválida do servidor - client secret não encontrado');
+    }
+    
+    // Validação do formato do client secret
+    const clientSecret = response.clientSecret;
+    if (typeof clientSecret !== 'string' || 
+        !clientSecret.startsWith('pi_') || 
+        !clientSecret.includes('_secret_') ||
+        clientSecret.length < 50) {
+      throw new Error('Client secret com formato inválido recebido do servidor');
+    }
+    
+    console.log('✅ Client secret válido recebido');
+    return { clientSecret };
+    
+  } catch (error: any) {
+    console.error('❌ Erro ao criar intent de pagamento:', error);
+    
+    // Tratamento específico baseado no tipo de erro
+    if (error?.response?.status === 400) {
+      throw new Error('Dados de pagamento inválidos. Verifique os valores e tente novamente.');
+    } else if (error?.response?.status === 401) {
+      throw new Error('Não autorizado. Faça login novamente.');
+    } else if (error?.response?.status === 403) {
+      throw new Error('Acesso negado ao serviço de pagamento.');
+    } else if (error?.response?.status >= 500) {
+      throw new Error('Serviço de pagamento temporariamente indisponível. Tente novamente em alguns minutos.');
+    } else if (error.message) {
+      throw error; // Re-throw dos erros customizados
+    } else {
+      throw new Error('Falha ao iniciar processo de pagamento. Verifique sua conexão.');
+    }
   }
 };
 
