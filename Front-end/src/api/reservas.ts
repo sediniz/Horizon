@@ -97,6 +97,30 @@ export const reservasApi = {
           pacoteHotelId: reserva.pacote?.hotel?.hotelId
         });
         
+        // Determinar status com verificação de data
+        let statusProcessado: 'confirmada' | 'pendente' | 'concluida' | 'cancelada';
+        
+        if (reserva.status === 2) {
+          statusProcessado = 'cancelada';
+        } else if (reserva.status === 0) {
+          statusProcessado = 'pendente';
+        } else if (reserva.status === 1) {
+          // Verificar se a viagem já passou para marcar como concluída
+          const dataFimViagem = new Date(reserva.dataFim);
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0); // Zerar horas para comparação apenas de data
+          
+          if (dataFimViagem < hoje) {
+            statusProcessado = 'concluida'; // Viagem já terminou
+            console.log(`📅 Reserva ${reserva.reservaId} marcada como concluída (viagem terminou em ${dataFimViagem.toLocaleDateString('pt-BR')})`);
+          } else {
+            statusProcessado = 'confirmada'; // Viagem ainda não começou ou está em andamento
+            console.log(`📅 Reserva ${reserva.reservaId} mantida como confirmada (viagem termina em ${dataFimViagem.toLocaleDateString('pt-BR')})`);
+          }
+        } else {
+          statusProcessado = 'confirmada'; // Status padrão
+        }
+
         return {
           id: reserva.reservaId,
           codigo: `HZ${new Date().getFullYear()}${reserva.reservaId.toString().padStart(3, '0')}`,
@@ -104,7 +128,7 @@ export const reservasApi = {
           hotel: hotelNome || 'Hotel não especificado',
           dataViagem: `${new Date(reserva.dataInicio).toLocaleDateString('pt-BR')} - ${new Date(reserva.dataFim).toLocaleDateString('pt-BR')}`,
           dataReserva: new Date(reserva.dataReserva).toLocaleDateString('pt-BR'),
-          status: reserva.status === 0 ? 'pendente' : reserva.status === 1 ? 'confirmada' : 'cancelada',
+          status: statusProcessado,
           valor: reserva.valorTotal,
           pessoas: reserva.quantidadePessoas,
           // Escolher a primeira imagem disponível no formato correto
@@ -180,6 +204,28 @@ export const reservasApi = {
       const destino = reserva.hotel?.localizacao || reserva.pacote?.destino;
       const hotelNome = reserva.hotel?.nome || (reserva.pacote?.hotel?.nome);
       
+      // Determinar status com verificação de data (mesma lógica da lista)
+      let statusProcessado: 'confirmada' | 'pendente' | 'concluida' | 'cancelada';
+      
+      if (reserva.status === 2) {
+        statusProcessado = 'cancelada';
+      } else if (reserva.status === 0) {
+        statusProcessado = 'pendente';
+      } else if (reserva.status === 1) {
+        // Verificar se a viagem já passou para marcar como concluída
+        const dataFimViagem = new Date(reserva.dataFim);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Zerar horas para comparação apenas de data
+        
+        if (dataFimViagem < hoje) {
+          statusProcessado = 'concluida'; // Viagem já terminou
+        } else {
+          statusProcessado = 'confirmada'; // Viagem ainda não começou ou está em andamento
+        }
+      } else {
+        statusProcessado = 'confirmada'; // Status padrão
+      }
+
       return {
         id: reserva.reservaId,
         codigo: `HZ${new Date().getFullYear()}${reserva.reservaId.toString().padStart(3, '0')}`,
@@ -187,7 +233,7 @@ export const reservasApi = {
         hotel: hotelNome || 'Hotel não especificado',
         dataViagem: `${new Date(reserva.dataInicio).toLocaleDateString('pt-BR')} - ${new Date(reserva.dataFim).toLocaleDateString('pt-BR')}`,
         dataReserva: new Date(reserva.dataReserva).toLocaleDateString('pt-BR'),
-        status: reserva.status === 0 ? 'pendente' : reserva.status === 1 ? 'confirmada' : 'cancelada',
+        status: statusProcessado,
         valor: reserva.valorTotal,
         pessoas: reserva.quantidadePessoas,
         imagem: reserva.hotel?.imagem || reserva.pacote?.hotel?.imagem || reserva.pacote?.imagem || 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg',
