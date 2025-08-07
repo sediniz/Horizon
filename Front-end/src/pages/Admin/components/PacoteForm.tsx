@@ -125,12 +125,12 @@ const PacoteForm: React.FC<PacoteFormProps> = ({
             onChange={handleInputChange}
             rows={3}
             required
-            maxLength={200}
+            maxLength={400}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Descreva o pacote de viagem... (máx. 200 caracteres)"
+            placeholder="Descreva o pacote de viagem... (máx. 400 caracteres)"
           />
           <div className="text-sm text-gray-500 mt-1">
-            {formData.descricao.length}/200 caracteres
+            {formData.descricao.length}/400 caracteres
           </div>
         </div>
 
