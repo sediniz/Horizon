@@ -3,6 +3,23 @@ import type { AxiosRequestConfig } from 'axios';
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7202/api';
 
+// Modo de desenvolvimento - permite fallback para mock
+export const isDevelopmentMode = import.meta.env.DEV;
+
+// Função para verificar se a API está disponível
+export const checkApiHealth = async (): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/health`, { 
+      method: 'GET',
+      signal: AbortSignal.timeout(3000) // 3 segundos de timeout
+    });
+    return response.ok;
+  } catch (error) {
+    console.warn('API não está disponível:', error);
+    return false;
+  }
+};
+
 export const defaultHeaders = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
