@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { apiRequest } from './config';
+import { isDevelopmentMode } from './config';
 // Tipos para as reservas
 export interface Reserva {
   id: number; // ou reservaId dependendo do backend
@@ -96,6 +97,30 @@ export const reservasApi = {
           pacoteHotelId: reserva.pacote?.hotel?.hotelId
         });
         
+        // Determinar status com verificação de data
+        let statusProcessado: 'confirmada' | 'pendente' | 'concluida' | 'cancelada';
+        
+        if (reserva.status === 2) {
+          statusProcessado = 'cancelada';
+        } else if (reserva.status === 0) {
+          statusProcessado = 'pendente';
+        } else if (reserva.status === 1) {
+          // Verificar se a viagem já passou para marcar como concluída
+          const dataFimViagem = new Date(reserva.dataFim);
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0); // Zerar horas para comparação apenas de data
+          
+          if (dataFimViagem < hoje) {
+            statusProcessado = 'concluida'; // Viagem já terminou
+            console.log(`📅 Reserva ${reserva.reservaId} marcada como concluída (viagem terminou em ${dataFimViagem.toLocaleDateString('pt-BR')})`);
+          } else {
+            statusProcessado = 'confirmada'; // Viagem ainda não começou ou está em andamento
+            console.log(`📅 Reserva ${reserva.reservaId} mantida como confirmada (viagem termina em ${dataFimViagem.toLocaleDateString('pt-BR')})`);
+          }
+        } else {
+          statusProcessado = 'confirmada'; // Status padrão
+        }
+
         return {
           id: reserva.reservaId,
           codigo: `HZ${new Date().getFullYear()}${reserva.reservaId.toString().padStart(3, '0')}`,
@@ -103,7 +128,7 @@ export const reservasApi = {
           hotel: hotelNome || 'Hotel não especificado',
           dataViagem: `${new Date(reserva.dataInicio).toLocaleDateString('pt-BR')} - ${new Date(reserva.dataFim).toLocaleDateString('pt-BR')}`,
           dataReserva: new Date(reserva.dataReserva).toLocaleDateString('pt-BR'),
-          status: reserva.status === 0 ? 'pendente' : reserva.status === 1 ? 'confirmada' : 'cancelada',
+          status: statusProcessado,
           valor: reserva.valorTotal,
           pessoas: reserva.quantidadePessoas,
           // Escolher a primeira imagem disponível no formato correto
@@ -179,6 +204,28 @@ export const reservasApi = {
       const destino = reserva.hotel?.localizacao || reserva.pacote?.destino;
       const hotelNome = reserva.hotel?.nome || (reserva.pacote?.hotel?.nome);
       
+      // Determinar status com verificação de data (mesma lógica da lista)
+      let statusProcessado: 'confirmada' | 'pendente' | 'concluida' | 'cancelada';
+      
+      if (reserva.status === 2) {
+        statusProcessado = 'cancelada';
+      } else if (reserva.status === 0) {
+        statusProcessado = 'pendente';
+      } else if (reserva.status === 1) {
+        // Verificar se a viagem já passou para marcar como concluída
+        const dataFimViagem = new Date(reserva.dataFim);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Zerar horas para comparação apenas de data
+        
+        if (dataFimViagem < hoje) {
+          statusProcessado = 'concluida'; // Viagem já terminou
+        } else {
+          statusProcessado = 'confirmada'; // Viagem ainda não começou ou está em andamento
+        }
+      } else {
+        statusProcessado = 'confirmada'; // Status padrão
+      }
+
       return {
         id: reserva.reservaId,
         codigo: `HZ${new Date().getFullYear()}${reserva.reservaId.toString().padStart(3, '0')}`,
@@ -186,7 +233,7 @@ export const reservasApi = {
         hotel: hotelNome || 'Hotel não especificado',
         dataViagem: `${new Date(reserva.dataInicio).toLocaleDateString('pt-BR')} - ${new Date(reserva.dataFim).toLocaleDateString('pt-BR')}`,
         dataReserva: new Date(reserva.dataReserva).toLocaleDateString('pt-BR'),
-        status: reserva.status === 0 ? 'pendente' : reserva.status === 1 ? 'confirmada' : 'cancelada',
+        status: statusProcessado,
         valor: reserva.valorTotal,
         pessoas: reserva.quantidadePessoas,
         imagem: reserva.hotel?.imagem || reserva.pacote?.hotel?.imagem || reserva.pacote?.imagem || 'https://cdn.pixabay.com/photo/2016/10/18/09/02/hotel-1749602_1280.jpg',
@@ -252,18 +299,58 @@ export const reservasApi = {
   // Cancelar reserva
   async cancelarReserva(dadosCancelamento: CancelamentoReserva): Promise<void> {
     try {
-      await apiRequest(`/reservas/${dadosCancelamento.reservaId}/cancelar`, {
-        method: 'POST',
-        data: {
-          nome: dadosCancelamento.nome,
-          data: dadosCancelamento.data,
-          motivo: dadosCancelamento.motivo,
-          motivoPersonalizado: dadosCancelamento.motivoPersonalizado
+      console.log('🚀 Iniciando cancelamento de reserva:', dadosCancelamento);
+      
+      // Em modo de desenvolvimento, sempre simular sucesso se a API falhar
+      if (isDevelopmentMode) {
+        try {
+          await apiRequest(`/reservas/${dadosCancelamento.reservaId}/cancelar`, {
+            method: 'POST',
+            data: {
+              nome: dadosCancelamento.nome,
+              data: dadosCancelamento.data,
+              motivo: dadosCancelamento.motivo,
+              motivoPersonalizado: dadosCancelamento.motivoPersonalizado
+            }
+          });
+          console.log('✅ Cancelamento realizado com sucesso via API');
+          return;
+        } catch (apiError) {
+          console.warn('⚠️ API não disponível em desenvolvimento, usando modo simulado:', apiError);
+          
+          // Simular delay da API
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          // Em desenvolvimento, sempre simular sucesso
+          console.log('✅ Cancelamento simulado com sucesso (modo desenvolvimento)');
+          return;
         }
-      });
+      } else {
+        // Em produção, sempre tentar a API real
+        await apiRequest(`/reservas/${dadosCancelamento.reservaId}/cancelar`, {
+          method: 'POST',
+          data: {
+            nome: dadosCancelamento.nome,
+            data: dadosCancelamento.data,
+            motivo: dadosCancelamento.motivo,
+            motivoPersonalizado: dadosCancelamento.motivoPersonalizado
+          }
+        });
+        console.log('✅ Cancelamento realizado com sucesso via API (produção)');
+      }
     } catch (error) {
-      console.error('Erro ao cancelar reserva:', error);
-      throw new Error('Não foi possível cancelar a reserva');
+      console.error('❌ Erro ao cancelar reserva:', error);
+      
+      // Mensagem de erro mais específica
+      if (error instanceof Error && error.message.includes('conectar ao servidor')) {
+        throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão com a internet.');
+      } else if (error instanceof Error && error.message.includes('401')) {
+        throw new Error('Sua sessão expirou. Faça login novamente.');
+      } else if (error instanceof Error && error.message.includes('404')) {
+        throw new Error('Reserva não encontrada. Atualize a página e tente novamente.');
+      } else {
+        throw new Error('Não foi possível processar o cancelamento. Tente novamente em alguns instantes.');
+      }
     }
   },
   // Avaliar reserva

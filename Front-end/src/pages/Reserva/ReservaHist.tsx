@@ -15,6 +15,10 @@ export default function ReservaHist() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showSelectRatingModal, setShowSelectRatingModal] = useState(false);
   const [showNoTripsModal, setShowNoTripsModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
   const [selectedReserva, setSelectedReserva] = useState<number | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,12 +152,16 @@ export default function ReservaHist() {
   const handleCancelSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cancelData.nome || !cancelData.data || !cancelData.motivo) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      setModalTitle('Campos Obrigatórios');
+      setModalMessage('Por favor, preencha todos os campos obrigatórios para continuar com o cancelamento.');
+      setShowErrorModal(true);
       return;
     }
     
     if (cancelData.motivo === 'Outro motivo' && !cancelData.motivoPersonalizado) {
-      alert('Por favor, descreva o motivo do cancelamento.');
+      setModalTitle('Motivo Personalizado');
+      setModalMessage('Por favor, descreva o motivo do cancelamento no campo específico.');
+      setShowErrorModal(true);
       return;
     }
     
@@ -171,18 +179,53 @@ export default function ReservaHist() {
         motivoPersonalizado: cancelData.motivoPersonalizado
       };
       
+      console.log('Enviando dados de cancelamento:', dadosCancelamento);
+      
       await reservasApi.cancelarReserva(dadosCancelamento);
       
       setReservas(prev => prev.map(r => 
         r.id === selectedReserva ? { ...r, status: 'cancelada' as const } : r
       ));
       
-      alert(`Solicitação de cancelamento para ${reservaInfo} enviada com sucesso!`);
+      // Mostrar pop-up de sucesso
+      setModalTitle('Cancelamento Realizado');
+      setModalMessage(`Solicitação de cancelamento para ${reservaInfo} realizada com sucesso!\n\nVocê receberá um e-mail de confirmação em breve.`);
+      setShowSuccessModal(true);
+      
       setShowCancelModal(false);
       setSelectedReserva(null);
+      
+      // Limpar dados do formulário
+      setCancelData({
+        nome: '',
+        data: '',
+        motivo: '',
+        motivoPersonalizado: ''
+      });
+      
     } catch (err) {
-      console.error('Erro ao cancelar reserva:', err);
-      alert('Erro ao cancelar a reserva. Tente novamente.');
+      console.error('Erro detalhado ao cancelar reserva:', err);
+      
+      // Tratamento de erro mais específico
+      let mensagemErro = 'Não foi possível processar o cancelamento.';
+      let tituloErro = 'Erro no Cancelamento';
+      
+      if (err instanceof Error) {
+        if (err.message.includes('conexão')) {
+          tituloErro = 'Problema de Conexão';
+          mensagemErro = 'Verifique sua internet e tente novamente.';
+        } else if (err.message.includes('autorização')) {
+          tituloErro = 'Sessão Expirada';
+          mensagemErro = 'Faça login novamente para continuar.';
+        } else {
+          mensagemErro = err.message;
+        }
+      }
+      
+      // Mostrar pop-up de erro
+      setModalTitle(tituloErro);
+      setModalMessage(`${mensagemErro}\n\nSe o problema persistir, entre em contato com nosso suporte.`);
+      setShowErrorModal(true);
     }
   };
   const handleRatingSubmit = async (e: React.FormEvent) => {
@@ -1764,6 +1807,56 @@ export default function ReservaHist() {
                    Planejar Viagem
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Sucesso */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all duration-300 ease-out scale-95 animate-[scale-in_0.3s_ease-out_forwards]">
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-8 h-8 text-green-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-4">{modalTitle}</h2>
+              <p className="text-slate-600 mb-6 whitespace-pre-line">{modalMessage}</p>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+              >
+                Perfeito!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Erro */}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all duration-300 ease-out scale-95 animate-[scale-in_0.3s_ease-out_forwards]">
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-8 h-8 text-red-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-4">{modalTitle}</h2>
+              <p className="text-slate-600 mb-6 whitespace-pre-line">{modalMessage}</p>
+              <button
+                onClick={() => setShowErrorModal(false)}
+                className="w-full bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+              >
+                Entendido
+              </button>
             </div>
           </div>
         </div>
