@@ -1,8 +1,7 @@
-# 🌍 Projeto Horizon
+# Projeto Horizon
 
 <div align="center">
 
-![Horizon Logo](https://via.placeholder.com/200x80/6366f1/ffffff?text=HORIZON)
 
 **Sistema web completo para uma agência de viagens digital**
 
