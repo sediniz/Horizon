@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import type { StripeCardElementOptions } from '@stripe/stripe-js';
-import { useStripeContext } from '../../contexts/StripeContext';
 
 interface StripeCardFormProps {
   clientSecret: string;
@@ -40,62 +39,112 @@ const cardStyle: StripeCardElementOptions = {
 const StripeCardForm: React.FC<StripeCardFormProps> = ({
   clientSecret,
   valorTotal,
-  pacoteId,
-  dataViagem,
-  dataInicio,
-  dataFim,
-  quantidadePessoas,
   onPaymentSuccess,
   onPaymentError
 }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const { confirmarPagamentoCompleto } = useStripeContext();
   const [loading, setLoading] = useState(false);
   const [cardComplete, setCardComplete] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!stripe || !elements) return;
+    if (!stripe || !elements) {
+      console.error('❌ Stripe ou Elements não estão disponíveis');
+      onPaymentError("Sistema de pagamento não está pronto. Recarregue a página e tente novamente.");
+      return;
+    }
 
     setLoading(true);
 
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
+      console.error('❌ Elemento de cartão não encontrado');
       onPaymentError("Elemento de cartão não encontrado");
       setLoading(false);
       return;
     }
 
     try {
+      // Validação mais rigorosa do client secret
       const isValidStripeClientSecret =
-        clientSecret.startsWith('pi_') &&
+        clientSecret &&
+        typeof clientSecret === 'string' &&
+        clientSecret.trim().startsWith('pi_') &&
         clientSecret.includes('_secret_') &&
         clientSecret.length > 50;
 
       if (!isValidStripeClientSecret) {
-        onPaymentError("Configuração de pagamento inválida. Tente novamente.");
+        console.error('❌ Client secret inválido:', {
+          clientSecret: clientSecret?.substring(0, 20) + '...',
+          type: typeof clientSecret,
+          startsWith: clientSecret?.startsWith?.('pi_'),
+          includes: clientSecret?.includes?.('_secret_'),
+          length: clientSecret?.length
+        });
+        onPaymentError("Configuração de pagamento inválida. Tente reiniciar o processo de pagamento.");
         setLoading(false);
         return;
       }
+
+      console.log('🔄 Confirmando pagamento com Stripe...');
+      console.log('📋 Client Secret válido:', clientSecret.substring(0, 20) + '...');
 
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: {
+            name: 'Cliente Horizon',
           },
         },
       });
 
       if (result.error) {
-        onPaymentError(result.error.message || "Erro ao processar pagamento");
+        console.error('❌ Erro na confirmação de pagamento:', result.error);
+        
+        // Mensagens de erro mais específicas baseadas no código do erro
+        let errorMessage = "Erro ao processar pagamento";
+        
+        switch (result.error.code) {
+          case 'card_declined':
+            errorMessage = "Cartão recusado pela operadora. Verifique os dados ou tente outro cartão.";
+            break;
+          case 'expired_card':
+            errorMessage = "Cartão expirado. Use um cartão com data de validade atual.";
+            break;
+          case 'incorrect_cvc':
+            errorMessage = "Código de segurança (CVC) incorreto. Verifique os 3 dígitos no verso do cartão.";
+            break;
+          case 'processing_error':
+            errorMessage = "Erro temporário no processamento. Tente novamente em alguns segundos.";
+            break;
+          case 'insufficient_funds':
+            errorMessage = "Saldo insuficiente no cartão. Use outro cartão ou método de pagamento.";
+            break;
+          case 'invalid_request_error':
+            errorMessage = "Dados de pagamento inválidos. Verifique as informações e tente novamente.";
+            break;
+          default:
+            errorMessage = result.error.message || "Erro desconhecido no pagamento. Entre em contato com o suporte.";
+        }
+        
+        onPaymentError(errorMessage);
       } else if (result.paymentIntent) {
         const status = result.paymentIntent.status;
         console.log(`💳 Status do pagamento: ${status}`);
+        console.log(`📄 Payment Intent ID: ${result.paymentIntent.id}`);
 
-        // Passar o paymentIntent.id para confirmação
-        onPaymentSuccess(result.paymentIntent.id);
+        if (status === 'succeeded') {
+          console.log('✅ Pagamento confirmado com sucesso!');
+          onPaymentSuccess(result.paymentIntent.id);
+        } else {
+          console.warn(`⚠️ Status inesperado: ${status}`);
+          onPaymentError(`Pagamento não foi completado. Status: ${status}. Entre em contato com o suporte.`);
+        }
+      } else {
+        console.error('❌ Resposta inesperada do Stripe - sem paymentIntent');
+        onPaymentError("Resposta inesperada do sistema de pagamento. Tente novamente.");
       }
     } catch (error) {
       console.error("Erro no pagamento:", error);
