@@ -143,6 +143,52 @@ export const allPackages: PackageProps[] = [
       { name: 'Bar', icon: 'bar' }
     ],
     highlights: ['Tour cultural incluso', 'Aulas de culinária', 'Cerimônia do chá']
+  },
+  {
+    id: 7,
+    title: 'Pacote Romântico Gramado',
+    hotelName: 'Hotel Casa da Montanha',
+    price: 'R$ 1.800',
+    originalPrice: 'R$ 2.300',
+    duration: '4 dias / 3 noites',
+    image: PraiaImg, // Usar temporariamente
+    rating: 4.6,
+    reviewCount: 234,
+    location: 'Gramado, RS',
+    discount: 22,
+    description: 'Escapada romântica na charmosa Gramado. Hotel aconchegante com vista para as montanhas e experiência gastronômica única.',
+    amenities: [
+      { name: 'WiFi Grátis', icon: 'wifi' },
+      { name: 'Ar Condicionado', icon: 'ac' },
+      { name: 'Restaurante', icon: 'restaurant' },
+      { name: 'Spa', icon: 'spa' },
+      { name: 'Transfer', icon: 'car' },
+      { name: 'Bar', icon: 'bar' }
+    ],
+    highlights: ['City tour incluso', 'Jantar romântico', 'Chocolate tour']
+  },
+  {
+    id: 8,
+    title: 'Rio de Janeiro Maravilhoso',
+    hotelName: 'Copacabana Palace',
+    price: 'R$ 3.500',
+    originalPrice: 'R$ 4.200',
+    duration: '5 dias / 4 noites',
+    image: CancunImg, // Usar temporariamente
+    rating: 4.8,
+    reviewCount: 567,
+    location: 'Rio de janeiro, RJ',
+    discount: 17,
+    description: 'Viva a experiência carioca completa no icônico Copacabana Palace. Localização privilegiada de frente para a praia de Copacabana.',
+    amenities: [
+      { name: 'WiFi Grátis', icon: 'wifi' },
+      { name: 'Piscina', icon: 'pool' },
+      { name: 'Ar Condicionado', icon: 'ac' },
+      { name: 'Restaurante', icon: 'restaurant' },
+      { name: 'Spa', icon: 'spa' },
+      { name: 'Academia', icon: 'gym' }
+    ],
+    highlights: ['Café da manhã incluso', 'Vista para o mar', 'Piscina na cobertura']
   }
 ];
 
@@ -164,12 +210,14 @@ export const allAmenities: Amenity[] = [
   { name: 'Shows', icon: 'entertainment' }
 ];
 
-// Lista de todas as localidades
+// Lista de destinos disponíveis (extraída dinamicamente dos pacotes)
 export const allLocations: string[] = [
   'Bahia, Brasil',
   'Paris, França',
   'Cancún, México',
   'Dubai, Emirados Árabes',
   'Maldivas',
-  'Tóquio, Japão'
+  'Tóquio, Japão',
+  'Gramado, RS',
+  'Rio de janeiro, RJ'
 ];

@@ -76,8 +76,8 @@ namespace Horizon.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Descricao")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<bool>("Estacionamento")
                         .HasColumnType("bit");
@@ -132,8 +132,8 @@ namespace Horizon.Migrations
 
                     b.Property<string>("Descricao")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<string>("Destino")
                         .IsRequired()
