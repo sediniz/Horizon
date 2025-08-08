@@ -828,7 +828,7 @@ export default function ReservaHist() {
       {loading && (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mb-4"></div>
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mb-4 mx-auto"></div>
             <p className="text-lg text-gray-600">Carregando suas reservas...</p>
           </div>
         </div>
